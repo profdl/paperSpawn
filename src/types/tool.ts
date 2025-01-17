@@ -1,0 +1,1 @@
+export type Tool = 'none' | 'paint' | 'erase' | 'rectangle' | 'select';
