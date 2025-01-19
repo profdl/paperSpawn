@@ -1,7 +1,6 @@
-import React from 'react';
 import { useSimulation } from '../../contexts/SimulationContext';
 import ColorPicker from '../ui/ColorPicker';
-import { colorSchemes } from '../../types/colorSchemes';
+import { colorSchemes } from '../../types';
 import { Shuffle } from 'lucide-react';
 import DraggableNumberInput from '../ui/DraggableNumberInput';
 

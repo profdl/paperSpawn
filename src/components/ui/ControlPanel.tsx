@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Save } from 'lucide-react';
-import { presets } from '../../types/particle';
+import { presets } from '../../types';
 import { usePresets } from '../../hooks/usePresets';
 import { useAuth } from '../../hooks/useAuth';
 import AccordionSection from './AccordionSection';
 import ParticleControls from '../controls/ParticleControls';
 import BehaviorControls from '../controls/BehaviorControls';
-import TrailControls from '../controls/TrailControls';
 import SpawnControls from '../controls/SpawnControls';
 import AppearanceControls from '../controls/AppearanceControls';
 import CanvasBehaviorsControls from '../controls/ExternalForcesControls';
@@ -47,7 +46,7 @@ export default function ControlPanel() {
         const presetId = value.replace('custom:', '');
         const loadedSettings = await loadPreset(presetId);
         Object.entries(loadedSettings).forEach(([key, value]) => {
-          updateSetting(key as keyof typeof settings, value);
+          updateSetting(key as keyof typeof settings, value as string | number | boolean);
         });
       } catch (error) {
         console.error('Failed to load preset:', error);
@@ -168,13 +167,7 @@ export default function ControlPanel() {
           <CanvasBehaviorsControls />
         </AccordionSection>
 
-        <AccordionSection
-          title="Trails"
-          isOpen={openSections.has('trails')}
-          onToggle={() => toggleSection('trails')}
-        >
-          <TrailControls />
-        </AccordionSection>
+
 
         <AccordionSection
           title="Spawn Properties"

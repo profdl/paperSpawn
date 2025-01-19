@@ -1,7 +1,6 @@
-import React from 'react';
 import { useSimulation } from '../../contexts/SimulationContext';
 import DraggableNumberInput from '../ui/DraggableNumberInput';
-import { BoundaryBehavior } from '../../types/particle';
+import { BoundaryBehavior } from '../../types';
 
 export default function CanvasBehaviorsControls() {
   const { settings, updateSetting } = useSimulation();

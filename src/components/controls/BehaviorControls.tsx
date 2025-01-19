@@ -1,4 +1,3 @@
-import React from 'react';
 import { useSimulation } from '../../contexts/SimulationContext';
 import DraggableNumberInput from '../ui/DraggableNumberInput';
 

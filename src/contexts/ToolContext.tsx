@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { Tool } from '../types/tool';
+import { Tool } from '../types';
 
 interface EraserProperties {
   eraseParticles: boolean;

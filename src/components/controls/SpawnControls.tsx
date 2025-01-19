@@ -1,8 +1,7 @@
-import React from 'react';
 import { RefreshCw } from 'lucide-react';
 import { useSimulation } from '../../contexts/SimulationContext';
 import DraggableNumberInput from '../ui/DraggableNumberInput';
-import { SpawnPattern } from '../../types/particle';
+import { SpawnPattern } from '../../types';
 
 export default function SpawnControls() {
   const { settings, updateSetting, handleRespawn } = useSimulation();

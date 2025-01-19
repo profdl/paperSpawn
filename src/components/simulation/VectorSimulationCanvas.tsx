@@ -122,7 +122,7 @@ export default function VectorSimulationCanvas() {
     }
   }, [currentTool, eraserProperties.size]);
 
-  const handleMouseUp = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleMouseUp = useCallback(() => {
     isDrawingRef.current = false;
     lastDrawPosRef.current = null;
     
@@ -133,9 +133,9 @@ export default function VectorSimulationCanvas() {
     }
   }, [currentTool]);
 
-  const handleMouseLeave = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    handleMouseUp(e);
-  }, [currentTool, handleMouseUp]);
+  const handleMouseLeave = useCallback(() => {
+      handleMouseUp();
+    }, [currentTool, handleMouseUp]);
 
   useEffect(() => {
     if (!systemRef.current) return;

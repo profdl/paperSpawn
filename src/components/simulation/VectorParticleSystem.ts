@@ -4,7 +4,6 @@ import {  SimulationSettings } from '../../types.ts';
 export class VectorParticleSystem {
   private project: paper.Project;
   private particles: paper.Group;
-  private trails: paper.Group;
   private particleRadius: number = 2;
   private trailWidth: number = 1;
   private eraserCircle: paper.Path.Circle | null = null;
@@ -245,7 +244,6 @@ export class VectorParticleSystem {
 
   private calculateRectangleAvoidance(
     position: paper.Point,
-    velocity: paper.Point
   ): paper.Point {
     const avoidanceForce = new paper.Point(0, 0);
     const avoidanceDistance = 30; // Distance at which particles start avoiding rectangles
@@ -284,17 +282,6 @@ export class VectorParticleSystem {
     return avoidanceForce;
   }
 
-  updateRectangle(x: number, y: number, maintainAspectRatio: boolean): void {
-    // Method removed
-  }
-
-  finishRectangle(): void {
-    // Method removed
-  }
-
-  cancelRectangle(): void {
-    // Method removed
-  }
 
   constructor(canvas: HTMLCanvasElement) {
     // Initialize Paper.js project
@@ -304,7 +291,6 @@ export class VectorParticleSystem {
     
     // Create groups for particles and trails
     this.particles = new paper.Group();
-    this.trails = new paper.Group();
     
     // Create test rectangle
     new paper.Path.Rectangle({
@@ -418,7 +404,6 @@ export class VectorParticleSystem {
     // Update or create eraser visualization
     if (this.eraserCircle) {
       this.eraserCircle.position = erasePoint;
-      this.eraserCircle.radius = radius;
     } else {
       this.eraserCircle = new paper.Path.Circle({
         center: erasePoint,
@@ -441,14 +426,12 @@ export class VectorParticleSystem {
     });
 
     particlesToRemove.forEach(particle => particle.remove());
-    this.project.view.draw();
   }
 
   hideEraserCircle(): void {
     if (this.eraserCircle) {
       this.eraserCircle.remove();
       this.eraserCircle = null;
-      this.project.view.draw();
     }
   }
 
@@ -538,7 +521,6 @@ export class VectorParticleSystem {
     const trail = particle.children[1] as paper.Path;
     const age = Date.now() - particle.data.createdAt;
     let velocity = particle.data.velocity;
-    const activeProgress = Math.min(1, age / settings.activeStateDuration);
 
     // Update state based on age
     if (settings.paintingModeEnabled) {
@@ -653,7 +635,6 @@ export class VectorParticleSystem {
     this.particles.children.forEach(particle => {
       this.updateParticle(particle as paper.Group, settings, view.bounds.width, view.bounds.height);
     });
-    this.project.view.draw();
   }
 
   clear(): void {
@@ -661,7 +642,6 @@ export class VectorParticleSystem {
     this.rectangles.forEach(rect => rect.remove());
     this.rectangles = [];
     paper.view.update();
-    this.project.view.draw();
   }
 
   exportSVG(): string {
@@ -681,10 +661,7 @@ export class VectorParticleSystem {
 
   setParticleRadius(radius: number): void {
     this.particleRadius = radius;
-    this.particles.children.forEach(particle => {
-      const point = particle.children[0] as paper.Path.Circle;
-      point.radius = radius;
-    });
+
     paper.view.update();
   }
 
