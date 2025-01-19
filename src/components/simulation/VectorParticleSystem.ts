@@ -25,6 +25,10 @@ export class VectorParticleSystem {
     
     paper.view.update();
   }
+  
+  isHandleAt(point: paper.Point): boolean {
+    return this.rectangleManager.isHandleAt(point);
+  }
 
   handleTransform(point: paper.Point, delta: paper.Point, shiftKey: boolean): void {
     if (this.rectangleManager) {

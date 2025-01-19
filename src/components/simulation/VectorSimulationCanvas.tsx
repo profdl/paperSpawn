@@ -13,6 +13,18 @@ export default function VectorSimulationCanvas() {
   const animationFrameRef = useRef<number>();
   const isInitializedRef = useRef(false);
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
+  const getViewPoint = (e: React.MouseEvent<HTMLCanvasElement>): paper.Point => {
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!rect) return new paper.Point(0, 0);
+    
+    // Get point in canvas coordinates
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // Convert to view coordinates
+    const viewPoint = paper.view.viewToProject(new paper.Point(x, y));
+    return viewPoint;
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -51,54 +63,50 @@ export default function VectorSimulationCanvas() {
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (currentTool === 'none' || !systemRef.current) return;
     
+    const point = getViewPoint(e);
     isDrawingRef.current = true;
-    const rect = canvasRef.current?.getBoundingClientRect();
-    const x = e.clientX - (rect?.left || 0);
-    const y = e.clientY - (rect?.top || 0);
-    lastDrawPosRef.current = { x, y };
+    lastDrawPosRef.current = { x: point.x, y: point.y };
 
     if (currentTool === 'select') {
-      systemRef.current.selectItemAt(new paper.Point(x, y));
+      if (systemRef.current.isHandleAt(point)) {
+        isDrawingRef.current = true;
+      }
+      systemRef.current.selectItemAt(point);
       return;
     }
 
     if (currentTool === 'rectangle') {
-      systemRef.current.startRectangle(x, y);
+      systemRef.current.startRectangle(point.x, point.y);
       return;
     }
 
     if (currentTool === 'paint') {
-      systemRef.current.createParticle(x, y);
+      systemRef.current.createParticle(point.x, point.y);
     } else if (currentTool === 'erase') {
-      systemRef.current.eraseParticlesNear(x, y, eraserProperties.size);
+      systemRef.current.eraseParticlesNear(point.x, point.y, eraserProperties.size);
     }
   }, [currentTool, eraserProperties.size]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (currentTool === 'none' || !systemRef.current) return;
-    
     if (!canvasRef.current) return;
     
-    const rect = canvasRef.current?.getBoundingClientRect();
-    const x = e.clientX - (rect?.left || 0);
-    const y = e.clientY - (rect?.top || 0);
-  
-  
+    const point = getViewPoint(e);
+
     if (currentTool === 'select') {
       if (isDrawingRef.current) {
         const delta = new paper.Point(
-          x - (lastDrawPosRef.current?.x || x),
-          y - (lastDrawPosRef.current?.y || y)
+          point.x - (lastDrawPosRef.current?.x || point.x),
+          point.y - (lastDrawPosRef.current?.y || point.y)
         );
-        systemRef.current.handleTransform(new paper.Point(x, y), delta, e.shiftKey);
-        // Update the last position AFTER calculating the delta
-        lastDrawPosRef.current = { x, y };
+        systemRef.current.handleTransform(point, delta, e.shiftKey);
+        lastDrawPosRef.current = { x: point.x, y: point.y };
       }
       return;
     }
-    
-  // Update last position for other tools
-  lastDrawPosRef.current = { x, y };
+
+    // Update last position for other tools
+    lastDrawPosRef.current = { x: point.x, y: point.y };
 
     if (!isDrawingRef.current) return;
     
@@ -108,8 +116,8 @@ export default function VectorSimulationCanvas() {
     
     if (lastDrawPosRef.current) {
       const { x: lastX, y: lastY } = lastDrawPosRef.current;
-      const dx = x - lastX;
-      const dy = y - lastY;
+      const dx = point.x - lastX;
+      const dy = point.y - lastY;
       const distance = Math.sqrt(dx * dx + dy * dy);
       const steps = Math.max(1, Math.floor(distance / 5));
 
@@ -120,11 +128,10 @@ export default function VectorSimulationCanvas() {
           systemRef.current.createParticle(px, py);
         }
       } else if (currentTool === 'erase') {
-        systemRef.current.eraseParticlesNear(x, y, eraserProperties.size);
+        systemRef.current.eraseParticlesNear(point.x, point.y, eraserProperties.size);
       }
     }
   }, [currentTool, eraserProperties.size]);
-
   const handleMouseUp = useCallback(() => {
     isDrawingRef.current = false;
     lastDrawPosRef.current = null;
@@ -132,7 +139,7 @@ export default function VectorSimulationCanvas() {
     if (!systemRef.current) return;
     
     if (currentTool === 'select') {
-      systemRef.current.endTransform(); // Add this line
+      systemRef.current.endTransform(); 
     } else if (currentTool !== 'rectangle') {
       systemRef.current.hideEraserCircle();
     }
@@ -178,6 +185,8 @@ export default function VectorSimulationCanvas() {
       systemRef.current.setBackgroundColor(settings.backgroundColor);
     }
   }, [settings.particleColor, settings.trailColor, settings.backgroundColor]);
+
+
 
   return (
     <div 

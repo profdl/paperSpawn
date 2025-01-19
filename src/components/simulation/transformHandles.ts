@@ -84,7 +84,8 @@ export class TransformHandles {
   getHandleAt(point: paper.Point): paper.Item | null {
     if (!this.handles) return null;
     
-    const hitResult = paper.project.hitTest(point, {
+    // First, try to hit test the group itself
+    const groupHit = this.handles.hitTest(point, {
       fill: true,
       stroke: true,
       tolerance: 5,
@@ -92,14 +93,47 @@ export class TransformHandles {
         return item.data?.type === 'resize';
       }
     });
-
-    return hitResult?.item || null;
+  
+    if (groupHit?.item) {
+      return groupHit.item;
+    }
+  
+    // If that fails, try each handle individually
+    for (let child of this.handles.children) {
+      if (child.data?.type === 'resize') {
+        const bounds = child.bounds;
+        if (bounds.contains(point) || bounds.expand(5).contains(point)) {
+          return child;
+        }
+      }
+    }
+  
+    return null;
   }
-
+  
   getRotateHandle(): paper.Item | null {
     if (!this.handles) return null;
     return this.handles.children.find((child: paper.Item) => child.data?.type === 'rotate') || null;
   }
+  
+  isHandleAt(point: paper.Point): boolean {
+    const resizeHandle = this.getHandleAt(point);
+    const rotateHandle = this.getRotateHandle();
+    
+    if (resizeHandle) {
+      console.log('Found resize handle:', resizeHandle.data?.index);
+      return true;
+    }
+    
+    if (rotateHandle && rotateHandle.bounds.expand(5).contains(point)) {
+      console.log('Found rotate handle');
+      return true;
+    }
+    
+    return false;
+  }
+
+
 
   remove(): void {
     if (this.handles) {

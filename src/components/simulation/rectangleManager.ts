@@ -65,6 +65,10 @@ export class RectangleManager {
     paper.view.update();
   }
 
+  isHandleAt(point: paper.Point): boolean {
+    return this.transformHandles.isHandleAt(point);
+  }
+
   selectAt(point: paper.Point): void {
     this.clearSelection();
 
@@ -86,6 +90,7 @@ export class RectangleManager {
 
   clearSelection(): void {
     if (this.selectedItem) {
+      delete this.selectedItem.data.activeHandle;
       this.selectedItem = null;
     }
     this.transformHandles.remove();
@@ -103,22 +108,27 @@ export class RectangleManager {
       this.dragStartPosition = point.subtract(delta);
       this.originalBounds = this.selectedItem.bounds.clone();
       
+      // Check if we're starting on a handle
       const rotateHandle = this.transformHandles.getRotateHandle();
+      const resizeHandle = this.transformHandles.getHandleAt(point);
+      
       if (rotateHandle && rotateHandle.bounds.contains(point)) {
         this.isRotating = true;
         this.rotationStartAngle = this.getAngleToCenter(point);
+      } else if (resizeHandle) {
+        // Store the handle we're using for resize
+        this.selectedItem.data.activeHandle = resizeHandle;
       }
     }
 
     if (this.isRotating) {
       this.handleRotation(point);
+    } else if (this.selectedItem.data.activeHandle) {
+      // We're resizing
+      this.handleResize(this.selectedItem.data.activeHandle, delta, shiftKey);
     } else {
-      const handle = this.transformHandles.getHandleAt(point);
-      if (handle) {
-        this.handleResize(handle, delta, shiftKey);
-      } else {
-        this.handleMove(delta);
-      }
+      // We're moving
+      this.handleMove(delta);
     }
 
     paper.view.update();
@@ -126,10 +136,9 @@ export class RectangleManager {
 
   private handleRotation(point: paper.Point): void {
     if (!this.selectedItem || !this.dragStartPosition) return;
-
+  
     const currentAngle = this.getAngleToCenter(point);
     const deltaAngle = currentAngle - this.rotationStartAngle;
-    
     const snappedAngle = Math.round(deltaAngle / 45) * 45;
     
     this.selectedItem.rotate(snappedAngle, this.selectedItem.bounds.center);
@@ -138,31 +147,36 @@ export class RectangleManager {
 
   private handleResize(handle: paper.Item, delta: paper.Point, shiftKey: boolean): void {
     if (!this.selectedItem || !this.originalBounds) return;
-
+    
     const newBounds = this.originalBounds.clone();
     const handleIndex = handle.data.index;
-
+    
+    // Apply the cumulative delta to the original bounds
     switch (handleIndex) {
       case 0: // Top-left
-        newBounds.topLeft = newBounds.topLeft.add(delta);
+        newBounds.left += delta.x;
+        newBounds.top += delta.y;
         break;
       case 1: // Top-center
         newBounds.top += delta.y;
         break;
       case 2: // Top-right
-        newBounds.topRight = newBounds.topRight.add(delta);
+        newBounds.right += delta.x;
+        newBounds.top += delta.y;
         break;
       case 3: // Middle-right
         newBounds.right += delta.x;
         break;
       case 4: // Bottom-right
-        newBounds.bottomRight = newBounds.bottomRight.add(delta);
+        newBounds.right += delta.x;
+        newBounds.bottom += delta.y;
         break;
       case 5: // Bottom-center
         newBounds.bottom += delta.y;
         break;
       case 6: // Bottom-left
-        newBounds.bottomLeft = newBounds.bottomLeft.add(delta);
+        newBounds.left += delta.x;
+        newBounds.bottom += delta.y;
         break;
       case 7: // Middle-left
         newBounds.left += delta.x;
@@ -174,14 +188,21 @@ export class RectangleManager {
       const originalRatio = this.originalBounds.width / this.originalBounds.height;
       const width = Math.abs(newBounds.width);
       const height = width / originalRatio;
-      newBounds.height = height * Math.sign(newBounds.height);
+      
+      if (handleIndex < 3) { // Top handles
+        newBounds.top = newBounds.bottom - height;
+      } else if (handleIndex > 4) { // Bottom handles
+        newBounds.bottom = newBounds.top + height;
+      }
     }
 
+    // Apply the new bounds
     this.selectedItem.bounds = newBounds;
+    // Update transform handles
     this.transformHandles.update(newBounds);
   }
 
-  private handleMove(delta: paper.Point): void {
+  handleMove(delta: paper.Point): void {
     if (!this.selectedItem) return;
     
     this.selectedItem.position = this.selectedItem.position.add(delta);
@@ -230,6 +251,9 @@ export class RectangleManager {
   }
 
   endTransform(): void {
+    if (this.selectedItem) {
+      delete this.selectedItem.data.activeHandle;
+    }
     this.dragStartPosition = null;
     this.originalBounds = null;
     this.isRotating = false;
