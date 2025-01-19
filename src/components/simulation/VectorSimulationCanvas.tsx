@@ -82,10 +82,8 @@ export default function VectorSimulationCanvas() {
     const rect = canvasRef.current?.getBoundingClientRect();
     const x = e.clientX - (rect?.left || 0);
     const y = e.clientY - (rect?.top || 0);
-
-    // Update last position for all tools
-    lastDrawPosRef.current = { x, y };
-
+  
+  
     if (currentTool === 'select') {
       if (isDrawingRef.current) {
         const delta = new paper.Point(
@@ -93,9 +91,14 @@ export default function VectorSimulationCanvas() {
           y - (lastDrawPosRef.current?.y || y)
         );
         systemRef.current.handleTransform(new paper.Point(x, y), delta, e.shiftKey);
+        // Update the last position AFTER calculating the delta
+        lastDrawPosRef.current = { x, y };
       }
       return;
     }
+    
+  // Update last position for other tools
+  lastDrawPosRef.current = { x, y };
 
     if (!isDrawingRef.current) return;
     
@@ -128,7 +131,9 @@ export default function VectorSimulationCanvas() {
     
     if (!systemRef.current) return;
     
-    if (currentTool !== 'rectangle') {
+    if (currentTool === 'select') {
+      systemRef.current.endTransform(); // Add this line
+    } else if (currentTool !== 'rectangle') {
       systemRef.current.hideEraserCircle();
     }
   }, [currentTool]);
