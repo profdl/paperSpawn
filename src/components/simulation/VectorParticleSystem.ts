@@ -545,7 +545,7 @@ export class VectorParticleSystem {
       }
       
       // Add rectangle avoidance force
-      force = force.add(this.calculateRectangleAvoidance(point.position, velocity));
+      force = force.add(this.calculateRectangleAvoidance(point.position));
 
       // Apply forces to velocity
       velocity = velocity.add(force);
