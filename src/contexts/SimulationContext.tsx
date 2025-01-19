@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useCallback, useState, useRef } from 'react';
-import { SimulationSettings, presets } from '../types/particle';
-import { VectorParticleSystem } from '../systems/VectorParticleSystem';
+import { SimulationSettings, presets } from '../types';
+import { VectorParticleSystem } from '../components/simulation/VectorParticleSystem';
 
 interface SimulationContextType {
   settings: SimulationSettings;

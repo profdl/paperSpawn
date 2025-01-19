@@ -1,5 +1,4 @@
 import { useEffect, useRef, RefObject } from 'react';
-import { SimulationSettings } from '../types/particle';
 
 interface SimulationCanvasProps {
   chemicalCanvasRef: RefObject<HTMLCanvasElement>;

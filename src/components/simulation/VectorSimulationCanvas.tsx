@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useCallback } from 'react';
 import paper from 'paper';
 import { useSimulation } from '../../contexts/SimulationContext';
 import { useTool } from '../../contexts/ToolContext';
-import { VectorParticleSystem } from '../../systems/VectorParticleSystem';
+import { VectorParticleSystem } from './VectorParticleSystem';
 
 export default function VectorSimulationCanvas() {
   const { settings, isPaused, systemRef } = useSimulation();

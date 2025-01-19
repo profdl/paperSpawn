@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../../hooks/useAuth';
 
 interface Props {
   isOpen: boolean;

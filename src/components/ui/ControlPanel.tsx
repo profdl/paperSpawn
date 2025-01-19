@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { Save } from 'lucide-react';
-import { presets } from '../types/particle';
-import { usePresets } from '../hooks/usePresets';
-import { useAuth } from '../hooks/useAuth';
+import { presets } from '../../types/particle';
+import { usePresets } from '../../hooks/usePresets';
+import { useAuth } from '../../hooks/useAuth';
 import AccordionSection from './AccordionSection';
-import ParticleControls from './controls/ParticleControls';
-import BehaviorControls from './controls/BehaviorControls';
-import TrailControls from './controls/TrailControls';
-import SpawnControls from './controls/SpawnControls';
-import AppearanceControls from './controls/AppearanceControls';
-import CanvasBehaviorsControls from './controls/ExternalForcesControls';
+import ParticleControls from '../controls/ParticleControls';
+import BehaviorControls from '../controls/BehaviorControls';
+import TrailControls from '../controls/TrailControls';
+import SpawnControls from '../controls/SpawnControls';
+import AppearanceControls from '../controls/AppearanceControls';
+import CanvasBehaviorsControls from '../controls/ExternalForcesControls';
 import PresetModal from './PresetModal';
-import { useSimulation } from '../contexts/SimulationContext';
+import { useSimulation } from '../../contexts/SimulationContext';
 
 export default function ControlPanel() {
   const [openSections, setOpenSections] = useState<Set<string>>(new Set(['presets', 'particles']));

@@ -1,5 +1,5 @@
 import paper from 'paper';
-import { ParticleType, SimulationSettings } from '../types/particle';
+import {  SimulationSettings } from '../../types.ts';
 
 export class VectorParticleSystem {
   private project: paper.Project;

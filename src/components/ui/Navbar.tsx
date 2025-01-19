@@ -1,9 +1,9 @@
-import React, { useRef } from 'react';
-import { Eye, EyeOff, Download, Pencil, Eraser, Pause, Play, Trash2, FileDown, Square, MousePointer } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
-import AuthModal from './AuthModal';
-import { useSimulation } from '../contexts/SimulationContext'; 
-import { useTool } from '../contexts/ToolContext';
+import React from 'react';
+import { Eye, EyeOff,  Pencil, Eraser, Pause, Play, Trash2, FileDown, Square, MousePointer } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
+import AuthModal from '../ui/AuthModal';
+import { useSimulation } from '../../contexts/SimulationContext'; 
+import { useTool } from '../../contexts/ToolContext';
 
 interface NavbarProps {
   showUI: boolean;
@@ -12,7 +12,7 @@ interface NavbarProps {
 
 export default function Navbar({ showUI, onToggleUI }: NavbarProps) {
   const { user, signOut } = useAuth();
-  const { settings, isPaused, setIsPaused, handleClear } = useSimulation();
+  const {  isPaused, setIsPaused, handleClear } = useSimulation();
   const { currentTool, setTool } = useTool();
   const [showAuthModal, setShowAuthModal] = React.useState(false);
   const { systemRef } = useSimulation();

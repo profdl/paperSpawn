@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
-import Navbar from '../Navbar';
-import ControlPanel from '../ControlPanel';
-import ToolProperties from '../ToolProperties';
-import SimulationCanvas from '../simulation/SimulationCanvas';
+import  { useState } from 'react';
+import Navbar from '../ui/Navbar';
+import ControlPanel from '../ui/ControlPanel';
+import ToolProperties from '../ui/ToolProperties';
 import { SimulationProvider } from '../../contexts/SimulationContext';
 import { ToolProvider } from '../../contexts/ToolContext';
 import VectorSimulationCanvas from '../simulation/VectorSimulationCanvas';

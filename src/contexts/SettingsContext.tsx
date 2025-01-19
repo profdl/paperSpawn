@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useCallback } from 'react';
-import { SimulationSettings, presets } from '../types/particle';
+import { SimulationSettings, presets } from '../types';
 
 interface SettingsContextType {
   settings: SimulationSettings;

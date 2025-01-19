@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSimulation } from '../../contexts/SimulationContext';
-import DraggableNumberInput from '../DraggableNumberInput';
+import DraggableNumberInput from '../ui/DraggableNumberInput';
 
 export default function TrailControls() {
   const { settings, updateSetting } = useSimulation();

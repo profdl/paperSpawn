@@ -1,6 +1,6 @@
-import React from 'react';
+
 import DraggableNumberInput from './DraggableNumberInput';
-import { useTool } from '../contexts/ToolContext';
+import { useTool } from '../../contexts/ToolContext';
 
 export default function ToolProperties() {
   const { currentTool, eraserProperties, updateEraserProperties } = useTool();
