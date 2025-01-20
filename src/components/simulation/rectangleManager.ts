@@ -5,11 +5,8 @@ export class RectangleManager {
   private rectangles: paper.Path.Rectangle[] = [];
   private selectedItem: paper.Path.Rectangle | null = null;
   private transformHandles: TransformHandles;
-  private clipboard: paper.Path.Rectangle | null = null;
   private dragStartPosition: paper.Point | null = null;
   private originalBounds: paper.Rectangle | null = null;
-  private isRotating: boolean = false;
-  private rotationStartAngle: number = 0;
 
   constructor() {
     this.transformHandles = new TransformHandles();
@@ -96,8 +93,6 @@ export class RectangleManager {
     this.transformHandles.remove();
     this.dragStartPosition = null;
     this.originalBounds = null;
-    this.isRotating = false;
-    this.rotationStartAngle = 0;
   }
 
   handleTransform(point: paper.Point, delta: paper.Point, shiftKey: boolean): void {
@@ -108,24 +103,18 @@ export class RectangleManager {
       this.dragStartPosition = point.subtract(delta);
       this.originalBounds = this.selectedItem.bounds.clone();
       
-      // Check if we're starting on a handle
-      const rotateHandle = this.transformHandles.getRotateHandle();
+      // Check if we're starting on the resize handle
       const resizeHandle = this.transformHandles.getHandleAt(point);
       
-      if (rotateHandle && rotateHandle.bounds.contains(point)) {
-        this.isRotating = true;
-        this.rotationStartAngle = this.getAngleToCenter(point);
-      } else if (resizeHandle) {
-        // Store the handle we're using for resize
+      if (resizeHandle) {
         this.selectedItem.data.activeHandle = resizeHandle;
       }
     }
 
-    if (this.isRotating) {
-      this.handleRotation(point);
-    } else if (this.selectedItem.data.activeHandle) {
-      // We're resizing
-      this.handleResize(this.selectedItem.data.activeHandle, delta, shiftKey);
+    if (this.selectedItem.data.activeHandle) {
+      // We're resizing - calculate the total delta from the original position
+      const totalDelta = point.subtract(this.dragStartPosition);
+      this.handleResize(totalDelta, shiftKey);
     } else {
       // We're moving
       this.handleMove(delta);
@@ -134,66 +123,30 @@ export class RectangleManager {
     paper.view.update();
   }
 
-  private handleRotation(point: paper.Point): void {
-    if (!this.selectedItem || !this.dragStartPosition) return;
-  
-    const currentAngle = this.getAngleToCenter(point);
-    const deltaAngle = currentAngle - this.rotationStartAngle;
-    const snappedAngle = Math.round(deltaAngle / 45) * 45;
-    
-    this.selectedItem.rotate(snappedAngle, this.selectedItem.bounds.center);
-    this.transformHandles.update(this.selectedItem.bounds, snappedAngle);
-  }
-
-  private handleResize(handle: paper.Item, delta: paper.Point, shiftKey: boolean): void {
+  private handleResize(totalDelta: paper.Point, shiftKey: boolean): void {
     if (!this.selectedItem || !this.originalBounds) return;
     
     const newBounds = this.originalBounds.clone();
-    const handleIndex = handle.data.index;
     
-    // Apply the cumulative delta to the original bounds
-    switch (handleIndex) {
-      case 0: // Top-left
-        newBounds.left += delta.x;
-        newBounds.top += delta.y;
-        break;
-      case 1: // Top-center
-        newBounds.top += delta.y;
-        break;
-      case 2: // Top-right
-        newBounds.right += delta.x;
-        newBounds.top += delta.y;
-        break;
-      case 3: // Middle-right
-        newBounds.right += delta.x;
-        break;
-      case 4: // Bottom-right
-        newBounds.right += delta.x;
-        newBounds.bottom += delta.y;
-        break;
-      case 5: // Bottom-center
-        newBounds.bottom += delta.y;
-        break;
-      case 6: // Bottom-left
-        newBounds.left += delta.x;
-        newBounds.bottom += delta.y;
-        break;
-      case 7: // Middle-left
-        newBounds.left += delta.x;
-        break;
-    }
-
-    // Maintain aspect ratio if shift is held
-    if (shiftKey && handleIndex % 2 === 0) {
+    // Calculate new width and height based on the total delta from drag start
+    const newWidth = Math.max(10, this.originalBounds.width + totalDelta.x);
+    const newHeight = Math.max(10, this.originalBounds.height + totalDelta.y);
+    
+    if (shiftKey) {
+      // Maintain aspect ratio
       const originalRatio = this.originalBounds.width / this.originalBounds.height;
-      const width = Math.abs(newBounds.width);
-      const height = width / originalRatio;
+      const newRatio = newWidth / newHeight;
       
-      if (handleIndex < 3) { // Top handles
-        newBounds.top = newBounds.bottom - height;
-      } else if (handleIndex > 4) { // Bottom handles
-        newBounds.bottom = newBounds.top + height;
+      if (newRatio > originalRatio) {
+        // Width is dominant, adjust height
+        newBounds.size = new paper.Size(newWidth, newWidth / originalRatio);
+      } else {
+        // Height is dominant, adjust width
+        newBounds.size = new paper.Size(newHeight * originalRatio, newHeight);
       }
+    } else {
+      // Free resize
+      newBounds.size = new paper.Size(newWidth, newHeight);
     }
 
     // Apply the new bounds
@@ -209,31 +162,10 @@ export class RectangleManager {
     this.transformHandles.update(this.selectedItem.bounds);
   }
 
-  private getAngleToCenter(point: paper.Point): number {
-    if (!this.selectedItem) return 0;
-    const center = this.selectedItem.bounds.center;
-    return Math.atan2(point.y - center.y, point.x - center.x) * 180 / Math.PI;
-  }
-
   handleKeyboardShortcut(event: KeyboardEvent): void {
     if (!this.selectedItem) return;
 
-    const isCtrlCmd = event.ctrlKey || event.metaKey;
-
-    if (isCtrlCmd && event.key === 'c') {
-      this.clipboard = this.selectedItem.clone();
-      this.clipboard.visible = false;
-    } else if (isCtrlCmd && event.key === 'x') {
-      this.clipboard = this.selectedItem.clone();
-      this.clipboard.visible = false;
-      this.removeSelected();
-    } else if (isCtrlCmd && event.key === 'v' && this.clipboard) {
-      const pastedItem = this.clipboard.clone();
-      pastedItem.visible = true;
-      pastedItem.position = pastedItem.position.add(new paper.Point(20, 20));
-      this.rectangles.push(pastedItem);
-      this.selectAt(pastedItem.position);
-    } else if (event.key === 'Delete' || event.key === 'Backspace') {
+    if (event.key === 'Delete' || event.key === 'Backspace') {
       this.removeSelected();
     }
 
@@ -256,8 +188,6 @@ export class RectangleManager {
     }
     this.dragStartPosition = null;
     this.originalBounds = null;
-    this.isRotating = false;
-    this.rotationStartAngle = 0;
   }
 
   getAllRectangles(): paper.Path.Rectangle[] {
@@ -269,4 +199,6 @@ export class RectangleManager {
     this.rectangles = [];
     this.clearSelection();
   }
+
+  
 }
