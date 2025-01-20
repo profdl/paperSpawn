@@ -75,11 +75,6 @@ export default function VectorSimulationCanvas() {
       return;
     }
 
-    if (currentTool === 'rectangle') {
-      systemRef.current.startRectangle(point.x, point.y);
-      return;
-    }
-
     if (currentTool === 'paint') {
       systemRef.current.createParticle(point.x, point.y);
     } else if (currentTool === 'erase') {

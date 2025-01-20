@@ -14,8 +14,8 @@ export class RectangleManager {
 
   calculateAvoidanceForce(position: paper.Point): paper.Point {
     const avoidanceForce = new paper.Point(0, 0);
-    const avoidanceDistance = 30;
-    const maxForce = 0.5;
+    const avoidanceDistance = 30; // Increased from 15 to make avoidance more noticeable
+    const maxForce = 1.0; // Increased from 0.5 to make avoidance stronger
 
     for (const rectangle of this.rectangles) {
       const bounds = rectangle.bounds;
@@ -27,26 +27,35 @@ export class RectangleManager {
       const distance = diff.length;
 
       if (distance < avoidanceDistance) {
-        const force = Math.min(maxForce, (avoidanceDistance - distance) / avoidanceDistance);
+        // Use inverse square law for more natural avoidance
+        const force = Math.min(maxForce, Math.pow(avoidanceDistance - distance, 2) / (avoidanceDistance * avoidanceDistance));
         
         if (bounds.contains(position)) {
+          // Stronger force when inside rectangle to push particles out
           avoidanceForce.set(
-            avoidanceForce.x + diff.x * maxForce * 2,
-            avoidanceForce.y + diff.y * maxForce * 2
+            avoidanceForce.x + diff.x * maxForce * 3,
+            avoidanceForce.y + diff.y * maxForce * 3
           );
         } else {
+          // Normal avoidance force when outside
+          const normalizedForce = diff.normalize().multiply(force);
           avoidanceForce.set(
-            avoidanceForce.x + diff.normalize().x * force,
-            avoidanceForce.y + diff.normalize().y * force
+            avoidanceForce.x + normalizedForce.x,
+            avoidanceForce.y + normalizedForce.y
           );
         }
       }
     }
 
+    // Limit the maximum force magnitude
+    if (avoidanceForce.length > maxForce) {
+      avoidanceForce.length = maxForce;
+    }
+
     return avoidanceForce;
   }
 
-  create(x: number, y: number): void {
+  create(x: number, y: number): paper.Path.Rectangle {
     const width = 30;
     const height = 30;
 
@@ -60,6 +69,7 @@ export class RectangleManager {
 
     this.rectangles.push(rectangle);
     paper.view.update();
+    return rectangle; // Return the created rectangle
   }
 
   isHandleAt(point: paper.Point): boolean {

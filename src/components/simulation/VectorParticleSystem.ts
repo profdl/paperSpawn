@@ -59,9 +59,9 @@ export class VectorParticleSystem {
   }
 
   // Rectangle-related methods
-  startRectangle(x: number, y: number): void {
-    this.rectangleManager.create(x, y);
-  }
+  startRectangle(x: number, y: number): paper.Path.Rectangle {
+    return this.rectangleManager.create(x, y);
+}
 
   selectItemAt(point: paper.Point): void {
     this.rectangleManager.selectAt(point);

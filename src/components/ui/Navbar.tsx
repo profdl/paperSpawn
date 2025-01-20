@@ -17,6 +17,24 @@ export default function Navbar({ showUI, onToggleUI }: NavbarProps) {
   const [showAuthModal, setShowAuthModal] = React.useState(false);
   const { systemRef } = useSimulation();
 
+  const handleRectangleClick = () => {
+    if (!systemRef.current) return;
+    
+    // Calculate center point of canvas
+    const centerX = 500 / 2;  // canvas width / 2
+    const centerY = 400 / 2;  // canvas height / 2
+    
+    // Create rectangle at center
+    const rectangle = systemRef.current.startRectangle(centerX, centerY);
+    
+    // Switch to select tool and select the new rectangle
+    setTool('select');
+    
+    // Select the newly created rectangle
+    const point = new paper.Point(centerX, centerY);
+    systemRef.current.selectItemAt(point);
+  };
+
   const handleDownload = () => {
     if (!systemRef.current) return;
 
@@ -56,14 +74,14 @@ export default function Navbar({ showUI, onToggleUI }: NavbarProps) {
                   <Eraser className="w-4 h-4" />
                 </button>
                 <button
-                  className={`p-1.5 rounded hover:bg-white/10 transition-colors ${
-                    currentTool === 'rectangle' ? 'bg-white/20' : ''
-                  }`}
-                  onClick={() => setTool(currentTool === 'rectangle' ? 'none' : 'rectangle')}
-                  title="Draw Rectangle (R)"
-                >
-                  <Square className="w-4 h-4" />
-                </button>
+          className={`p-1.5 rounded hover:bg-white/10 transition-colors ${
+            currentTool === 'rectangle' ? 'bg-white/20' : ''
+          }`}
+          onClick={handleRectangleClick}
+          title="Draw Rectangle (R)"
+        >
+          <Square className="w-4 h-4" />
+        </button>
                 <button
                   className={`p-1.5 rounded hover:bg-white/10 transition-colors ${
                     currentTool === 'select' ? 'bg-white/20' : ''
