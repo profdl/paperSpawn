@@ -17,6 +17,11 @@ export default function Navbar({ showUI, onToggleUI }: NavbarProps) {
   const [showAuthModal, setShowAuthModal] = React.useState(false);
   const { systemRef } = useSimulation();
 
+  const handleClearParticles = () => {
+    if (!systemRef.current) return;
+    systemRef.current.clearParticlesOnly();
+  };
+
   const handleRectangleClick = () => {
     if (!systemRef.current) return;
     
@@ -103,13 +108,13 @@ export default function Navbar({ showUI, onToggleUI }: NavbarProps) {
                     <Pause className="w-4 h-4" />
                   )}
                 </button>
-                <button
-                  className="p-1.5 rounded hover:bg-white/10 transition-colors"
-                  onClick={handleClear}
-                  title="Clear All"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+               <button
+        className="p-1.5 rounded hover:bg-white/10 transition-colors"
+        onClick={handleClearParticles}
+        title="Clear Particles"
+      >
+        <Trash2 className="w-4 h-4" />
+      </button>
               </div>
             </div>
             <div className="flex items-center gap-4">

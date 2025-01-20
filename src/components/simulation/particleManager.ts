@@ -1,32 +1,101 @@
 import paper from 'paper';
 import { SimulationSettings } from '../../types';
+import { RectangleManager } from './rectangleManager';
 
 export class ParticleManager {
   private particles: paper.Group;
-  private particleRadius: number = 2;
-  private trailWidth: number = 1;
+  private rectangleManager: RectangleManager;
+  // Change from private readonly to private
+  private _particleRadius: number = 2;
+  private _trailWidth: number = 1;
   private wanderAngles: Map<number, number> = new Map();
 
-  constructor() {
+  
+
+  constructor(rectangleManager: RectangleManager) {
     this.particles = new paper.Group();
+    this.rectangleManager = rectangleManager;
   }
 
-  createParticle(x: number, y: number, particleColor: string = '#000000', trailColor: string = '#8b8680'): paper.Group {
-    const particle = new paper.Group();
-    
-    const point = new paper.Path.Circle({
-      center: new paper.Point(x, y),
-      radius: this.particleRadius,
-      fillColor: particleColor
-    });
+  // Add new method for rectangle avoidance
+  private calculateRectangleAvoidance(position: paper.Point): paper.Point {
+    const avoidanceForce = new paper.Point(0, 0);
+    const avoidanceDistance = 30;
+    const maxForce = 1.0;
 
-    const trail = new paper.Path({
-      strokeColor: trailColor,
-      strokeWidth: this.trailWidth,
-      strokeCap: 'round',
-      opacity: 1
-    });
-    trail.add(new paper.Point(x, y));
+    const rectangles = this.rectangleManager.getAllRectangles();
+    
+    for (const rectangle of rectangles) {
+      const bounds = rectangle.bounds;
+      const nearestX = Math.max(bounds.left, Math.min(position.x, bounds.right));
+      const nearestY = Math.max(bounds.top, Math.min(position.y, bounds.bottom));
+      const nearest = new paper.Point(nearestX, nearestY);
+
+      const diff = position.subtract(nearest);
+      const distance = diff.length;
+
+      if (distance < avoidanceDistance) {
+        const force = Math.min(maxForce, Math.pow(avoidanceDistance - distance, 2) / (avoidanceDistance * avoidanceDistance));
+        
+        if (bounds.contains(position)) {
+          avoidanceForce.set(
+            avoidanceForce.x + diff.x * maxForce * 3,
+            avoidanceForce.y + diff.y * maxForce * 3
+          );
+        } else {
+          const normalizedForce = diff.normalize().multiply(force);
+          avoidanceForce.set(
+            avoidanceForce.x + normalizedForce.x,
+            avoidanceForce.y + normalizedForce.y
+          );
+        }
+      }
+    }
+
+    if (avoidanceForce.length > maxForce) {
+      avoidanceForce.length = maxForce;
+    }
+
+    return avoidanceForce;
+  }
+
+    // Add getters and setters for the properties
+    get particleRadius(): number {
+      return this._particleRadius;
+    }
+  
+    get trailWidth(): number {
+      return this._trailWidth;
+    }
+  
+    // Update methods to use the new property names
+    setParticleRadius(radius: number): void {
+      this._particleRadius = radius;
+    }
+  
+    setTrailWidth(width: number): void {
+      this._trailWidth = width;
+      this.particles.children.forEach(particle => {
+        const trail = particle.children[1] as paper.Path;
+        trail.strokeWidth = width;
+      });
+    }
+    createParticle(x: number, y: number, particleColor: string = '#000000', trailColor: string = '#8b8680'): paper.Group {
+      const particle = new paper.Group();
+      
+      const point = new paper.Path.Circle({
+        center: new paper.Point(x, y),
+        radius: this._particleRadius,  // Updated here
+        fillColor: particleColor
+      });
+  
+      const trail = new paper.Path({
+        strokeColor: trailColor,
+        strokeWidth: this._trailWidth,  // Updated here
+        strokeCap: 'round',
+        opacity: 1
+      });
+      trail.add(new paper.Point(x, y));
 
     particle.addChildren([point, trail]);
     particle.data = {
@@ -42,7 +111,7 @@ export class ParticleManager {
     return particle;
   }
 
-  private calculateFlockingForces(
+   calculateFlockingForces(
     particle: paper.Group,
     settings: SimulationSettings
   ): paper.Point {
@@ -89,7 +158,7 @@ export class ParticleManager {
     return force;
   }
 
-  private calculateWanderForce(
+   calculateWanderForce(
     particle: paper.Group,
     settings: SimulationSettings
   ): paper.Point {
@@ -118,23 +187,34 @@ export class ParticleManager {
       .multiply(settings.wanderStrength);
   }
 
+   calculateExternalForce(settings: SimulationSettings): paper.Point {
+    // Convert angle from degrees to radians
+    const angleInRadians = (settings.externalForceAngle || 0) * Math.PI / 180;
+    const strength = settings.externalForceStrength || 0;
+    
+    // Create a vector from angle and strength
+    return new paper.Point({
+      length: strength * 0.1, // Scale down the strength to not overwhelm other forces
+      angle: angleInRadians
+    });
+  }
+
   updateParticles(
     settings: SimulationSettings, 
     width: number, 
-    height: number, 
-    getRectangleAvoidance: (position: paper.Point) => paper.Point
+    height: number
   ): void {
     this.particles.children.forEach(particle => {
-      this.updateParticle(particle as paper.Group, settings, width, height, getRectangleAvoidance);
+      this.updateParticle(particle as paper.Group, settings, width, height);
     });
   }
+
 
   private updateParticle(
     particle: paper.Group,
     settings: SimulationSettings,
     width: number,
-    height: number,
-    getRectangleAvoidance: (position: paper.Point) => paper.Point
+    height: number
   ): void {
     const point = particle.children[0] as paper.Path.Circle;
     const trail = particle.children[1] as paper.Path;
@@ -162,16 +242,10 @@ export class ParticleManager {
       if (settings.wanderEnabled) {
         force = force.add(this.calculateWanderForce(particle, settings));
       }
-      
-      // Add rectangle avoidance force
-      force = force.add(getRectangleAvoidance(point.position));
 
-      // Apply forces to velocity
-      velocity = velocity.add(force);
-
-      // Normalize velocity
-      if (velocity.length > 0) {
-        velocity = velocity.normalize().multiply(2);
+      // Normalize and scale the behavioral forces first
+      if (force.length > 0) {
+        force = force.normalize().multiply(2);
       }
 
       // Apply speed setting and state-based modifications
@@ -181,7 +255,19 @@ export class ParticleManager {
           : 1
       );
 
-      velocity = velocity.multiply(speedMultiplier);
+      force = force.multiply(speedMultiplier);
+
+      // Add avoidance force after normalizing the behavioral forces
+      const avoidanceForce = this.calculateRectangleAvoidance(point.position);
+      force = force.add(avoidanceForce);
+
+      // Apply forces to velocity
+      velocity = velocity.add(force);
+
+      // Normalize final velocity if needed
+      if (velocity.length > 2) {
+        velocity = velocity.normalize().multiply(2);
+      }
 
       // Update position
       const newPosition = point.position.add(velocity);
@@ -261,17 +347,7 @@ export class ParticleManager {
     });
   }
 
-  setParticleRadius(radius: number): void {
-    this.particleRadius = radius;
-  }
 
-  setTrailWidth(width: number): void {
-    this.trailWidth = width;
-    this.particles.children.forEach(particle => {
-      const trail = particle.children[1] as paper.Path;
-      trail.strokeWidth = width;
-    });
-  }
 
   removeParticlesInRadius(center: paper.Point, radius: number): void {
     const particlesToRemove: paper.Group[] = [];

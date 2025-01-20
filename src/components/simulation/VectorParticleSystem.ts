@@ -19,7 +19,8 @@ export class VectorParticleSystem {
     this.project = paper.project;
     
     this.rectangleManager = new RectangleManager();
-    this.particleManager = new ParticleManager();
+    // Pass rectangleManager to ParticleManager
+    this.particleManager = new ParticleManager(this.rectangleManager);
     this.eraserTool = new EraserTool();
     this.background = new CanvasBackground(this.project.view.bounds);
     
@@ -50,11 +51,11 @@ export class VectorParticleSystem {
 
   updateParticles(settings: SimulationSettings): void {
     const view = this.project.view;
+    // Simplified call without passing avoidance calculation
     this.particleManager.updateParticles(
       settings, 
       view.bounds.width, 
-      view.bounds.height,
-      (position) => this.rectangleManager.calculateAvoidanceForce(position)
+      view.bounds.height
     );
   }
 
@@ -87,6 +88,10 @@ export class VectorParticleSystem {
   }
 
   // General methods
+  clearParticlesOnly(): void {
+    this.particleManager.clear();
+  }
+  
   clear(): void {
     this.particleManager.clear();
     this.rectangleManager.clear();
