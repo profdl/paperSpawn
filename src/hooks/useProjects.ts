@@ -87,6 +87,6 @@ export function useProjects() {
     isLoading,
     saveProject,
     deleteProject,
-    refreshProjects: fetchProjects
+    refreshProjects: fetchProjects 
   };
 }

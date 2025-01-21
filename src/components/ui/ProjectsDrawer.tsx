@@ -1,8 +1,9 @@
+import { useEffect } from 'react';
 import { X, Trash2, Download } from 'lucide-react';
 import { useProjects, Project } from '../../hooks/useProjects';
 import { useSimulation } from '../../contexts/SimulationContext';
 import { format } from 'date-fns';
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 
 interface ProjectsDrawerProps {
   isOpen: boolean;
@@ -10,9 +11,10 @@ interface ProjectsDrawerProps {
 }
 
 export default function ProjectsDrawer({ isOpen, onClose }: ProjectsDrawerProps) {
-  const { projects, isLoading, deleteProject } = useProjects();
+  const { projects, isLoading, deleteProject, refreshProjects } = useProjects();  // Add refreshProjects here
   const { systemRef, updateSettings } = useSimulation();
   const [previews, setPreviews] = useState<{ [key: string]: string }>({});
+
   const handleOverlayClick = useCallback((e: MouseEvent) => {
     const drawer = document.getElementById('projects-drawer');
     if (drawer && !drawer.contains(e.target as Node)) {
@@ -20,10 +22,17 @@ export default function ProjectsDrawer({ isOpen, onClose }: ProjectsDrawerProps)
     }
   }, [onClose]);
 
-
+  
+  useEffect(() => {
+    if (isOpen) {
+      refreshProjects();
+    }
+  }, [isOpen, refreshProjects]);
+  
   useEffect(() => {
     if (isOpen) {
       document.addEventListener('mousedown', handleOverlayClick);
+      
     }
     return () => {
       document.removeEventListener('mousedown', handleOverlayClick);

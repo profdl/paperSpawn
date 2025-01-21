@@ -43,6 +43,15 @@ export default function Navbar({
     systemRef.current.clearParticlesOnly();
   };
 
+  const handleOpenProjects = () => {
+    if (user) {
+      // This will trigger the drawer to open
+      onOpenProjects();
+    } else {
+      setShowAuthModal(true);
+    }
+  };
+
   const handleRectangleClick = () => {
     if (!systemRef.current) return;
     
@@ -148,12 +157,12 @@ export default function Navbar({
 
                 {/* Project Management */}
                 <button
-                  className="p-1.5 rounded hover:bg-white/10 transition-colors"
-                  onClick={() => user ? onOpenProjects() : setShowAuthModal(true)}
-                  title={user ? "Open Projects" : "Sign in to open projects"}
-                >
-                  <FolderOpen className="w-4 h-4" />
-                </button>
+        className="p-1.5 rounded hover:bg-white/10 transition-colors"
+        onClick={handleOpenProjects}
+        title={user ? "Open Projects" : "Sign in to open projects"}
+      >
+        <FolderOpen className="w-4 h-4" />
+      </button>
                 <button
                   className="p-1.5 rounded hover:bg-white/10 transition-colors"
                   onClick={() => user ? onSave() : setShowAuthModal(true)}
