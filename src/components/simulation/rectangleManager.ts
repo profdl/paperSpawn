@@ -16,7 +16,13 @@ export class RectangleManager {
     this.transformHandles = new TransformHandles();
   }
 
-
+getAllClosedPaths(): paper.Path[] {
+  // Get all rectangles (which are closed paths) and closed freehand paths
+  return [
+    ...this.rectangles,
+    ...this.paths.filter(path => path.closed)
+  ];
+}
 
 
   importRectangle(rectangle: paper.Path.Rectangle): void {

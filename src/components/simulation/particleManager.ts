@@ -14,32 +14,31 @@ export class ParticleManager {
     this.rectangleManager = rectangleManager;
   }
 
-  // Add new method for rectangle avoidance
+  // Add new method for obstacle avoidance
   private calculateRectangleAvoidance(position: paper.Point): paper.Point {
     const avoidanceForce = new paper.Point(0, 0);
     const avoidanceDistance = 30;
     const maxForce = 1.0;
-
-    const rectangles = this.rectangleManager.getAllRectangles();
+  
+    // Get all closed paths instead of just rectangles
+    const obstacles = this.rectangleManager.getAllClosedPaths();
     
-    for (const rectangle of rectangles) {
-      const bounds = rectangle.bounds;
-      const nearestX = Math.max(bounds.left, Math.min(position.x, bounds.right));
-      const nearestY = Math.max(bounds.top, Math.min(position.y, bounds.bottom));
-      const nearest = new paper.Point(nearestX, nearestY);
-
-      const diff = position.subtract(nearest);
+    for (const obstacle of obstacles) {
+      // Use path.getNearestPoint instead of calculating bounds
+      const nearestPoint = obstacle.getNearestPoint(position);
+      const diff = position.subtract(nearestPoint);
       const distance = diff.length;
-
+      
       if (distance < avoidanceDistance) {
-        const force = Math.min(maxForce, Math.pow(avoidanceDistance - distance, 2) / (avoidanceDistance * avoidanceDistance));
+        const isInside = obstacle.contains(position);
         
-        if (bounds.contains(position)) {
+        if (isInside) {
           avoidanceForce.set(
             avoidanceForce.x + diff.x * maxForce * 3,
             avoidanceForce.y + diff.y * maxForce * 3
           );
         } else {
+          const force = Math.min(maxForce, Math.pow(avoidanceDistance - distance, 2) / (avoidanceDistance * avoidanceDistance));
           const normalizedForce = diff.normalize().multiply(force);
           avoidanceForce.set(
             avoidanceForce.x + normalizedForce.x,
@@ -48,11 +47,11 @@ export class ParticleManager {
         }
       }
     }
-
+  
     if (avoidanceForce.length > maxForce) {
       avoidanceForce.length = maxForce;
     }
-
+  
     return avoidanceForce;
   }
 
@@ -80,11 +79,11 @@ export class ParticleManager {
     createParticle(x: number, y: number, particleColor: string = '#000000', trailColor: string = '#8b8680'): paper.Group | null {
       const position = new paper.Point(x, y);
       
-      // Check if the spawn position is inside any rectangle
-      const rectangles = this.rectangleManager.getAllRectangles();
-      for (const rectangle of rectangles) {
-        if (rectangle.bounds.contains(position)) {
-          return null; // Don't spawn the particle if it's inside a rectangle
+      // Check if the spawn position is inside any closed path
+      const obstacles = this.rectangleManager.getAllClosedPaths();
+      for (const obstacle of obstacles) {
+        if (obstacle.contains(position)) {
+          return null; // Don't spawn the particle if it's inside any closed path
         }
       }
   
@@ -138,17 +137,31 @@ export class ParticleManager {
   }
 
   private spawnScatterPattern(count: number, width: number, height: number): void {
-    let attempts = 0;
     let created = 0;
-    const maxAttempts = count * 3; // Limit attempts to prevent infinite loops
-
+    let attempts = 0;
+    const maxAttempts = count * 20; // Increase max attempts to give more chances
+  
     while (created < count && attempts < maxAttempts) {
-      const x = Math.random() * width;
-      const y = Math.random() * height;
+      // Try to find a position not inside any obstacle
+      let x = Math.random() * width;
+      let y = Math.random() * height;
+      
       const particle = this.createParticle(x, y);
-      if (particle) created++;
+      if (particle) {
+        created++;
+      }
       attempts++;
+  
+      // If we're struggling to place particles, start trying with more spread
+      if (attempts > count * 10) {
+        // Add some padding to avoid edges
+        const padding = 20;
+        x = padding + Math.random() * (width - padding * 2);
+        y = padding + Math.random() * (height - padding * 2);
+      }
     }
+  
+    console.log(`Spawned ${created}/${count} particles in ${attempts} attempts`);
   }
 
   private spawnGridPattern(count: number, width: number, height: number): void {
