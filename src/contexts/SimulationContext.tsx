@@ -31,11 +31,56 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
 
   const handleRespawn = useCallback(() => {
     if (systemRef.current) {
-      systemRef.current.clearParticlesOnly(); // Clear only particles, keep rectangles
-      systemRef.current.spawnParticles(settings.count, settings.spawnPattern);
+      const { width, height } = systemRef.current.getCanvasDimensions();
+      // Ensure we're using the correct fixed dimensions
+      const canvasWidth = 500;  // Match canvas.width
+      const canvasHeight = 400; // Match canvas.height
+      
+      systemRef.current.clearParticlesOnly();
+      
+      for (let i = 0; i < settings.count; i++) {
+        switch (settings.spawnPattern) {
+          case 'scatter': {
+            const x = Math.random() * canvasWidth;
+            const y = Math.random() * canvasHeight;
+            systemRef.current.createParticle(x, y);
+            break;
+          }
+          case 'grid': {
+            const cols = Math.ceil(Math.sqrt(settings.count * canvasWidth / canvasHeight));
+            const rows = Math.ceil(settings.count / cols);
+            const cellWidth = canvasWidth / cols;
+            const cellHeight = canvasHeight / rows;
+            const col = i % cols;
+            const row = Math.floor(i / cols);
+            const x = (col + 0.5) * cellWidth;
+            const y = (row + 0.5) * cellHeight;
+            systemRef.current.createParticle(x, y);
+            break;
+          }
+          case 'circle': {
+            const centerX = canvasWidth / 2;
+            const centerY = canvasHeight / 2;
+            const radius = Math.min(canvasWidth, canvasHeight) * 0.4;
+            const angle = (i / settings.count) * Math.PI * 2;
+            const x = centerX + Math.cos(angle) * radius;
+            const y = centerY + Math.sin(angle) * radius;
+            systemRef.current.createParticle(x, y);
+            break;
+          }
+          case 'point': {
+            const centerX = canvasWidth / 2;
+            const centerY = canvasHeight / 2;
+            const spread = 5;
+            const x = centerX + (Math.random() - 0.5) * spread;
+            const y = centerY + (Math.random() - 0.5) * spread;
+            systemRef.current.createParticle(x, y);
+            break;
+          }
+        }
+      }
     }
   }, [settings.count, settings.spawnPattern]);
-
 
   const handleClear = useCallback(() => {
     if (systemRef.current) {

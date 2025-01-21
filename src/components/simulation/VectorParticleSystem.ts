@@ -37,7 +37,13 @@ export class VectorParticleSystem {
       this.rectangleManager.handleTransform(point, delta, shiftKey);
     }
   }
-
+  getCanvasDimensions(): { width: number; height: number } {
+    const canvas = this.project.view.element as HTMLCanvasElement;
+    return {
+      width: canvas.width,
+      height: canvas.height
+    };
+  }
 
   setBackgroundColor(color: string): void {
     this.background.setColor(color);
