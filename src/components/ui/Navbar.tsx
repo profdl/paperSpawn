@@ -2,7 +2,7 @@ import React from 'react';
 import { 
   Eye, 
   EyeOff, 
-  Pencil, 
+  Wand, 
   Eraser, 
   Pause, 
   Play, 
@@ -13,7 +13,8 @@ import {
   Save,
   FolderOpen,
   ImagePlus,
-  Pen
+  Pen,
+  wand
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import AuthModal from '../ui/AuthModal';
@@ -113,7 +114,7 @@ export default function Navbar({
                   onClick={() => setTool(currentTool === 'paint' ? 'none' : 'paint')}
                   title="Paint Particles (P)"
                 >
-                  <Pencil className="w-4 h-4" />
+                  <Wand className="w-4 h-4" />
                 </button>
                 <button
     className={`p-1.5 rounded hover:bg-white/10 transition-colors ${

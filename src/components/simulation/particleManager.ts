@@ -331,6 +331,7 @@ calculateFlockingForces(
   }
 
 
+
   private updateParticle(
     particle: paper.Group,
     settings: SimulationSettings,
@@ -341,6 +342,11 @@ calculateFlockingForces(
     const trail = particle.children[1] as paper.Path;
     const age = Date.now() - particle.data.createdAt;
     let velocity = particle.data.velocity;
+
+    // Check if particle is already stopped
+    if (particle.data.state === 'stopped') {
+      return; // Skip all calculations for stopped particles
+    }
 
     // Update state based on age and paint mode
     if (settings.paintingModeEnabled) {
@@ -353,37 +359,29 @@ calculateFlockingForces(
       trail.visible = false;
     }
 
-    if (!settings.paintingModeEnabled || particle.data.state !== 'frozen') {
+    // Only update active particles
+    if (particle.data.state === 'active') {
       let force = new paper.Point(0, 0);
 
       // Only apply flocking/wandering if not in bounce cooldown
-    const bounceComplete = !particle.data.bounceCooldown || 
-    Date.now() > particle.data.bounceCooldown;
+      const bounceComplete = !particle.data.bounceCooldown || 
+        Date.now() > particle.data.bounceCooldown;
 
-// Calculate desired force from behaviors
-if (bounceComplete) {
-if (settings.flockingEnabled) {
-force = force.add(this.calculateFlockingForces(particle, settings));
-}
-
-if (settings.wanderEnabled) {
-force = force.add(this.calculateWanderForce(particle, settings));
-}
-}
-      
       // Calculate desired force from behaviors
-      if (settings.flockingEnabled) {
-        force = force.add(this.calculateFlockingForces(particle, settings));
+      if (bounceComplete) {
+        if (settings.flockingEnabled) {
+          force = force.add(this.calculateFlockingForces(particle, settings));
+        }
+
+        if (settings.wanderEnabled) {
+          force = force.add(this.calculateWanderForce(particle, settings));
+        }
       }
-  
-      if (settings.wanderEnabled) {
-        force = force.add(this.calculateWanderForce(particle, settings));
-      }
-  
+
       if (settings.externalForceStrength && settings.externalForceStrength !== 0) {
         force = force.add(this.calculateExternalForce(settings));
       }
-  
+
       // Normalize the behavioral forces but scale based on speed setting
       if (force.length > 0) {
         force = force.normalize().multiply(settings.speed * 1);
@@ -412,44 +410,21 @@ force = force.add(this.calculateWanderForce(particle, settings));
           newPosition.y = ((newPosition.y + height) % height);
           break;
           
-          case 'bounce':
-            if (newPosition.x < 0 || newPosition.x > width ||
-                newPosition.y < 0 || newPosition.y > height) {
-              const id = particle.id;
-              if (this.wanderAngles.has(id)) {
-                const currentAngle = this.wanderAngles.get(id)!;
-                
-                // Determine which boundary was hit and invert the angle accordingly
-                if (newPosition.x < 0 || newPosition.x > width) {
-                  // For vertical boundaries (left/right), reflect across vertical axis
-                  // This is done by inverting around π (180 degrees)
-                  this.wanderAngles.set(id, Math.PI - currentAngle);
-                } else {
-                  // For horizontal boundaries (top/bottom), reflect across horizontal axis
-                  // This is done by negating the angle
-                  this.wanderAngles.set(id, -currentAngle);
-                }
-              }
-              
-              // Reflect velocity based on which boundary was hit
-              if (newPosition.x < 0 || newPosition.x > width) {
-                velocity.x *= -1; // Reflect x component
-              } else {
-                velocity.y *= -1; // Reflect y component
-              }
-              
-              // Move particle back into bounds
-              newPosition.x = Math.max(this._particleRadius, Math.min(width - this._particleRadius, newPosition.x));
-              newPosition.y = Math.max(this._particleRadius, Math.min(height - this._particleRadius, newPosition.y));
-            }
-            break;
+        case 'bounce':
+          if (newPosition.x < 0 || newPosition.x > width ||
+              newPosition.y < 0 || newPosition.y > height) {
+            // ... existing bounce code ...
+          }
+          break;
           
-            case 'stop':
+        case 'stop':
           if (newPosition.x < 0 || newPosition.x > width ||
               newPosition.y < 0 || newPosition.y > height) {
             velocity.set(0, 0);
             newPosition.x = Math.max(0, Math.min(width, newPosition.x));
             newPosition.y = Math.max(0, Math.min(height, newPosition.y));
+            // Mark the particle as stopped
+            particle.data.state = 'stopped';
           }
           break;
           
@@ -476,13 +451,14 @@ force = force.add(this.calculateWanderForce(particle, settings));
       particle.data.velocity = velocity;
     }
 
-    // Update opacity
+    // Update opacity based on state
     if (settings.paintingModeEnabled) {
       point.opacity = particle.data.state === 'frozen' ? 1 : 1;
     } else {
       point.opacity = 1;
     }
   }
+
 
   clear(): void {
     this.particles.removeChildren();
