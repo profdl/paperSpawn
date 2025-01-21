@@ -1,6 +1,8 @@
 import paper from 'paper';
 import { TransformHandles } from './transformHandles';
 
+
+
 export class RectangleManager {
   private rectangles: paper.Path.Rectangle[] = [];
   private selectedItem: paper.Path.Rectangle | null = null;
@@ -10,6 +12,14 @@ export class RectangleManager {
 
   constructor() {
     this.transformHandles = new TransformHandles();
+  }
+
+  importRectangle(rectangle: paper.Path.Rectangle): void {
+    rectangle.data.isObstacle = true;
+    rectangle.fillColor = new paper.Color('#00000010');
+    rectangle.strokeColor = new paper.Color('#000000');
+    rectangle.strokeWidth = 1;
+    this.rectangles.push(rectangle);
   }
 
   calculateAvoidanceForce(position: paper.Point): paper.Point {

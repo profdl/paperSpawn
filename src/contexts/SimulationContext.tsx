@@ -4,7 +4,8 @@ import { VectorParticleSystem } from '../components/simulation/VectorParticleSys
 
 interface SimulationContextType {
   settings: SimulationSettings;
-  updateSetting: <K extends keyof SimulationSettings>(key: K, value: SimulationSettings[K]) => void;
+  updateSetting: (key: keyof SimulationSettings, value: string | number | boolean) => void;
+  updateSettings: (newSettings: SimulationSettings) => void;
   isPaused: boolean;
   setIsPaused: (paused: boolean) => void;
   handleRespawn: () => void;
@@ -19,15 +20,13 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
   const [isPaused, setIsPaused] = useState(false);
   const systemRef = useRef<VectorParticleSystem>();
 
-  const updateSetting = useCallback(<K extends keyof SimulationSettings>(
-    key: K,
-    value: SimulationSettings[K]
-  ) => {
-    setSettings(prev => ({
-      ...prev,
-      [key]: value
-    }));
-  }, []);
+  const updateSetting = (key: keyof SimulationSettings, value: string | number | boolean) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  const updateSettings = (newSettings: SimulationSettings) => {
+    setSettings(newSettings);
+  };
 
   const handleRespawn = useCallback(() => {
     if (systemRef.current) {
@@ -91,6 +90,7 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
   const value = {
     settings,
     updateSetting,
+    updateSettings,
     isPaused,
     setIsPaused,
     handleRespawn,
@@ -105,7 +105,6 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
   );
 }
 
-// Export the hook separately from the context creation
 export const useSimulation = () => {
   const context = useContext(SimulationContext);
   if (!context) {

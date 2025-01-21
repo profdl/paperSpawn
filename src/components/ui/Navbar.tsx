@@ -1,19 +1,39 @@
 import React from 'react';
-import { Eye, EyeOff,  Pencil, Eraser, Pause, Play, Trash2, FileDown, Square, MousePointer } from 'lucide-react';
+import { 
+  Eye, 
+  EyeOff, 
+  Pencil, 
+  Eraser, 
+  Pause, 
+  Play, 
+  Trash2, 
+  FileDown, 
+  Square, 
+  MousePointer,
+  Save,
+  FolderOpen
+} from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import AuthModal from '../ui/AuthModal';
-import { useSimulation } from '../../contexts/SimulationContext'; 
+import { useSimulation } from '../../contexts/SimulationContext';
 import { useTool } from '../../contexts/ToolContext';
 import paper from 'paper';
 
 interface NavbarProps {
   showUI: boolean;
   onToggleUI: () => void;
+  onSave: () => void;
+  onOpenProjects: () => void;
 }
 
-export default function Navbar({ showUI, onToggleUI }: NavbarProps) {
+export default function Navbar({ 
+  showUI, 
+  onToggleUI,
+  onSave,
+  onOpenProjects
+}: NavbarProps) {
   const { user, signOut } = useAuth();
-  const {  isPaused, setIsPaused, handleClear } = useSimulation();
+  const { isPaused, setIsPaused } = useSimulation(); // Removed handleClear
   const { currentTool, setTool } = useTool();
   const [showAuthModal, setShowAuthModal] = React.useState(false);
   const { systemRef } = useSimulation();
@@ -32,7 +52,8 @@ export default function Navbar({ showUI, onToggleUI }: NavbarProps) {
     
     // Create rectangle at center
     const rectangle = systemRef.current.startRectangle(centerX, centerY);
-    
+
+
     // Switch to select tool and select the new rectangle
     setTool('select');
     
@@ -61,6 +82,7 @@ export default function Navbar({ showUI, onToggleUI }: NavbarProps) {
             <div className="flex items-center gap-4">
               <span className="text-white font-mono text-sm">Field Conditions</span>
               <div className="flex items-center gap-1">
+                {/* Drawing Tools */}
                 <button
                   className={`p-1.5 rounded hover:bg-white/10 transition-colors ${
                     currentTool === 'paint' ? 'bg-white/20' : ''
@@ -80,14 +102,14 @@ export default function Navbar({ showUI, onToggleUI }: NavbarProps) {
                   <Eraser className="w-4 h-4" />
                 </button>
                 <button
-          className={`p-1.5 rounded hover:bg-white/10 transition-colors ${
-            currentTool === 'rectangle' ? 'bg-white/20' : ''
-          }`}
-          onClick={handleRectangleClick}
-          title="Draw Rectangle (R)"
-        >
-          <Square className="w-4 h-4" />
-        </button>
+                  className={`p-1.5 rounded hover:bg-white/10 transition-colors ${
+                    currentTool === 'rectangle' ? 'bg-white/20' : ''
+                  }`}
+                  onClick={handleRectangleClick}  
+                  title="Draw Rectangle (R)"
+                >
+                  <Square className="w-4 h-4" />
+                </button>
                 <button
                   className={`p-1.5 rounded hover:bg-white/10 transition-colors ${
                     currentTool === 'select' ? 'bg-white/20' : ''
@@ -97,7 +119,11 @@ export default function Navbar({ showUI, onToggleUI }: NavbarProps) {
                 >
                   <MousePointer className="w-4 h-4" />
                 </button>
+
+                {/* Divider */}
                 <div className="w-px bg-white/20 mx-1" />
+
+                {/* Simulation Controls */}
                 <button
                   className="p-1.5 rounded hover:bg-white/10 transition-colors"
                   onClick={() => setIsPaused(!isPaused)}
@@ -109,16 +135,38 @@ export default function Navbar({ showUI, onToggleUI }: NavbarProps) {
                     <Pause className="w-4 h-4" />
                   )}
                 </button>
-               <button
-        className="p-1.5 rounded hover:bg-white/10 transition-colors"
-        onClick={handleClearParticles}
-        title="Clear Particles"
-      >
-        <Trash2 className="w-4 h-4" />
-      </button>
+                <button
+                  className="p-1.5 rounded hover:bg-white/10 transition-colors"
+                  onClick={handleClearParticles}
+                  title="Clear Particles"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+
+                {/* Divider */}
+                <div className="w-px bg-white/20 mx-1" />
+
+                {/* Project Management */}
+                <button
+                  className="p-1.5 rounded hover:bg-white/10 transition-colors"
+                  onClick={() => user ? onOpenProjects() : setShowAuthModal(true)}
+                  title={user ? "Open Projects" : "Sign in to open projects"}
+                >
+                  <FolderOpen className="w-4 h-4" />
+                </button>
+                <button
+                  className="p-1.5 rounded hover:bg-white/10 transition-colors"
+                  onClick={() => user ? onSave() : setShowAuthModal(true)}
+                  title={user ? "Save Project" : "Sign in to save project"}
+                >
+                  <Save className="w-4 h-4" />
+                </button>
               </div>
             </div>
+
+            {/* Right Side Controls */}
             <div className="flex items-center gap-4">
+              {/* Auth */}
               {user ? (
                 <button
                   onClick={signOut}
@@ -134,6 +182,8 @@ export default function Navbar({ showUI, onToggleUI }: NavbarProps) {
                   Sign In
                 </button>
               )}
+
+              {/* Export & UI Toggle */}
               <button
                 onClick={handleDownload}
                 className="p-1.5 rounded hover:bg-white/10 transition-colors"

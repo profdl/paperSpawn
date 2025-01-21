@@ -12,20 +12,39 @@ export class VectorParticleSystem {
   private eraserTool: EraserTool;
   private background: CanvasBackground;
 
-
   constructor(canvas: HTMLCanvasElement) {
     paper.setup(canvas);
     paper.view.viewSize = new paper.Size(500, 400);
     this.project = paper.project;
     
     this.rectangleManager = new RectangleManager();
-    // Pass rectangleManager to ParticleManager
     this.particleManager = new ParticleManager(this.rectangleManager);
     this.eraserTool = new EraserTool();
     this.background = new CanvasBackground(this.project.view.bounds);
     
     paper.view.update();
   }
+
+  loadSVG(svgElement: SVGElement): void {
+    this.clear();
+    const item = this.project.importSVG(svgElement);
+    item.children.forEach((child: paper.Item) => {
+      if (child instanceof paper.Group && child.data.isParticle) {
+        const position = child.position;
+        this.createParticle(position.x, position.y);
+        child.remove();
+      } else if (child instanceof paper.Path && child.data.isObstacle) {
+        const rectangle = new paper.Path.Rectangle(child.bounds);
+        rectangle.rotation = child.rotation;
+        this.rectangleManager.importRectangle(rectangle);
+        child.remove();
+      }
+    });
+    item.remove();
+    paper.view.update();
+  }
+
+
   
   isHandleAt(point: paper.Point): boolean {
     return this.rectangleManager.isHandleAt(point);
@@ -52,7 +71,11 @@ export class VectorParticleSystem {
   createParticle(x: number, y: number): paper.Group {
     const particleColor = this.project.view.element.dataset.particleColor || '#000000';
     const trailColor = this.project.view.element.dataset.trailColor || '#8b8680';
-    return this.particleManager.createParticle(x, y, particleColor, trailColor);
+    const particle = this.particleManager.createParticle(x, y, particleColor, trailColor);
+    if (!particle) {
+      throw new Error('Failed to create particle');
+    }
+    return particle;
   }
 
   updateParticles(settings: SimulationSettings): void {
