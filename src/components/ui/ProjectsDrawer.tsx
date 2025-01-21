@@ -1,8 +1,8 @@
-import { X, Trash2 } from 'lucide-react';
+import { X, Trash2, Download } from 'lucide-react';
 import { useProjects, Project } from '../../hooks/useProjects';
 import { useSimulation } from '../../contexts/SimulationContext';
 import { format } from 'date-fns';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 interface ProjectsDrawerProps {
   isOpen: boolean;
@@ -13,6 +13,22 @@ export default function ProjectsDrawer({ isOpen, onClose }: ProjectsDrawerProps)
   const { projects, isLoading, deleteProject } = useProjects();
   const { systemRef, updateSettings } = useSimulation();
   const [previews, setPreviews] = useState<{ [key: string]: string }>({});
+  const handleOverlayClick = useCallback((e: MouseEvent) => {
+    const drawer = document.getElementById('projects-drawer');
+    if (drawer && !drawer.contains(e.target as Node)) {
+      onClose();
+    }
+  }, [onClose]);
+
+
+  useEffect(() => {
+    if (isOpen) {
+      document.addEventListener('mousedown', handleOverlayClick);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleOverlayClick);
+    };
+  }, [isOpen, handleOverlayClick]);
 
   useEffect(() => {
     const generatePreviews = async () => {
@@ -71,7 +87,29 @@ export default function ProjectsDrawer({ isOpen, onClose }: ProjectsDrawerProps)
     }
   };
 
+  const downloadSVG = (project: Project) => {
+    const blob = new Blob([project.svg_content], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${project.name}.svg`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
+    <>
+    {isOpen && (
+      <div className="fixed inset-0 bg-black/50 z-40" />
+    )}
+    <div
+      id="projects-drawer"
+      className={`fixed inset-y-0 left-0 w-80 bg-black/90 backdrop-blur-sm transform transition-transform duration-300 ease-in-out ${
+        isOpen ? 'translate-x-0' : '-translate-x-full'
+      } z-50`}
+    >
     <div
       className={`fixed inset-y-0 left-0 w-80 bg-black/90 backdrop-blur-sm transform transition-transform duration-300 ease-in-out ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
@@ -114,6 +152,13 @@ export default function ProjectsDrawer({ isOpen, onClose }: ProjectsDrawerProps)
                       )}
                     </button>
                     <button
+                        onClick={() => downloadSVG(project)}
+                        className="p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-white/10 transition-all"
+                        title="Download SVG"
+                      >
+                        <Download className="w-4 h-4" />
+                      </button>
+                    <button
                       onClick={() => deleteProject(project.id)}
                       className="p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-white/10 transition-all"
                       title="Delete project"
@@ -128,5 +173,7 @@ export default function ProjectsDrawer({ isOpen, onClose }: ProjectsDrawerProps)
         </div>
       </div>
     </div>
+    </div>
+    </>
   );
 }
