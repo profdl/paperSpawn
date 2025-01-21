@@ -25,6 +25,10 @@ export class VectorParticleSystem {
     paper.view.update();
   }
 
+  setBackgroundImage(imageUrl: string): void {
+    this.background.setImage(imageUrl);
+  }
+
   loadSVG(svgElement: SVGElement): void {
     this.clear();
     const item = this.project.importSVG(svgElement);

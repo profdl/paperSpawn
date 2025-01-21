@@ -11,7 +11,8 @@ import {
   Square, 
   MousePointer,
   Save,
-  FolderOpen
+  FolderOpen,
+  ImagePlus
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import AuthModal from '../ui/AuthModal';
@@ -37,6 +38,18 @@ export default function Navbar({
   const { currentTool, setTool } = useTool();
   const [showAuthModal, setShowAuthModal] = React.useState(false);
   const { systemRef } = useSimulation();
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !systemRef.current) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const imageUrl = event.target?.result as string;
+      systemRef.current?.setBackgroundImage(imageUrl);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleClearParticles = () => {
     if (!systemRef.current) return;
@@ -119,6 +132,18 @@ export default function Navbar({
                 >
                   <Square className="w-4 h-4" />
                 </button>
+                <label 
+          className="p-1.5 rounded hover:bg-white/10 transition-colors cursor-pointer"
+          title="Upload Background Image"
+        >
+          <ImagePlus className="w-4 h-4" />
+          <input
+            type="file"
+            className="hidden"
+            accept="image/*"
+            onChange={handleImageUpload}
+          />
+        </label>
                 <button
                   className={`p-1.5 rounded hover:bg-white/10 transition-colors ${
                     currentTool === 'select' ? 'bg-white/20' : ''
