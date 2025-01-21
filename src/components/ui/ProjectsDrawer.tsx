@@ -2,6 +2,7 @@ import { X, Trash2 } from 'lucide-react';
 import { useProjects, Project } from '../../hooks/useProjects';
 import { useSimulation } from '../../contexts/SimulationContext';
 import { format } from 'date-fns';
+import { useEffect, useState } from 'react';
 
 interface ProjectsDrawerProps {
   isOpen: boolean;
@@ -11,23 +12,63 @@ interface ProjectsDrawerProps {
 export default function ProjectsDrawer({ isOpen, onClose }: ProjectsDrawerProps) {
   const { projects, isLoading, deleteProject } = useProjects();
   const { systemRef, updateSettings } = useSimulation();
+  const [previews, setPreviews] = useState<{ [key: string]: string }>({});
+
+  useEffect(() => {
+    const generatePreviews = async () => {
+      const newPreviews: { [key: string]: string } = {};
+      for (const project of projects) {
+        const svgContent = project.svg_content;
+        const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        newPreviews[project.id] = url;
+      }
+      setPreviews(newPreviews);
+    };
+
+    if (projects.length > 0) {
+      generatePreviews();
+    }
+  }, [projects]);
 
   const loadProject = (project: Project) => {
-    if (!systemRef.current) return;
-
-    // Load SVG content
-    const parser = new DOMParser();
-    const svgDoc = parser.parseFromString(project.svg_content, 'image/svg+xml');
-    const svgElement = svgDoc.documentElement;
+    if (!systemRef.current) {
+      console.error('Simulation system not initialized');
+      return;
+    }
+  
+    console.log('Loading project:', project.name);
     
-    // Clear current content and load new SVG
-    systemRef.current.clear();
-    systemRef.current.loadSVG(svgElement);
-
-    // Update settings
-    updateSettings(project.settings);
-    
-    onClose();
+    try {
+      // Parse SVG content
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(project.svg_content, 'image/svg+xml');
+      
+      if (!svgDoc || svgDoc.documentElement.nodeName === 'parsererror') {
+        console.error('Invalid SVG content');
+        return;
+      }
+  
+      console.log('SVG parsed successfully');
+      
+      const svgElement = svgDoc.documentElement as unknown as SVGElement;
+      
+      // Update settings first
+      updateSettings(project.settings);
+      
+      // Small delay to ensure settings are applied
+      setTimeout(() => {
+        // Clear and load SVG
+        systemRef.current?.clear();
+        systemRef.current?.loadSVG(svgElement);
+        
+        console.log('Project loaded successfully');
+        onClose();
+      }, 100);
+      
+    } catch (error) {
+      console.error('Error loading project:', error);
+    }
   };
 
   return (
@@ -68,6 +109,9 @@ export default function ProjectsDrawer({ isOpen, onClose }: ProjectsDrawerProps)
                       <div className="text-xs text-white/50">
                         {format(new Date(project.created_at), 'MMM d, yyyy h:mm a')}
                       </div>
+                      {previews[project.id] && (
+                        <img src={previews[project.id]} alt="Project Preview" className="mt-2 w-full h-auto rounded" />
+                      )}
                     </button>
                     <button
                       onClick={() => deleteProject(project.id)}
