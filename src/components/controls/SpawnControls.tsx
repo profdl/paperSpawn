@@ -8,22 +8,14 @@ export default function SpawnControls() {
 
   return (
     <div className="space-y-2">
-      <div className="control">
-        <label className="inline-block w-[80px] text-[10px]">Paint Mode</label>
-        <input
-          type="checkbox"
-          checked={settings.paintingModeEnabled}
-          onChange={(e) => updateSetting('paintingModeEnabled', e.target.checked)}
-          className="ml-2"
-        />
-      </div>
+
       <div className="control">
         <label className="inline-block w-[80px] text-[10px]">Count</label>
         <DraggableNumberInput
           value={settings.count}
           onChange={(value) => updateSetting('count', value)}
           min={0}
-          max={2000}
+          max={700}
           step={1}
         />
       </div>

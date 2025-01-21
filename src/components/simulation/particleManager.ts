@@ -5,12 +5,9 @@ import { RectangleManager } from './rectangleManager';
 export class ParticleManager {
   private particles: paper.Group;
   private rectangleManager: RectangleManager;
-  // Change from private readonly to private
   private _particleRadius: number = 2;
   private _trailWidth: number = 1;
   private wanderAngles: Map<number, number> = new Map();
-
-  
 
   constructor(rectangleManager: RectangleManager) {
     this.particles = new paper.Group();
@@ -111,24 +108,108 @@ export class ParticleManager {
     return particle;
   }
 
-   calculateFlockingForces(
-    particle: paper.Group,
-    settings: SimulationSettings
-  ): paper.Point {
-    let separation = new paper.Point(0, 0);
-    let cohesion = new paper.Point(0, 0);
-    let alignment = new paper.Point(0, 0);
-    let neighbors = 0;
+  spawnParticles(count: number, pattern: string, width: number, height: number): void {
+    this.clear();
 
-    const particlePos = (particle.children[0] as paper.Path.Circle).position;
+    switch (pattern) {
+      case 'scatter':
+        this.spawnScatterPattern(count, width, height);
+        break;
+      case 'grid':
+        this.spawnGridPattern(count, width, height);
+        break;
+      case 'circle':
+        this.spawnCirclePattern(count, width, height);
+        break;
+      case 'point':
+        this.spawnPointPattern(count, width, height);
+        break;
+    }
+  }
 
-    this.particles.children.forEach(other => {
-      if (particle === other || other.data.state === 'frozen') return;
+  private spawnScatterPattern(count: number, width: number, height: number): void {
+    for (let i = 0; i < count; i++) {
+      const x = Math.random() * width;
+      const y = Math.random() * height;
+      this.createParticle(x, y);
+    }
+  }
 
-      const otherPos = (other.children[0] as paper.Path.Circle).position;
-      const diff = otherPos.subtract(particlePos);
-      const distance = diff.length;
+  private spawnGridPattern(count: number, width: number, height: number): void {
+    const cols = Math.ceil(Math.sqrt(count * width / height));
+    const rows = Math.ceil(count / cols);
+    const cellWidth = width / cols;
+    const cellHeight = height / rows;
 
+    let created = 0;
+    for (let row = 0; row < rows && created < count; row++) {
+      for (let col = 0; col < cols && created < count; col++) {
+        const x = (col + 0.5) * cellWidth;
+        const y = (row + 0.5) * cellHeight;
+        this.createParticle(x, y);
+        created++;
+      }
+    }
+  }
+
+  private spawnCirclePattern(count: number, width: number, height: number): void {
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const radius = Math.min(width, height) * 0.4;
+
+    for (let i = 0; i < count; i++) {
+      const angle = (i / count) * Math.PI * 2;
+      const x = centerX + Math.cos(angle) * radius;
+      const y = centerY + Math.sin(angle) * radius;
+      this.createParticle(x, y);
+    }
+  }
+
+  private spawnPointPattern(count: number, width: number, height: number): void {
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const spread = 5; // Small spread from center point
+
+    for (let i = 0; i < count; i++) {
+      const x = centerX + (Math.random() - 0.5) * spread;
+      const y = centerY + (Math.random() - 0.5) * spread;
+      this.createParticle(x, y);
+    }
+  }
+
+// in particleManager.ts
+calculateFlockingForces(
+  particle: paper.Group,
+  settings: SimulationSettings
+): paper.Point {
+  let separation = new paper.Point(0, 0);
+  let cohesion = new paper.Point(0, 0);
+  let alignment = new paper.Point(0, 0);
+  let neighbors = 0;
+
+  const particlePos = (particle.children[0] as paper.Path.Circle).position;
+  const velocity = particle.data.velocity;
+  // Convert sensor angle from degrees to radians and halve it (as it's the total angle divided by 2)
+  const halfSensorAngle = (settings.sensorAngle * Math.PI / 180) / 2;
+
+  this.particles.children.forEach(other => {
+    if (particle === other || other.data.state === 'frozen') return;
+
+    const otherPos = (other.children[0] as paper.Path.Circle).position;
+    const diff = otherPos.subtract(particlePos);
+    const distance = diff.length;
+
+    // Calculate angle between velocity and direction to other particle
+    let angleToOther = Math.atan2(diff.y, diff.x);
+    let currentAngle = Math.atan2(velocity.y, velocity.x);
+    
+    // Normalize angle difference to [-PI, PI]
+    let angleDiff = angleToOther - currentAngle;
+    while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+    while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+    
+    // Only consider particles within the sensor angle
+    if (Math.abs(angleDiff) <= halfSensorAngle) {
       if (distance < settings.separationDistance) {
         const force = (settings.separationDistance - distance) / settings.separationDistance;
         separation = separation.subtract(diff.multiply(force));
@@ -142,21 +223,22 @@ export class ParticleManager {
       if (distance < settings.alignmentDistance) {
         alignment = alignment.add(other.data.velocity);
       }
-    });
-
-    let force = new paper.Point(0, 0);
-
-    if (neighbors > 0) {
-      cohesion = cohesion.divide(neighbors).subtract(particlePos);
-      alignment = alignment.divide(neighbors);
-      
-      force = force.add(separation.multiply(settings.separation))
-                   .add(cohesion.multiply(settings.cohesion))
-                   .add(alignment.multiply(settings.alignment));
     }
+  });
 
-    return force;
+  let force = new paper.Point(0, 0);
+
+  if (neighbors > 0) {
+    cohesion = cohesion.divide(neighbors).subtract(particlePos);
+    alignment = alignment.divide(neighbors);
+    
+    force = force.add(separation.multiply(settings.separation))
+                 .add(cohesion.multiply(settings.cohesion))
+                 .add(alignment.multiply(settings.alignment));
   }
+
+  return force;
+}
 
    calculateWanderForce(
     particle: paper.Group,
@@ -184,18 +266,18 @@ export class ParticleManager {
 
     return center.add(offset)
       .subtract((particle.children[0] as paper.Path.Circle).position)
-      .multiply(settings.wanderStrength);
+      .multiply(settings.wanderStrength * 0.5);
   }
 
-   calculateExternalForce(settings: SimulationSettings): paper.Point {
-    // Convert angle from degrees to radians
-    const angleInRadians = (settings.externalForceAngle || 0) * Math.PI / 180;
+  calculateExternalForce(settings: SimulationSettings): paper.Point {
+    // Use angle directly in degrees - Paper.js handles the conversion internally
+    const angle = settings.externalForceAngle || 0;
     const strength = settings.externalForceStrength || 0;
     
-    // Create a vector from angle and strength
+    // Create a vector using degrees - Paper.js Point constructor accepts degrees by default
     return new paper.Point({
-      length: strength * 0.1, // Scale down the strength to not overwhelm other forces
-      angle: angleInRadians
+      length: strength * 10, // Scale the strength to make it more noticeable
+      angle: angle
     });
   }
 
@@ -221,41 +303,37 @@ export class ParticleManager {
     const age = Date.now() - particle.data.createdAt;
     let velocity = particle.data.velocity;
 
-    // Update state based on age
+    // Update state based on age and paint mode
     if (settings.paintingModeEnabled) {
       if (particle.data.state === 'active' && age >= settings.activeStateDuration) {
-        particle.data.state = 'freezing';
-      } else if (particle.data.state === 'freezing' && 
-                 age >= settings.activeStateDuration + settings.freezingDuration) {
         particle.data.state = 'frozen';
       }
+    } else {
+      // If paint mode is disabled, always stay active but don't show trail
+      particle.data.state = 'active';
+      trail.visible = false;
     }
 
     if (!settings.paintingModeEnabled || particle.data.state !== 'frozen') {
-      // Calculate forces
       let force = new paper.Point(0, 0);
-
+      
+      // Calculate desired force from behaviors
       if (settings.flockingEnabled) {
         force = force.add(this.calculateFlockingForces(particle, settings));
       }
-
+  
       if (settings.wanderEnabled) {
         force = force.add(this.calculateWanderForce(particle, settings));
       }
-
-      // Normalize and scale the behavioral forces first
-      if (force.length > 0) {
-        force = force.normalize().multiply(2);
+  
+      if (settings.externalForceStrength && settings.externalForceStrength !== 0) {
+        force = force.add(this.calculateExternalForce(settings));
       }
-
-      // Apply speed setting and state-based modifications
-      const speedMultiplier = settings.speed * (
-        particle.data.state === 'freezing' 
-          ? 1 - ((age - settings.activeStateDuration) / settings.freezingDuration)
-          : 1
-      );
-
-      force = force.multiply(speedMultiplier);
+  
+      // Normalize the behavioral forces but scale based on speed setting
+      if (force.length > 0) {
+        force = force.normalize().multiply(settings.speed * 1);
+      }
 
       // Add avoidance force after normalizing the behavioral forces
       const avoidanceForce = this.calculateRectangleAvoidance(point.position);
@@ -264,9 +342,10 @@ export class ParticleManager {
       // Apply forces to velocity
       velocity = velocity.add(force);
 
-      // Normalize final velocity if needed
-      if (velocity.length > 2) {
-        velocity = velocity.normalize().multiply(2);
+      // Scale maximum velocity based on speed setting
+      const maxVelocity = settings.speed * 1;
+      if (velocity.length > maxVelocity) {
+        velocity = velocity.normalize().multiply(maxVelocity);
       }
 
       // Update position
@@ -311,8 +390,9 @@ export class ParticleManager {
       // Update point position
       point.position = newPosition;
 
-      // Add to trail during active and freezing states
-      if (particle.data.state === 'active' || particle.data.state === 'freezing') {
+      // Add to trail only if in paint mode and active
+      if (settings.paintingModeEnabled && particle.data.state === 'active') {
+        trail.visible = true;
         trail.add(newPosition);
         trail.smooth();
       }
@@ -323,13 +403,9 @@ export class ParticleManager {
 
     // Update opacity
     if (settings.paintingModeEnabled) {
-      if (particle.data.state === 'frozen') {
-        point.opacity = settings.trailPersistence;
-      } else if (particle.data.state === 'freezing') {
-        const freezingProgress = (age - settings.activeStateDuration) / settings.freezingDuration;
-        const opacity = 1 - (1 - settings.trailPersistence) * freezingProgress;
-        point.opacity = opacity;
-      }
+      point.opacity = particle.data.state === 'frozen' ? 1 : 1;
+    } else {
+      point.opacity = 1;
     }
   }
 

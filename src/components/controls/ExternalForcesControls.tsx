@@ -29,7 +29,7 @@ export default function CanvasBehaviorsControls() {
               value={settings.externalForceStrength}
               onChange={(value) => updateSetting('externalForceStrength', value)}
               min={0}
-              max={1}
+              max={2}
               step={0.01}
               formatValue={(v) => `${(v * 100).toFixed(0)}%`}
             />

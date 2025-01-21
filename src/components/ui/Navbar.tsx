@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import AuthModal from '../ui/AuthModal';
 import { useSimulation } from '../../contexts/SimulationContext'; 
 import { useTool } from '../../contexts/ToolContext';
+import paper from 'paper';
 
 interface NavbarProps {
   showUI: boolean;

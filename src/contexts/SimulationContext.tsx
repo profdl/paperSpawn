@@ -30,8 +30,12 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
   }, []);
 
   const handleRespawn = useCallback(() => {
-    // Implement if needed
-  }, []);
+    if (systemRef.current) {
+      systemRef.current.clearParticlesOnly(); // Clear only particles, keep rectangles
+      systemRef.current.spawnParticles(settings.count, settings.spawnPattern);
+    }
+  }, [settings.count, settings.spawnPattern]);
+
 
   const handleClear = useCallback(() => {
     if (systemRef.current) {

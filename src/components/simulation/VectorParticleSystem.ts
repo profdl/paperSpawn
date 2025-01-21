@@ -91,7 +91,6 @@ export class VectorParticleSystem {
   clearParticlesOnly(): void {
     this.particleManager.clear();
   }
-  
   clear(): void {
     this.particleManager.clear();
     this.rectangleManager.clear();

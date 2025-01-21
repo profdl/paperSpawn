@@ -44,20 +44,20 @@ export type PresetType = 'fish' | 'slime' | 'hybrid';
 
 export const presets: Record<PresetType, SimulationSettings> = {
   fish: {
-    count: 0,
+    count: 100,
     particleSize: 2.5,
-    speed: 0.40,
+    speed: 0.5,                    // Changed to 50%
     flockingEnabled: true,
-    separation: 0.15,
-    cohesion: 1,
-    alignment: 1,
+    separation: 0.5,               // Changed to 50%
+    cohesion: 0.5,                // Changed to 50%
+    alignment: 0.5,               // Changed to 50%
     separationDistance: 20,
     cohesionDistance: 80,
     alignmentDistance: 60,
     slimeBehavior: true,
     sensorAngle: 40,
     sensorDistance: 20,
-    turnRate: 1,
+    turnRate: 0.5,                // Changed to 50%
     spawnPattern: 'scatter',
     backgroundColor: '#FFFFFF',
     particleColor: '#000000',
@@ -70,10 +70,10 @@ export const presets: Record<PresetType, SimulationSettings> = {
     freezingDuration: 1000,
     trailPersistence: 1.0,
     externalForceAngle: 0,
-    externalForceStrength: 0,
-    boundaryBehavior: 'wrap-around',
-    wanderEnabled: false,
-    wanderStrength: 0.5,
+    externalForceStrength: 0.5,   // Changed to 50%
+    boundaryBehavior: 'bounce',
+    wanderEnabled: true,          // Changed to true
+    wanderStrength: 0.5,          // Already at 50%
     wanderSpeed: 1.0,
     wanderRadius: 50
   },

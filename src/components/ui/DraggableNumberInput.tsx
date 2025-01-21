@@ -24,6 +24,18 @@ const DraggableNumberInput: React.FC<Props> = ({
   const startValueRef = useRef<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const isPercentageFormat = formatValue(value).includes('%');
+
+  // Convert the display value based on whether it's a percentage
+  const getDisplayValue = () => {
+    if (isPercentageFormat) {
+      return Math.round(value * 100).toString();
+    }
+    return value.toString();
+  };
+
+  const [inputValue, setInputValue] = useState(getDisplayValue());
+
   const handlePointerDown = (e: React.PointerEvent) => {
     if (isEditing) return;
     setIsDragging(true);
@@ -56,27 +68,46 @@ const DraggableNumberInput: React.FC<Props> = ({
   const handleClick = () => {
     if (!isEditing) {
       setIsEditing(true);
+      setInputValue(getDisplayValue());
       setTimeout(() => inputRef.current?.select(), 0);
     }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = parseFloat(e.target.value);
-    if (!isNaN(newValue)) {
-      const clampedValue = Math.max(min, Math.min(max, newValue));
-      onChange(clampedValue);
+    setInputValue(e.target.value);
+  };
+
+  const parseAndValidateInput = (input: string): number | null => {
+    const parsed = parseFloat(input);
+    if (isNaN(parsed)) return null;
+
+    let finalValue = parsed;
+    if (isPercentageFormat) {
+      finalValue = parsed / 100;
     }
+
+    const clampedValue = Math.max(min, Math.min(max, finalValue));
+    return Math.round(clampedValue / step) * step;
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
+      const newValue = parseAndValidateInput(inputValue);
+      if (newValue !== null) {
+        onChange(newValue);
+      }
       setIsEditing(false);
     } else if (e.key === 'Escape') {
+      setInputValue(getDisplayValue());
       setIsEditing(false);
     }
   };
 
   const handleBlur = () => {
+    const newValue = parseAndValidateInput(inputValue);
+    if (newValue !== null) {
+      onChange(newValue);
+    }
     setIsEditing(false);
   };
 
@@ -96,7 +127,7 @@ const DraggableNumberInput: React.FC<Props> = ({
     <div className="inline-flex items-stretch">
       <div 
         className={`
-          relative flex items-center flex-1 w-[100px] h-5 
+          relative flex items-center flex-1 w-[64px] h-5 ml-4
           bg-black/50 border border-white/20 rounded-l px-2 
           select-none font-mono text-xs
           ${isDragging ? 'border-white/40' : ''}
@@ -113,7 +144,7 @@ const DraggableNumberInput: React.FC<Props> = ({
           <input
             ref={inputRef}
             type="text"
-            value={value}
+            value={inputValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             onBlur={handleBlur}

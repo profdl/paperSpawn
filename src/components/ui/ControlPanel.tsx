@@ -135,13 +135,6 @@ export default function ControlPanel() {
           </div>
         </AccordionSection>
 
-        <AccordionSection
-          title="Appearance"
-          isOpen={openSections.has('appearance')}
-          onToggle={() => toggleSection('appearance')}
-        >
-          <AppearanceControls />
-        </AccordionSection>
 
         <AccordionSection
           title="Particles"
@@ -167,8 +160,6 @@ export default function ControlPanel() {
           <CanvasBehaviorsControls />
         </AccordionSection>
 
-
-
         <AccordionSection
           title="Spawn Properties"
           isOpen={openSections.has('spawn')}
@@ -176,6 +167,15 @@ export default function ControlPanel() {
         >
           <SpawnControls />
         </AccordionSection>
+
+        <AccordionSection
+          title="Appearance"
+          isOpen={openSections.has('appearance')}
+          onToggle={() => toggleSection('appearance')}
+        >
+          <AppearanceControls />
+        </AccordionSection>
+
       </div>
 
       <PresetModal
