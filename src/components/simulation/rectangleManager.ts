@@ -62,7 +62,7 @@ export class RectangleManager {
     const rectangle = new paper.Path.Rectangle({
       point: [x - width/2, y - height/2],
       size: [width, height],
-      fillColor: '#FF0000',
+      fillColor: '#000000',
       strokeColor: '#000000',
       strokeWidth: 1
     });

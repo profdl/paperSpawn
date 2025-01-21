@@ -77,18 +77,28 @@ export class ParticleManager {
         trail.strokeWidth = width;
       });
     }
-    createParticle(x: number, y: number, particleColor: string = '#000000', trailColor: string = '#8b8680'): paper.Group {
+    createParticle(x: number, y: number, particleColor: string = '#000000', trailColor: string = '#8b8680'): paper.Group | null {
+      const position = new paper.Point(x, y);
+      
+      // Check if the spawn position is inside any rectangle
+      const rectangles = this.rectangleManager.getAllRectangles();
+      for (const rectangle of rectangles) {
+        if (rectangle.bounds.contains(position)) {
+          return null; // Don't spawn the particle if it's inside a rectangle
+        }
+      }
+  
       const particle = new paper.Group();
       
       const point = new paper.Path.Circle({
-        center: new paper.Point(x, y),
-        radius: this._particleRadius,  // Updated here
+        center: position,
+        radius: this._particleRadius,
         fillColor: particleColor
       });
-  
+    
       const trail = new paper.Path({
         strokeColor: trailColor,
-        strokeWidth: this._trailWidth,  // Updated here
+        strokeWidth: this._trailWidth,
         strokeCap: 'round',
         opacity: 1
       });
@@ -128,10 +138,16 @@ export class ParticleManager {
   }
 
   private spawnScatterPattern(count: number, width: number, height: number): void {
-    for (let i = 0; i < count; i++) {
+    let attempts = 0;
+    let created = 0;
+    const maxAttempts = count * 3; // Limit attempts to prevent infinite loops
+
+    while (created < count && attempts < maxAttempts) {
       const x = Math.random() * width;
       const y = Math.random() * height;
-      this.createParticle(x, y);
+      const particle = this.createParticle(x, y);
+      if (particle) created++;
+      attempts++;
     }
   }
 
@@ -146,8 +162,8 @@ export class ParticleManager {
       for (let col = 0; col < cols && created < count; col++) {
         const x = (col + 0.5) * cellWidth;
         const y = (row + 0.5) * cellHeight;
-        this.createParticle(x, y);
-        created++;
+        const particle = this.createParticle(x, y);
+        if (particle) created++;
       }
     }
   }
@@ -156,24 +172,34 @@ export class ParticleManager {
     const centerX = width / 2;
     const centerY = height / 2;
     const radius = Math.min(width, height) * 0.4;
+    let created = 0;
+    let attempts = 0;
+    const maxAttempts = count * 3;
 
-    for (let i = 0; i < count; i++) {
-      const angle = (i / count) * Math.PI * 2;
+    while (created < count && attempts < maxAttempts) {
+      const angle = (attempts / count) * Math.PI * 2;
       const x = centerX + Math.cos(angle) * radius;
       const y = centerY + Math.sin(angle) * radius;
-      this.createParticle(x, y);
+      const particle = this.createParticle(x, y);
+      if (particle) created++;
+      attempts++;
     }
   }
 
   private spawnPointPattern(count: number, width: number, height: number): void {
     const centerX = width / 2;
     const centerY = height / 2;
-    const spread = 5; // Small spread from center point
+    const spread = 5;
+    let created = 0;
+    let attempts = 0;
+    const maxAttempts = count * 3;
 
-    for (let i = 0; i < count; i++) {
+    while (created < count && attempts < maxAttempts) {
       const x = centerX + (Math.random() - 0.5) * spread;
       const y = centerY + (Math.random() - 0.5) * spread;
-      this.createParticle(x, y);
+      const particle = this.createParticle(x, y);
+      if (particle) created++;
+      attempts++;
     }
   }
 
@@ -316,6 +342,21 @@ calculateFlockingForces(
 
     if (!settings.paintingModeEnabled || particle.data.state !== 'frozen') {
       let force = new paper.Point(0, 0);
+
+      // Only apply flocking/wandering if not in bounce cooldown
+    const bounceComplete = !particle.data.bounceCooldown || 
+    Date.now() > particle.data.bounceCooldown;
+
+// Calculate desired force from behaviors
+if (bounceComplete) {
+if (settings.flockingEnabled) {
+force = force.add(this.calculateFlockingForces(particle, settings));
+}
+
+if (settings.wanderEnabled) {
+force = force.add(this.calculateWanderForce(particle, settings));
+}
+}
       
       // Calculate desired force from behaviors
       if (settings.flockingEnabled) {
@@ -358,18 +399,39 @@ calculateFlockingForces(
           newPosition.y = ((newPosition.y + height) % height);
           break;
           
-        case 'bounce':
-          if (newPosition.x < 0 || newPosition.x > width) {
-            velocity.x *= -1;
-            newPosition.x = Math.max(0, Math.min(width, newPosition.x));
-          }
-          if (newPosition.y < 0 || newPosition.y > height) {
-            velocity.y *= -1;
-            newPosition.y = Math.max(0, Math.min(height, newPosition.y));
-          }
-          break;
+          case 'bounce':
+            if (newPosition.x < 0 || newPosition.x > width ||
+                newPosition.y < 0 || newPosition.y > height) {
+              const id = particle.id;
+              if (this.wanderAngles.has(id)) {
+                const currentAngle = this.wanderAngles.get(id)!;
+                
+                // Determine which boundary was hit and invert the angle accordingly
+                if (newPosition.x < 0 || newPosition.x > width) {
+                  // For vertical boundaries (left/right), reflect across vertical axis
+                  // This is done by inverting around π (180 degrees)
+                  this.wanderAngles.set(id, Math.PI - currentAngle);
+                } else {
+                  // For horizontal boundaries (top/bottom), reflect across horizontal axis
+                  // This is done by negating the angle
+                  this.wanderAngles.set(id, -currentAngle);
+                }
+              }
+              
+              // Reflect velocity based on which boundary was hit
+              if (newPosition.x < 0 || newPosition.x > width) {
+                velocity.x *= -1; // Reflect x component
+              } else {
+                velocity.y *= -1; // Reflect y component
+              }
+              
+              // Move particle back into bounds
+              newPosition.x = Math.max(this._particleRadius, Math.min(width - this._particleRadius, newPosition.x));
+              newPosition.y = Math.max(this._particleRadius, Math.min(height - this._particleRadius, newPosition.y));
+            }
+            break;
           
-        case 'stop':
+            case 'stop':
           if (newPosition.x < 0 || newPosition.x > width ||
               newPosition.y < 0 || newPosition.y > height) {
             velocity.set(0, 0);
