@@ -154,7 +154,7 @@ export interface ColorScheme {
     trail: string;
   }
 
-  export type Tool = 'none' | 'paint' | 'erase' | 'rectangle' | 'select';
+  export type Tool = 'none' | 'paint' | 'erase' | 'rectangle' | 'select' | 'freehand';
   
   export const colorSchemes: ColorScheme[] = [
     {

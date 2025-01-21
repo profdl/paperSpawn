@@ -5,14 +5,19 @@ import { TransformHandles } from './transformHandles';
 
 export class RectangleManager {
   private rectangles: paper.Path.Rectangle[] = [];
+  private paths: paper.Path[] = [];
   private selectedItem: paper.Path.Rectangle | null = null;
   private transformHandles: TransformHandles;
   private dragStartPosition: paper.Point | null = null;
   private originalBounds: paper.Rectangle | null = null;
+  private currentPath: paper.Path | null = null; 
 
   constructor() {
     this.transformHandles = new TransformHandles();
   }
+
+
+
 
   importRectangle(rectangle: paper.Path.Rectangle): void {
     rectangle.data.isObstacle = true;
@@ -22,48 +27,130 @@ export class RectangleManager {
     this.rectangles.push(rectangle);
   }
 
-  calculateAvoidanceForce(position: paper.Point): paper.Point {
-    const avoidanceForce = new paper.Point(0, 0);
-    const avoidanceDistance = 30; // Increased from 15 to make avoidance more noticeable
-    const maxForce = 1.0; // Increased from 0.5 to make avoidance stronger
+  startFreehandPath(point: paper.Point): void {
+    console.log('RM: Starting freehand path'); // Debug log
+    this.currentPath = new paper.Path({
+      segments: [point],
+      strokeColor: '#000000',
+      strokeWidth: 1,
+      fillColor: '#00000010',
+      closed: false,
+      data: { isObstacle: true }
+    });
+  }
 
-    for (const rectangle of this.rectangles) {
-      const bounds = rectangle.bounds;
-      const nearestX = Math.max(bounds.left, Math.min(position.x, bounds.right));
-      const nearestY = Math.max(bounds.top, Math.min(position.y, bounds.bottom));
-      const nearest = new paper.Point(nearestX, nearestY);
-
-      const diff = position.subtract(nearest);
-      const distance = diff.length;
-
-      if (distance < avoidanceDistance) {
-        // Use inverse square law for more natural avoidance
-        const force = Math.min(maxForce, Math.pow(avoidanceDistance - distance, 2) / (avoidanceDistance * avoidanceDistance));
-        
-        if (bounds.contains(position)) {
-          // Stronger force when inside rectangle to push particles out
-          avoidanceForce.set(
-            avoidanceForce.x + diff.x * maxForce * 3,
-            avoidanceForce.y + diff.y * maxForce * 3
-          );
-        } else {
-          // Normal avoidance force when outside
-          const normalizedForce = diff.normalize().multiply(force);
-          avoidanceForce.set(
-            avoidanceForce.x + normalizedForce.x,
-            avoidanceForce.y + normalizedForce.y
-          );
-        }
+  continueFreehandPath(point: paper.Point): void {
+    console.log('RM: Continuing freehand path', this.currentPath ? 'path exists' : 'no path'); // Debug log
+    if (this.currentPath) {
+      const lastPoint = this.currentPath.lastSegment.point;
+      const minDistance = 5;
+      
+      if (lastPoint.getDistance(point) > minDistance) {
+        this.currentPath.add(point);
       }
     }
+  }
 
-    // Limit the maximum force magnitude
+  endFreehandPath(): void {
+    console.log('RM: Ending freehand path', this.currentPath ? 'path exists' : 'no path'); // Debug log
+    if (this.currentPath && this.currentPath.segments.length >= 3) {
+      console.log('RM: Path has enough segments:', this.currentPath.segments.length);
+      
+      const firstPoint = this.currentPath.firstSegment.point;
+      const lastPoint = this.currentPath.lastSegment.point;
+      const closeDistance = 20;
+      
+      if (lastPoint.getDistance(firstPoint) < closeDistance) {
+        this.currentPath.add(firstPoint);
+      } else {
+        this.currentPath.add(firstPoint);
+      }
+
+      this.currentPath.closed = true;
+      this.currentPath.smooth({ type: 'continuous' });
+      this.currentPath.simplify(2.5);
+      
+      this.currentPath.fillColor = new paper.Color('#00000010');
+      this.currentPath.strokeColor = new paper.Color('#000000');
+      this.currentPath.strokeWidth = 1;
+      
+      this.paths.push(this.currentPath);
+      console.log('RM: Added closed path. Segments:', this.currentPath.segments.length, 'Closed:', this.currentPath.closed);
+      
+      this.currentPath = null;
+    } else if (this.currentPath) {
+      console.log('RM: Path too short, removing');
+      this.currentPath.remove();
+      this.currentPath = null;
+    }
+  }
+
+  calculateAvoidanceForce(position: paper.Point, ): paper.Point {
+    const avoidanceForce = new paper.Point(0, 0);
+    const avoidanceDistance = 30;
+    const maxForce = 1.0;
+
+    // Check paths
+    for (const path of this.paths) {
+        if (!path.closed) continue;
+
+        const nearestPoint = path.getNearestPoint(position);
+        const isInside = path.contains(position);
+        const diff = position.subtract(nearestPoint);
+        const distance = diff.length;
+
+        if (distance < avoidanceDistance || isInside) {
+            let forceVector;
+            if (isInside) {
+                forceVector = diff.multiply(maxForce * 3);
+            } else {
+                const force = Math.min(maxForce, Math.pow(avoidanceDistance - distance, 2) / (avoidanceDistance * avoidanceDistance));
+                forceVector = diff.normalize().multiply(force);
+            }
+            avoidanceForce.add(forceVector);
+        }
+    }
+
+    // Check rectangles
+    for (const rectangle of this.rectangles) {
+        const bounds = rectangle.bounds;
+        const nearestX = Math.max(bounds.left, Math.min(position.x, bounds.right));
+        const nearestY = Math.max(bounds.top, Math.min(position.y, bounds.bottom));
+        const nearest = new paper.Point(nearestX, nearestY);
+        
+        const diff = position.subtract(nearest);
+        const distance = diff.length;
+        const isInside = bounds.contains(position);
+
+        if (distance < avoidanceDistance || isInside) {
+            let forceVector;
+            if (isInside) {
+                forceVector = diff.multiply(maxForce * 3);
+            } else {
+                const force = Math.min(maxForce, Math.pow(avoidanceDistance - distance, 2) / (avoidanceDistance * avoidanceDistance));
+                forceVector = diff.normalize().multiply(force);
+            }
+            avoidanceForce.add(forceVector);
+        }
+    }
+
+    // Limit the maximum force
     if (avoidanceForce.length > maxForce) {
-      avoidanceForce.length = maxForce;
+        avoidanceForce.length = maxForce;
     }
 
     return avoidanceForce;
+}
+
+
+  clear(): void {
+    this.rectangles.forEach(rect => rect.remove());
+    this.paths.forEach(path => path.remove());
+    this.rectangles = [];
+    this.paths = [];
+    this.clearSelection();
   }
+
 
   create(x: number, y: number): paper.Path.Rectangle {
     const width = 30;
@@ -214,11 +301,7 @@ export class RectangleManager {
     return this.rectangles;
   }
 
-  clear(): void {
-    this.rectangles.forEach(rect => rect.remove());
-    this.rectangles = [];
-    this.clearSelection();
-  }
+
 
   
 }

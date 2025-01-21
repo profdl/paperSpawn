@@ -67,18 +67,24 @@ export default function VectorSimulationCanvas() {
     isDrawingRef.current = true;
     lastDrawPosRef.current = { x: point.x, y: point.y };
 
-    if (currentTool === 'select') {
-      if (systemRef.current.isHandleAt(point)) {
-        isDrawingRef.current = true;
-      }
-      systemRef.current.selectItemAt(point);
-      return;
-    }
 
-    if (currentTool === 'paint') {
-      systemRef.current.createParticle(point.x, point.y);
-    } else if (currentTool === 'erase') {
-      systemRef.current.eraseParticlesNear(point.x, point.y, eraserProperties.size);
+    switch (currentTool) {
+      case 'select':
+        if (systemRef.current.isHandleAt(point)) {
+          isDrawingRef.current = true;
+        }
+        systemRef.current.selectItemAt(point);
+        break;
+        case 'freehand':
+          console.log('Starting freehand path'); // Debug log
+          systemRef.current.startFreehandPath(point);
+          break;
+      case 'paint':
+        systemRef.current.createParticle(point.x, point.y);
+        break;
+      case 'erase':
+        systemRef.current.eraseParticlesNear(point.x, point.y, eraserProperties.size);
+        break;
     }
   }, [currentTool, eraserProperties.size]);
 
@@ -88,46 +94,55 @@ export default function VectorSimulationCanvas() {
     
     const point = getViewPoint(e);
 
-    if (currentTool === 'select') {
-      if (isDrawingRef.current) {
-        const delta = new paper.Point(
-          point.x - (lastDrawPosRef.current?.x || point.x),
-          point.y - (lastDrawPosRef.current?.y || point.y)
-        );
-        systemRef.current.handleTransform(point, delta, e.shiftKey);
-        lastDrawPosRef.current = { x: point.x, y: point.y };
-      }
-      return;
-    }
-
-    // Update last position for other tools
-    lastDrawPosRef.current = { x: point.x, y: point.y };
-
-    if (!isDrawingRef.current) return;
-    
-    if (currentTool === 'rectangle') {
-      return;
-    }
-    
-    if (lastDrawPosRef.current) {
-      const { x: lastX, y: lastY } = lastDrawPosRef.current;
-      const dx = point.x - lastX;
-      const dy = point.y - lastY;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      const steps = Math.max(1, Math.floor(distance / 5));
-
-      if (currentTool === 'paint') {
-        for (let i = 0; i < steps; i++) {
-          const px = lastX + (dx * i) / steps;
-          const py = lastY + (dy * i) / steps;
-          systemRef.current.createParticle(px, py);
+    switch (currentTool) {
+      case 'select':
+        if (isDrawingRef.current) {
+          const delta = new paper.Point(
+            point.x - (lastDrawPosRef.current?.x || point.x),
+            point.y - (lastDrawPosRef.current?.y || point.y)
+          );
+          systemRef.current.handleTransform(point, delta, e.shiftKey);
+          lastDrawPosRef.current = { x: point.x, y: point.y };
         }
-      } else if (currentTool === 'erase') {
-        systemRef.current.eraseParticlesNear(point.x, point.y, eraserProperties.size);
-      }
+        break;
+      case 'freehand':
+        if (isDrawingRef.current) {
+          console.log('Continuing freehand path'); 
+          systemRef.current.continueFreehandPath(point);
+        }
+        break;
+      case 'paint':
+        if (isDrawingRef.current && lastDrawPosRef.current) {
+          const { x: lastX, y: lastY } = lastDrawPosRef.current;
+          const dx = point.x - lastX;
+          const dy = point.y - lastY;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          const steps = Math.max(1, Math.floor(distance / 5));
+
+          for (let i = 0; i < steps; i++) {
+            const px = lastX + (dx * i) / steps;
+            const py = lastY + (dy * i) / steps;
+            systemRef.current.createParticle(px, py);
+          }
+          lastDrawPosRef.current = { x: point.x, y: point.y };
+        }
+        break;
+      case 'erase':
+        if (isDrawingRef.current) {
+          systemRef.current.eraseParticlesNear(point.x, point.y, eraserProperties.size);
+        }
+        break;
     }
   }, [currentTool, eraserProperties.size]);
+
   const handleMouseUp = useCallback(() => {
+    if (!systemRef.current) return;
+    
+    if (currentTool === 'freehand' && isDrawingRef.current) {
+      console.log('Ending freehand path'); // Debug log
+      systemRef.current.endFreehandPath();
+    }
+    
     isDrawingRef.current = false;
     lastDrawPosRef.current = null;
     
@@ -135,6 +150,9 @@ export default function VectorSimulationCanvas() {
     
     if (currentTool === 'select') {
       systemRef.current.endTransform(); 
+    }else if (currentTool !== 'rectangle') {
+        systemRef.current.hideEraserCircle();
+      
     } else if (currentTool !== 'rectangle') {
       systemRef.current.hideEraserCircle();
     }

@@ -12,11 +12,16 @@ interface ToolState {
   eraserProperties: EraserProperties;
 }
 
-interface ToolContextType extends ToolState {
-  setTool: (tool: Tool) => void;
+type ToolType = 'none' | 'paint' | 'erase' | 'rectangle' | 'select' | 'freehand';
+
+interface ToolContextType {
+  currentTool: ToolType;
+  setTool: (tool: ToolType) => void;
+  eraserProperties: {
+    size: number;
+  };
   updateEraserProperties: (props: Partial<EraserProperties>) => void;
 }
-
 const ToolContext = createContext<ToolContextType | undefined>(undefined);
 
 export function ToolProvider({ children }: { children: React.ReactNode }) {

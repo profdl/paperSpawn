@@ -23,7 +23,7 @@ export class VectorParticleSystem {
     this.background = new CanvasBackground(this.project.view.bounds);
     
     paper.view.update();
-  }
+}
 
   setBackgroundImage(imageUrl: string): void {
     this.background.setImage(imageUrl);
@@ -154,4 +154,17 @@ export class VectorParticleSystem {
       this.rectangleManager.endTransform();
     }
   }
+
+  startFreehandPath(point: paper.Point): void {
+    this.rectangleManager.startFreehandPath(point);
+  }
+
+  continueFreehandPath(point: paper.Point): void {
+    this.rectangleManager.continueFreehandPath(point);
+  }
+
+  endFreehandPath(): void {
+    this.rectangleManager.endFreehandPath();
+  }
+
 }

@@ -12,7 +12,8 @@ import {
   MousePointer,
   Save,
   FolderOpen,
-  ImagePlus
+  ImagePlus,
+  Pen
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import AuthModal from '../ui/AuthModal';
@@ -114,6 +115,15 @@ export default function Navbar({
                 >
                   <Pencil className="w-4 h-4" />
                 </button>
+                <button
+    className={`p-1.5 rounded hover:bg-white/10 transition-colors ${
+      currentTool === 'freehand' ? 'bg-white/20' : ''
+    }`}
+    onClick={() => setTool(currentTool === 'freehand' ? 'none' : 'freehand')}
+    title="Draw Boundary (B)"
+  >
+    <Pen className="w-4 h-4" />
+  </button>
                 <button
                   className={`p-1.5 rounded hover:bg-white/10 transition-colors ${
                     currentTool === 'erase' ? 'bg-white/20' : ''
