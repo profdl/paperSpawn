@@ -6,7 +6,7 @@ import { TransformHandles } from './transformHandles';
 export class obstacleManager {
   private rectangles: paper.Path.Rectangle[] = [];
   private paths: paper.Path[] = [];
-  private selectedItem: paper.Path.Rectangle | null = null;
+  private selectedItem: paper.Path.Rectangle | paper.Path | null = null;
   private transformHandles: TransformHandles;
   private dragStartPosition: paper.Point | null = null;
   private originalBounds: paper.Rectangle | null = null;
@@ -198,21 +198,55 @@ clearObstacles(): void {
 
   selectAt(point: paper.Point): void {
     this.clearSelection();
-
+  
     const hitResult = paper.project.hitTest(point, {
       fill: true,
       stroke: true,
       tolerance: 5
     });
-
+  
     if (hitResult && hitResult.item) {
+      // Check for rectangles
       const rectangle = this.rectangles.find(r => r === hitResult.item);
       if (rectangle) {
         this.selectedItem = rectangle;
         this.transformHandles.create(rectangle.bounds);
         paper.view.update();
+        return;
+      }
+  
+      // Check for paths 
+      const path = this.paths.find(p => p === hitResult.item);
+      if (path && path.closed) {
+        this.selectedItem = path;
+        this.transformHandles.create(path.bounds);
+        paper.view.update();
       }
     }
+  }
+  
+  // Update handleTransform to work with both rectangles and paths
+  handleTransform(point: paper.Point, delta: paper.Point, shiftKey: boolean): void {
+    if (!this.selectedItem) return;
+  
+    if (!this.dragStartPosition) {
+      this.dragStartPosition = point.subtract(delta);
+      this.originalBounds = this.selectedItem.bounds.clone();
+      
+      const resizeHandle = this.transformHandles.getHandleAt(point);
+      if (resizeHandle) {
+        this.selectedItem.data.activeHandle = resizeHandle;
+      }
+    }
+  
+    if (this.selectedItem.data.activeHandle) {
+      const totalDelta = point.subtract(this.dragStartPosition);
+      this.handleResize(totalDelta, shiftKey);
+    } else {
+      this.handleMove(delta);
+    }
+  
+    paper.view.update();
   }
 
   clearSelection(): void {
@@ -225,33 +259,7 @@ clearObstacles(): void {
     this.originalBounds = null;
   }
 
-  handleTransform(point: paper.Point, delta: paper.Point, shiftKey: boolean): void {
-    if (!this.selectedItem) return;
 
-    // Initialize drag start if not set
-    if (!this.dragStartPosition) {
-      this.dragStartPosition = point.subtract(delta);
-      this.originalBounds = this.selectedItem.bounds.clone();
-      
-      // Check if we're starting on the resize handle
-      const resizeHandle = this.transformHandles.getHandleAt(point);
-      
-      if (resizeHandle) {
-        this.selectedItem.data.activeHandle = resizeHandle;
-      }
-    }
-
-    if (this.selectedItem.data.activeHandle) {
-      // We're resizing - calculate the total delta from the original position
-      const totalDelta = point.subtract(this.dragStartPosition);
-      this.handleResize(totalDelta, shiftKey);
-    } else {
-      // We're moving
-      this.handleMove(delta);
-    }
-
-    paper.view.update();
-  }
 
   private handleResize(totalDelta: paper.Point, shiftKey: boolean): void {
     if (!this.selectedItem || !this.originalBounds) return;
