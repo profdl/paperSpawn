@@ -11,8 +11,8 @@ interface ProjectsDrawerProps {
 }
 
 export default function ProjectsDrawer({ isOpen, onClose }: ProjectsDrawerProps) {
-  const { projects, isLoading, deleteProject, refreshProjects } = useProjects();  // Add refreshProjects here
-  const { systemRef, updateSettings } = useSimulation();
+  const { projects, isLoading, deleteProject, refreshProjects } = useProjects();
+  const { updateSettings } = useSimulation(); // Remove systemRef since we won't need it
   const [previews, setPreviews] = useState<{ [key: string]: string }>({});
 
   const handleOverlayClick = useCallback((e: MouseEvent) => {
@@ -22,7 +22,6 @@ export default function ProjectsDrawer({ isOpen, onClose }: ProjectsDrawerProps)
     }
   }, [onClose]);
 
-  
   useEffect(() => {
     if (isOpen) {
       refreshProjects();
@@ -32,7 +31,6 @@ export default function ProjectsDrawer({ isOpen, onClose }: ProjectsDrawerProps)
   useEffect(() => {
     if (isOpen) {
       document.addEventListener('mousedown', handleOverlayClick);
-      
     }
     return () => {
       document.removeEventListener('mousedown', handleOverlayClick);
@@ -57,42 +55,13 @@ export default function ProjectsDrawer({ isOpen, onClose }: ProjectsDrawerProps)
   }, [projects]);
 
   const loadProject = (project: Project) => {
-    if (!systemRef.current) {
-      console.error('Simulation system not initialized');
-      return;
-    }
-  
-    console.log('Loading project:', project.name);
-    
+    console.log('Loading project settings:', project.name);
     try {
-      // Parse SVG content
-      const parser = new DOMParser();
-      const svgDoc = parser.parseFromString(project.svg_content, 'image/svg+xml');
-      
-      if (!svgDoc || svgDoc.documentElement.nodeName === 'parsererror') {
-        console.error('Invalid SVG content');
-        return;
-      }
-  
-      console.log('SVG parsed successfully');
-      
-      const svgElement = svgDoc.documentElement as unknown as SVGElement;
-      
-      // Update settings first
       updateSettings(project.settings);
-      
-      // Small delay to ensure settings are applied
-      setTimeout(() => {
-        // Clear and load SVG
-        systemRef.current?.clear();
-        systemRef.current?.loadSVG(svgElement);
-        
-        console.log('Project loaded successfully');
-        onClose();
-      }, 100);
-      
+      console.log('Settings updated successfully');
+      onClose();
     } catch (error) {
-      console.error('Error loading project:', error);
+      console.error('Error loading project settings:', error);
     }
   };
 
