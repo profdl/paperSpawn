@@ -1,6 +1,6 @@
 import paper from 'paper';
 import { SimulationSettings } from '../../types';
-import { RectangleManager } from './rectangleManager';
+import { obstacleManager } from './obstacleManager';
 import { ParticleManager } from './particleManager';
 import { EraserTool } from './eraserTool';
 import { CanvasBackground } from './canvasBackground';
@@ -8,13 +8,13 @@ import { CanvasBackground } from './canvasBackground';
 
 export class VectorParticleSystem {
   private project: paper.Project;
-  private rectangleManager: RectangleManager;
+  private obstacleManager: obstacleManager;
   private particleManager: ParticleManager;
   private eraserTool: EraserTool;
   private background: CanvasBackground;
   private onResizeCallback?: (width: number, height: number) => void;
   public clearObstacles(): void {
-    this.rectangleManager.clearObstacles();
+    this.obstacleManager.clearObstacles();
   }
 
   constructor(canvas: HTMLCanvasElement, onResize?: (width: number, height: number) => void) {
@@ -24,8 +24,8 @@ export class VectorParticleSystem {
     paper.view.viewSize = new paper.Size(500, 400);
     this.project = paper.project;
     
-    this.rectangleManager = new RectangleManager();
-    this.particleManager = new ParticleManager(this.rectangleManager);
+    this.obstacleManager = new obstacleManager();
+    this.particleManager = new ParticleManager(this.obstacleManager);
     this.eraserTool = new EraserTool();
     this.background = new CanvasBackground(
       this.project.view.bounds,
@@ -58,7 +58,7 @@ export class VectorParticleSystem {
       } else if (child instanceof paper.Path && child.data.isObstacle) {
         const rectangle = new paper.Path.Rectangle(child.bounds);
         rectangle.rotation = child.rotation;
-        this.rectangleManager.importRectangle(rectangle);
+        this.obstacleManager.importRectangle(rectangle);
         child.remove();
       }
     });
@@ -69,13 +69,13 @@ export class VectorParticleSystem {
 
   
   isHandleAt(point: paper.Point): boolean {
-    return this.rectangleManager.isHandleAt(point);
+    return this.obstacleManager.isHandleAt(point);
   }
 
   handleTransform(point: paper.Point, delta: paper.Point, shiftKey: boolean): void {
-    if (this.rectangleManager) {
+    if (this.obstacleManager) {
       // Delegate transform handling to the rectangle manager
-      this.rectangleManager.handleTransform(point, delta, shiftKey);
+      this.obstacleManager.handleTransform(point, delta, shiftKey);
     }
   }
   getCanvasDimensions(): { width: number; height: number } {
@@ -112,19 +112,19 @@ export class VectorParticleSystem {
 
   // Rectangle-related methods
   startRectangle(x: number, y: number): paper.Path.Rectangle {
-    return this.rectangleManager.create(x, y);
+    return this.obstacleManager.create(x, y);
 }
 
   selectItemAt(point: paper.Point): void {
-    this.rectangleManager.selectAt(point);
+    this.obstacleManager.selectAt(point);
   }
 
   clearSelection(): void {
-    this.rectangleManager.clearSelection();
+    this.obstacleManager.clearSelection();
   }
 
   handleKeyboardShortcut(event: KeyboardEvent): void {
-    this.rectangleManager.handleKeyboardShortcut(event);
+    this.obstacleManager.handleKeyboardShortcut(event);
   }
 
   // Eraser-related methods
@@ -144,7 +144,7 @@ export class VectorParticleSystem {
   }
   clear(): void {
     this.particleManager.clear();
-    this.rectangleManager.clear();
+    this.obstacleManager.clear();
     paper.view.update();
   }
 
@@ -168,21 +168,21 @@ export class VectorParticleSystem {
   }
 
   endTransform(): void {
-    if (this.rectangleManager) {
-      this.rectangleManager.endTransform();
+    if (this.obstacleManager) {
+      this.obstacleManager.endTransform();
     }
   }
 
   startFreehandPath(point: paper.Point): void {
-    this.rectangleManager.startFreehandPath(point);
+    this.obstacleManager.startFreehandPath(point);
   }
 
   continueFreehandPath(point: paper.Point): void {
-    this.rectangleManager.continueFreehandPath(point);
+    this.obstacleManager.continueFreehandPath(point);
   }
 
   endFreehandPath(): void {
-    this.rectangleManager.endFreehandPath();
+    this.obstacleManager.endFreehandPath();
   }
 
 }

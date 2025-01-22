@@ -3,7 +3,7 @@ import { TransformHandles } from './transformHandles';
 
 
 
-export class RectangleManager {
+export class obstacleManager {
   private rectangles: paper.Path.Rectangle[] = [];
   private paths: paper.Path[] = [];
   private selectedItem: paper.Path.Rectangle | null = null;

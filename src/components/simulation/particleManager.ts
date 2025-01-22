@@ -1,17 +1,17 @@
 import paper from 'paper';
 import { SimulationSettings } from '../../types';
-import { RectangleManager } from './rectangleManager';
+import { obstacleManager } from './obstacleManager';
 
 export class ParticleManager {
   private particles: paper.Group;
-  private rectangleManager: RectangleManager;
+  private obstacleManager: obstacleManager;
   private _particleRadius: number = 2;
   private _trailWidth: number = 1;
   private wanderAngles: Map<number, number> = new Map();
 
-  constructor(rectangleManager: RectangleManager) {
+  constructor(obstacleManager: obstacleManager) {
     this.particles = new paper.Group();
-    this.rectangleManager = rectangleManager;
+    this.obstacleManager = obstacleManager;
   }
 
   // Add new method for obstacle avoidance
@@ -21,7 +21,7 @@ export class ParticleManager {
     const maxForce = 1.0;
   
     // Get all closed paths instead of just rectangles
-    const obstacles = this.rectangleManager.getAllClosedPaths();
+    const obstacles = this.obstacleManager.getAllClosedPaths();
     
     for (const obstacle of obstacles) {
       // Use path.getNearestPoint instead of calculating bounds
@@ -80,7 +80,7 @@ export class ParticleManager {
       const position = new paper.Point(x, y);
       
       // Check if the spawn position is inside any closed path
-      const obstacles = this.rectangleManager.getAllClosedPaths();
+      const obstacles = this.obstacleManager.getAllClosedPaths();
       for (const obstacle of obstacles) {
         if (obstacle.contains(position)) {
           return null; // Don't spawn the particle if it's inside any closed path
