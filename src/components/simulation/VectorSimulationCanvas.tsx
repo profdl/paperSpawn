@@ -89,8 +89,9 @@ export default function VectorSimulationCanvas() {
       case 'select':
         if (systemRef.current.isHandleAt(point)) {
           isDrawingRef.current = true;
+        } else {
+          systemRef.current.selectItemAt(point);
         }
-        systemRef.current.selectItemAt(point);
         break;
         case 'freehand':
           console.log('Starting freehand path'); // Debug log

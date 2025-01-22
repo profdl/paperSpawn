@@ -11,7 +11,7 @@ interface Props {
 }
 
 const DraggableNumberInput: React.FC<Props> = ({
-  value,
+  value = 0, // Add default value
   onChange,
   min = 0,
   max = 100,
@@ -24,17 +24,18 @@ const DraggableNumberInput: React.FC<Props> = ({
   const startValueRef = useRef<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const isPercentageFormat = formatValue(value).includes('%');
-
-  // Convert the display value based on whether it's a percentage
+  // Ensure value is a number and within bounds
+  const sanitizedValue = Math.max(min, Math.min(max, Number(value) || 0));
+  
+  // Safe display value calculation
   const getDisplayValue = () => {
-    if (isPercentageFormat) {
-      return Math.round(value * 100).toString();
-    }
-    return value.toString();
+    if (typeof sanitizedValue !== 'number') return '0';
+    const formattedValue = formatValue(sanitizedValue);
+    return formattedValue || sanitizedValue.toString();
   };
 
   const [inputValue, setInputValue] = useState(getDisplayValue());
+  const isPercentageFormat = getDisplayValue().includes('%');
 
   const handlePointerDown = (e: React.PointerEvent) => {
     if (isEditing) return;
@@ -151,7 +152,7 @@ const DraggableNumberInput: React.FC<Props> = ({
             className="w-full h-full bg-transparent outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
         ) : (
-          formatValue(value)
+          getDisplayValue()
         )}
       </div>
       <div className="flex flex-col border-l border-white/20">
