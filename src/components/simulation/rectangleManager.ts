@@ -24,6 +24,23 @@ getAllClosedPaths(): paper.Path[] {
   ];
 }
 
+clearObstacles(): void {
+  // Clear rectangles
+  this.rectangles.forEach(rect => rect.remove());
+  this.rectangles = [];
+
+  // Clear closed paths
+  const closedPaths = this.paths.filter(path => path.closed);
+  closedPaths.forEach(path => {
+    const index = this.paths.indexOf(path);
+    if (index > -1) {
+      this.paths.splice(index, 1);
+      path.remove();
+    }
+  });
+
+  this.clearSelection();
+}
 
   importRectangle(rectangle: paper.Path.Rectangle): void {
     rectangle.data.isObstacle = true;

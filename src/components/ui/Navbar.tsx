@@ -7,6 +7,7 @@ import {
   Pause,
   Play,
   Trash2,
+  Trash,
   FileDown,
   Square,
   MousePointer,
@@ -39,6 +40,10 @@ export default function Navbar({
   const { currentTool, setTool } = useTool();
   const [showAuthModal, setShowAuthModal] = React.useState(false);
   const { saveProject } = useProjects();
+  const handleClearObstacles = () => {
+    if (!systemRef.current) return;
+    systemRef.current.clearObstacles();  // Using the public method instead
+  };
 
   const handleSave = async () => {
     if (!user) {
@@ -135,7 +140,7 @@ export default function Navbar({
                   }
                   title="Paint Particles (P)"
                 >
-                  <Wand className="w-4 h-4" />
+                  <Wand className="w-4 h-4 text-cyan-500" />
                 </button>
                 <button
                   className={`p-1.5 rounded hover:bg-white/10 transition-colors ${
@@ -146,8 +151,19 @@ export default function Navbar({
                   }
                   title="Erase Particles (E)"
                 >
-                  <Eraser className="w-4 h-4" />
+                  <Eraser className="w-4 h-4 text-cyan-500" />
                 </button>
+
+                <button
+                  className="p-1.5 rounded hover:bg-white/10 transition-colors"
+                  onClick={handleClearParticles}
+                  title="Clear Particles"
+                >
+                  <Trash2 className="w-4 h-4 text-cyan-500" />
+                </button>
+
+                {/* Divider */}
+                <div className="w-px bg-white/20 mx-1" />
                 {/* Divider */}
                 <div className="w-px bg-white/20 mx-1" />
                 <button
@@ -159,9 +175,9 @@ export default function Navbar({
                   }
                   title="Select (V)"
                 >
-                  <MousePointer className="w-4 h-4" />
+                  <MousePointer className="w-4 h-4  text-red-500" />
                 </button>
-                
+
                 <button
                   className={`p-1.5 rounded hover:bg-white/10 transition-colors ${
                     currentTool === "freehand" ? "bg-white/20" : ""
@@ -187,7 +203,7 @@ export default function Navbar({
                   className="p-1.5 rounded hover:bg-white/10 transition-colors cursor-pointer"
                   title="Upload Background Image"
                 >
-                  <ImagePlus className="w-4 h-4" />
+                  <ImagePlus className="w-4 h-4  text-red-500" />
                   <input
                     type="file"
                     className="hidden"
@@ -195,33 +211,16 @@ export default function Navbar({
                     onChange={handleImageUpload}
                   />
                 </label>
-
-
+                <button
+      className="p-1.5 rounded hover:bg-white/10 transition-colors"
+      onClick={handleClearObstacles}
+      title="Clear Obstacles"
+    >
+      <Trash className="w-4 h-4 text-red-500" />
+    </button>
                 {/* Divider */}
                 <div className="w-px bg-white/20 mx-1" />
 
-                {/* Simulation Controls */}
-                <button
-                  className="p-1.5 rounded hover:bg-white/10 transition-colors"
-                  onClick={() => setIsPaused(!isPaused)}
-                  title="Play/Pause (Space)"
-                >
-                  {isPaused ? (
-                    <Play className="w-4 h-4" />
-                  ) : (
-                    <Pause className="w-4 h-4" />
-                  )}
-                </button>
-                <button
-                  className="p-1.5 rounded hover:bg-white/10 transition-colors"
-                  onClick={handleClearParticles}
-                  title="Clear Particles"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-
-                {/* Divider */}
-                <div className="w-px bg-white/20 mx-1" />
 
                 {/* Project Management */}
                 <button
@@ -237,6 +236,25 @@ export default function Navbar({
                   title={user ? "Save Project" : "Sign in to save project"}
                 >
                   <Save className="w-4 h-4" />
+                </button>
+                <button
+                onClick={handleDownload}
+                className="p-1.5 rounded hover:bg-white/10 transition-colors"
+                title="Export as SVG"
+              >
+                <FileDown className="w-4 h-4" />
+              </button>
+                {/* Simulation Controls */}
+                <button
+                  className="p-1.5 rounded hover:bg-white/10 transition-colors"
+                  onClick={() => setIsPaused(!isPaused)}
+                  title="Play/Pause (Space)"
+                >
+                  {isPaused ? (
+                    <Play className="w-4 h-4" />
+                  ) : (
+                    <Pause className="w-4 h-4" />
+                  )}
                 </button>
               </div>
             </div>
@@ -260,14 +278,8 @@ export default function Navbar({
                 </button>
               )}
 
-              {/* Export & UI Toggle */}
-              <button
-                onClick={handleDownload}
-                className="p-1.5 rounded hover:bg-white/10 transition-colors"
-                title="Export as SVG"
-              >
-                <FileDown className="w-4 h-4" />
-              </button>
+              {/*  UI Toggle */}
+
               <button
                 onClick={onToggleUI}
                 className="p-1.5 rounded hover:bg-white/10 transition-colors"

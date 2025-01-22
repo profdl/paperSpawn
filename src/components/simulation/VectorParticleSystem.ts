@@ -13,7 +13,9 @@ export class VectorParticleSystem {
   private eraserTool: EraserTool;
   private background: CanvasBackground;
   private onResizeCallback?: (width: number, height: number) => void;
-
+  public clearObstacles(): void {
+    this.rectangleManager.clearObstacles();
+  }
 
   constructor(canvas: HTMLCanvasElement, onResize?: (width: number, height: number) => void) {
     this.onResizeCallback = onResize;
