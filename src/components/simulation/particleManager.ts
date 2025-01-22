@@ -14,107 +14,36 @@ export class ParticleManager {
     this.obstacleManager = obstacleManager;
   }
 
-  // Add new method for obstacle avoidance
-  private calculateRectangleAvoidance(position: paper.Point): paper.Point {
-    const avoidanceForce = new paper.Point(0, 0);
-    const avoidanceDistance = 30;
-    const maxForce = 1.0;
-  
-    // Get all closed paths instead of just rectangles
-    const obstacles = this.obstacleManager.getAllClosedPaths();
-    
-    for (const obstacle of obstacles) {
-      // Use path.getNearestPoint instead of calculating bounds
-      const nearestPoint = obstacle.getNearestPoint(position);
-      const diff = position.subtract(nearestPoint);
-      const distance = diff.length;
-      
-      if (distance < avoidanceDistance) {
-        const isInside = obstacle.contains(position);
-        
-        if (isInside) {
-          avoidanceForce.set(
-            avoidanceForce.x + diff.x * maxForce * 3,
-            avoidanceForce.y + diff.y * maxForce * 3
-          );
-        } else {
-          const force = Math.min(maxForce, Math.pow(avoidanceDistance - distance, 2) / (avoidanceDistance * avoidanceDistance));
-          const normalizedForce = diff.normalize().multiply(force);
-          avoidanceForce.set(
-            avoidanceForce.x + normalizedForce.x,
-            avoidanceForce.y + normalizedForce.y
-          );
-        }
-      }
-    }
-  
-    if (avoidanceForce.length > maxForce) {
-      avoidanceForce.length = maxForce;
-    }
-  
-    return avoidanceForce;
+
+
+  get particleRadius(): number {
+    return this._particleRadius;
   }
 
-    // Add getters and setters for the properties
-    get particleRadius(): number {
-      return this._particleRadius;
-    }
-  
-    get trailWidth(): number {
-      return this._trailWidth;
-    }
-  
-    // Update methods to use the new property names
-    setParticleRadius(radius: number): void {
-      this._particleRadius = radius;
-    }
-  
-    setTrailWidth(width: number): void {
-      this._trailWidth = width;
-      this.particles.children.forEach(particle => {
-        const trail = particle.children[1] as paper.Path;
-        trail.strokeWidth = width;
-      });
-    }
-    createParticle(x: number, y: number, particleColor: string = '#000000', trailColor: string = '#8b8680'): paper.Group | null {
-      const position = new paper.Point(x, y);
-      
-      // Check if the spawn position is inside any closed path
-      const obstacles = this.obstacleManager.getAllClosedPaths();
-      for (const obstacle of obstacles) {
-        if (obstacle.contains(position)) {
-          return null; // Don't spawn the particle if it's inside any closed path
-        }
-      }
-  
-      const particle = new paper.Group();
-      
-      const point = new paper.Path.Circle({
-        center: position,
-        radius: this._particleRadius,
-        fillColor: particleColor
-      });
-    
-      const trail = new paper.Path({
-        strokeColor: trailColor,
-        strokeWidth: this._trailWidth,
-        strokeCap: 'round',
-        opacity: 1
-      });
-      trail.add(new paper.Point(x, y));
+  get trailWidth(): number {
+    return this._trailWidth;
+  }
 
-    particle.addChildren([point, trail]);
-    particle.data = {
-      velocity: new paper.Point(
-        (Math.random() - 0.5) * 2,
-        (Math.random() - 0.5) * 2
-      ),
-      createdAt: Date.now(),
-      state: 'active'
-    };
+  setColors(particleColor: string, trailColor: string): void {
+    this.particles.children.forEach(particle => {
+      const point = particle.children[0] as paper.Path.Circle;
+      const trail = particle.children[1] as paper.Path;
 
-    this.particles.addChild(particle);
-    return particle;
+      point.fillColor = new paper.Color(particleColor);
+      trail.strokeColor = new paper.Color(trailColor);
+    });
+  }
+
+  setParticleRadius(radius: number): void {
+    this._particleRadius = radius;
+  }
+
+  setTrailWidth(width: number): void {
+    this._trailWidth = width;
+    this.particles.children.forEach(particle => {
+      const trail = particle.children[1] as paper.Path;
+      trail.strokeWidth = width;
+    });
   }
 
   spawnParticles(count: number, pattern: string, width: number, height: number): void {
@@ -136,22 +65,64 @@ export class ParticleManager {
     }
   }
 
+  createParticle(x: number, y: number, particleColor: string = '#000000', trailColor: string = '#8b8680'): paper.Group | null {
+    const position = new paper.Point(x, y);
+
+    // Check if the spawn position is inside any closed path
+    const obstacles = this.obstacleManager.getAllClosedPaths();
+    for (const obstacle of obstacles) {
+      if (obstacle.contains(position)) {
+        return null; // Don't spawn the particle if it's inside any closed path
+      }
+    }
+
+    const particle = new paper.Group();
+
+    const point = new paper.Path.Circle({
+      center: position,
+      radius: this._particleRadius,
+      fillColor: particleColor
+    });
+
+    const trail = new paper.Path({
+      strokeColor: trailColor,
+      strokeWidth: this._trailWidth,
+      strokeCap: 'round',
+      opacity: 1
+    });
+    trail.add(new paper.Point(x, y));
+
+    particle.addChildren([point, trail]);
+    particle.data = {
+      velocity: new paper.Point(
+        (Math.random() - 0.5) * 2,
+        (Math.random() - 0.5) * 2
+      ),
+      createdAt: Date.now(),
+      state: 'active'
+    };
+
+    this.particles.addChild(particle);
+    return particle;
+  }
+
+
   private spawnScatterPattern(count: number, width: number, height: number): void {
     let created = 0;
     let attempts = 0;
     const maxAttempts = count * 20; // Increase max attempts to give more chances
-  
+
     while (created < count && attempts < maxAttempts) {
       // Try to find a position not inside any obstacle
       let x = Math.random() * width;
       let y = Math.random() * height;
-      
+
       const particle = this.createParticle(x, y);
       if (particle) {
         created++;
       }
       attempts++;
-  
+
       // If we're struggling to place particles, start trying with more spread
       if (attempts > count * 10) {
         // Add some padding to avoid edges
@@ -160,7 +131,7 @@ export class ParticleManager {
         y = padding + Math.random() * (height - padding * 2);
       }
     }
-  
+
     console.log(`Spawned ${created}/${count} particles in ${attempts} attempts`);
   }
 
@@ -216,70 +187,69 @@ export class ParticleManager {
     }
   }
 
-// in particleManager.ts
-calculateFlockingForces(
-  particle: paper.Group,
-  settings: SimulationSettings
-): paper.Point {
-  let separation = new paper.Point(0, 0);
-  let cohesion = new paper.Point(0, 0);
-  let alignment = new paper.Point(0, 0);
-  let neighbors = 0;
+  calculateFlockingForces(
+    particle: paper.Group,
+    settings: SimulationSettings
+  ): paper.Point {
+    let separation = new paper.Point(0, 0);
+    let cohesion = new paper.Point(0, 0);
+    let alignment = new paper.Point(0, 0);
+    let neighbors = 0;
 
-  const particlePos = (particle.children[0] as paper.Path.Circle).position;
-  const velocity = particle.data.velocity;
-  // Convert sensor angle from degrees to radians and halve it (as it's the total angle divided by 2)
-  const halfSensorAngle = (settings.sensorAngle * Math.PI / 180) / 2;
+    const particlePos = (particle.children[0] as paper.Path.Circle).position;
+    const velocity = particle.data.velocity;
+    // Convert sensor angle from degrees to radians and halve it (as it's the total angle divided by 2)
+    const halfSensorAngle = (settings.sensorAngle * Math.PI / 180) / 2;
 
-  this.particles.children.forEach(other => {
-    if (particle === other || other.data.state === 'frozen') return;
+    this.particles.children.forEach(other => {
+      if (particle === other || other.data.state === 'frozen') return;
 
-    const otherPos = (other.children[0] as paper.Path.Circle).position;
-    const diff = otherPos.subtract(particlePos);
-    const distance = diff.length;
+      const otherPos = (other.children[0] as paper.Path.Circle).position;
+      const diff = otherPos.subtract(particlePos);
+      const distance = diff.length;
 
-    // Calculate angle between velocity and direction to other particle
-    let angleToOther = Math.atan2(diff.y, diff.x);
-    let currentAngle = Math.atan2(velocity.y, velocity.x);
-    
-    // Normalize angle difference to [-PI, PI]
-    let angleDiff = angleToOther - currentAngle;
-    while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
-    while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
-    
-    // Only consider particles within the sensor angle
-    if (Math.abs(angleDiff) <= halfSensorAngle) {
-      if (distance < settings.separationDistance) {
-        const force = (settings.separationDistance - distance) / settings.separationDistance;
-        separation = separation.subtract(diff.multiply(force));
+      // Calculate angle between velocity and direction to other particle
+      let angleToOther = Math.atan2(diff.y, diff.x);
+      let currentAngle = Math.atan2(velocity.y, velocity.x);
+
+      // Normalize angle difference to [-PI, PI]
+      let angleDiff = angleToOther - currentAngle;
+      while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+      while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+
+      // Only consider particles within the sensor angle
+      if (Math.abs(angleDiff) <= halfSensorAngle) {
+        if (distance < settings.separationDistance) {
+          const force = (settings.separationDistance - distance) / settings.separationDistance;
+          separation = separation.subtract(diff.multiply(force));
+        }
+
+        if (distance < settings.cohesionDistance) {
+          cohesion = cohesion.add(otherPos);
+          neighbors++;
+        }
+
+        if (distance < settings.alignmentDistance) {
+          alignment = alignment.add(other.data.velocity);
+        }
       }
+    });
 
-      if (distance < settings.cohesionDistance) {
-        cohesion = cohesion.add(otherPos);
-        neighbors++;
-      }
+    let force = new paper.Point(0, 0);
 
-      if (distance < settings.alignmentDistance) {
-        alignment = alignment.add(other.data.velocity);
-      }
+    if (neighbors > 0) {
+      cohesion = cohesion.divide(neighbors).subtract(particlePos);
+      alignment = alignment.divide(neighbors);
+
+      force = force.add(separation.multiply(settings.separation))
+        .add(cohesion.multiply(settings.cohesion))
+        .add(alignment.multiply(settings.alignment));
     }
-  });
 
-  let force = new paper.Point(0, 0);
-
-  if (neighbors > 0) {
-    cohesion = cohesion.divide(neighbors).subtract(particlePos);
-    alignment = alignment.divide(neighbors);
-    
-    force = force.add(separation.multiply(settings.separation))
-                 .add(cohesion.multiply(settings.cohesion))
-                 .add(alignment.multiply(settings.alignment));
+    return force;
   }
 
-  return force;
-}
-
-   calculateWanderForce(
+  calculateWanderForce(
     particle: paper.Group,
     settings: SimulationSettings
   ): paper.Point {
@@ -312,7 +282,7 @@ calculateFlockingForces(
     // Use angle directly in degrees - Paper.js handles the conversion internally
     const angle = settings.externalForceAngle || 0;
     const strength = settings.externalForceStrength || 0;
-    
+
     // Create a vector using degrees - Paper.js Point constructor accepts degrees by default
     return new paper.Point({
       length: strength * 10, // Scale the strength to make it more noticeable
@@ -320,9 +290,49 @@ calculateFlockingForces(
     });
   }
 
+  private calculateRectangleAvoidance(position: paper.Point): paper.Point {
+    const avoidanceForce = new paper.Point(0, 0);
+    const avoidanceDistance = 30;
+    const maxForce = 1.0;
+
+    // Get all closed paths instead of just rectangles
+    const obstacles = this.obstacleManager.getAllClosedPaths();
+
+    for (const obstacle of obstacles) {
+      // Use path.getNearestPoint instead of calculating bounds
+      const nearestPoint = obstacle.getNearestPoint(position);
+      const diff = position.subtract(nearestPoint);
+      const distance = diff.length;
+
+      if (distance < avoidanceDistance) {
+        const isInside = obstacle.contains(position);
+
+        if (isInside) {
+          avoidanceForce.set(
+            avoidanceForce.x + diff.x * maxForce * 3,
+            avoidanceForce.y + diff.y * maxForce * 3
+          );
+        } else {
+          const force = Math.min(maxForce, Math.pow(avoidanceDistance - distance, 2) / (avoidanceDistance * avoidanceDistance));
+          const normalizedForce = diff.normalize().multiply(force);
+          avoidanceForce.set(
+            avoidanceForce.x + normalizedForce.x,
+            avoidanceForce.y + normalizedForce.y
+          );
+        }
+      }
+    }
+
+    if (avoidanceForce.length > maxForce) {
+      avoidanceForce.length = maxForce;
+    }
+
+    return avoidanceForce;
+  }
+
   updateParticles(
-    settings: SimulationSettings, 
-    width: number, 
+    settings: SimulationSettings,
+    width: number,
     height: number
   ): void {
     this.particles.children.forEach(particle => {
@@ -364,7 +374,7 @@ calculateFlockingForces(
       let force = new paper.Point(0, 0);
 
       // Only apply flocking/wandering if not in bounce cooldown
-      const bounceComplete = !particle.data.bounceCooldown || 
+      const bounceComplete = !particle.data.bounceCooldown ||
         Date.now() > particle.data.bounceCooldown;
 
       // Calculate desired force from behaviors
@@ -409,21 +419,21 @@ calculateFlockingForces(
           newPosition.x = ((newPosition.x + width) % width);
           newPosition.y = ((newPosition.y + height) % height);
           break;
-          
-          case 'reflect':
-            if (newPosition.x < 0 || newPosition.x > width) {
-              velocity.x *= -1; // Reverse horizontal velocity
-              newPosition.x = newPosition.x < 0 ? 0 : width;
-            }
-            if (newPosition.y < 0 || newPosition.y > height) {
-              velocity.y *= -1; // Reverse vertical velocity
-              newPosition.y = newPosition.y < 0 ? 0 : height;
-            }
-            break;
-          
+
+        case 'reflect':
+          if (newPosition.x < 0 || newPosition.x > width) {
+            velocity.x *= -1; // Reverse horizontal velocity
+            newPosition.x = newPosition.x < 0 ? 0 : width;
+          }
+          if (newPosition.y < 0 || newPosition.y > height) {
+            velocity.y *= -1; // Reverse vertical velocity
+            newPosition.y = newPosition.y < 0 ? 0 : height;
+          }
+          break;
+
         case 'stop':
           if (newPosition.x < 0 || newPosition.x > width ||
-              newPosition.y < 0 || newPosition.y > height) {
+            newPosition.y < 0 || newPosition.y > height) {
             velocity.set(0, 0);
             newPosition.x = Math.max(0, Math.min(width, newPosition.x));
             newPosition.y = Math.max(0, Math.min(height, newPosition.y));
@@ -431,10 +441,10 @@ calculateFlockingForces(
             particle.data.state = 'stopped';
           }
           break;
-          
+
         case 'travel-off':
           if (newPosition.x < 0 || newPosition.x > width ||
-              newPosition.y < 0 || newPosition.y > height) {
+            newPosition.y < 0 || newPosition.y > height) {
             particle.remove();
             return;
           }
@@ -468,15 +478,7 @@ calculateFlockingForces(
     this.particles.removeChildren();
   }
 
-  setColors(particleColor: string, trailColor: string): void {
-    this.particles.children.forEach(particle => {
-      const point = particle.children[0] as paper.Path.Circle;
-      const trail = particle.children[1] as paper.Path;
-      
-      point.fillColor = new paper.Color(particleColor);
-      trail.strokeColor = new paper.Color(trailColor);
-    });
-  }
+
 
 
 
