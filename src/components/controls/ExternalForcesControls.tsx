@@ -48,7 +48,7 @@ export default function CanvasBehaviorsControls() {
         >
           <option value="travel-off">Travel Off</option>
           <option value="wrap-around">Wrap Around</option>
-          <option value="bounce">Bounce</option>
+          <option value="reflect">Reflect</option>
           <option value="stop">Stop</option>
         </select>
       </div>

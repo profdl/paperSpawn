@@ -2,7 +2,7 @@
 
 
 export type SpawnPattern = 'scatter' | 'grid' | 'circle' | 'point';
-export type BoundaryBehavior = 'travel-off' | 'wrap-around' | 'bounce' | 'stop';
+export type BoundaryBehavior = 'travel-off' | 'wrap-around' | 'reflect' | 'stop';
 
 export interface SimulationSettings {
   count: number;
@@ -71,7 +71,7 @@ export const presets: Record<PresetType, SimulationSettings> = {
     trailPersistence: 1.0,
     externalForceAngle: 0,
     externalForceStrength: 0.5,   // Changed to 50%
-    boundaryBehavior: 'bounce',
+    boundaryBehavior: 'reflect',
     wanderEnabled: true,          // Changed to true
     wanderStrength: 0.5,          // Already at 50%
     wanderSpeed: 1.0,

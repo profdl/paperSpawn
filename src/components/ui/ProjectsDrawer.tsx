@@ -4,6 +4,7 @@ import { useProjects, Project } from '../../hooks/useProjects';
 import { useSimulation } from '../../contexts/SimulationContext';
 import { format } from 'date-fns';
 import { useState, useCallback } from 'react';
+import {  SimulationSettings } from '../../types';
 
 interface ProjectsDrawerProps {
   isOpen: boolean;
@@ -57,6 +58,24 @@ export default function ProjectsDrawer({ isOpen, onClose }: ProjectsDrawerProps)
   const loadProject = (project: Project) => {
     console.log('Loading project settings:', project.name);
     try {
+      // Validate that all required settings are present
+      const requiredSettings: (keyof SimulationSettings)[] = [
+        'speed',
+        'turnRate',
+        'sensorAngle',
+        'paintingModeEnabled',
+        'activeStateDuration'
+        // Add other required settings from ParticleControls
+      ];
+      
+      const missingSettings = requiredSettings.filter(setting => 
+        project.settings[setting] === undefined
+      );
+  
+      if (missingSettings.length > 0) {
+        throw new Error(`Missing required settings: ${missingSettings.join(', ')}`);
+      }
+  
       updateSettings(project.settings);
       console.log('Settings updated successfully');
       onClose();

@@ -410,12 +410,16 @@ calculateFlockingForces(
           newPosition.y = ((newPosition.y + height) % height);
           break;
           
-        case 'bounce':
-          if (newPosition.x < 0 || newPosition.x > width ||
-              newPosition.y < 0 || newPosition.y > height) {
-            // ... existing bounce code ...
-          }
-          break;
+          case 'reflect':
+            if (newPosition.x < 0 || newPosition.x > width) {
+              velocity.x *= -1; // Reverse horizontal velocity
+              newPosition.x = newPosition.x < 0 ? 0 : width;
+            }
+            if (newPosition.y < 0 || newPosition.y > height) {
+              velocity.y *= -1; // Reverse vertical velocity
+              newPosition.y = newPosition.y < 0 ? 0 : height;
+            }
+            break;
           
         case 'stop':
           if (newPosition.x < 0 || newPosition.x > width ||
