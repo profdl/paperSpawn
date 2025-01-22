@@ -3,13 +3,15 @@ import paper from 'paper';
 export class CanvasBackground {
   private background: paper.Path.Rectangle;
   private backgroundImage: paper.Raster | null = null;
+  private onCanvasResize?: (width: number, height: number) => void;
 
-  constructor(bounds: paper.Rectangle) {
+  constructor(bounds: paper.Rectangle, onCanvasResize?: (width: number, height: number) => void) {
     this.background = new paper.Path.Rectangle({
       rectangle: bounds,
       fillColor: 'white'
     });
     this.background.sendToBack();
+    this.onCanvasResize = onCanvasResize;
   }
 
   setColor(color: string): void {
@@ -31,15 +33,28 @@ export class CanvasBackground {
       position: paper.view.center
     });
 
-    // Once the image is loaded, scale it to fit the canvas
+    // Once the image is loaded, resize canvas and scale image
     this.backgroundImage.onLoad = () => {
-      const bounds = paper.view.bounds;
-      const scale = Math.min(
-        bounds.width / this.backgroundImage!.width,
-        bounds.height / this.backgroundImage!.height
-      );
+      // Get the image dimensions
+      const imageWidth = this.backgroundImage!.width;
+      const imageHeight = this.backgroundImage!.height;
 
-      this.backgroundImage!.scale(scale);
+      // Resize the canvas to match image dimensions
+      if (this.onCanvasResize) {
+        this.onCanvasResize(imageWidth, imageHeight);
+      }
+
+      // Update view bounds
+      paper.view.viewSize = new paper.Size(imageWidth, imageHeight);
+      
+      // Update background rectangle
+      this.background.remove();
+      this.background = new paper.Path.Rectangle({
+        rectangle: paper.view.bounds,
+        fillColor: this.background.fillColor
+      });
+
+      // Position the image
       this.backgroundImage!.position = paper.view.center;
       this.backgroundImage!.opacity = 1;
       this.backgroundImage!.sendToBack();

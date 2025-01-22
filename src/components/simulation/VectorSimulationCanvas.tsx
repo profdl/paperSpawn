@@ -1,8 +1,13 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useState } from 'react';
 import paper from 'paper';
 import { useSimulation } from '../../contexts/SimulationContext';
 import { useTool } from '../../contexts/ToolContext';
 import { VectorParticleSystem } from './VectorParticleSystem';
+
+interface CanvasSize {
+  width: number;
+  height: number;
+}
 
 export default function VectorSimulationCanvas() {
   const { settings, isPaused, systemRef } = useSimulation();
@@ -13,6 +18,8 @@ export default function VectorSimulationCanvas() {
   const animationFrameRef = useRef<number>();
   const isInitializedRef = useRef(false);
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
+  const [canvasSize, setCanvasSize] = useState<CanvasSize>({ width: 500, height: 400 });
+
   const getViewPoint = (e: React.MouseEvent<HTMLCanvasElement>): paper.Point => {
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return new paper.Point(0, 0);
@@ -41,12 +48,21 @@ export default function VectorSimulationCanvas() {
     const canvas = canvasRef.current;
     if (!canvas || isInitializedRef.current) return;
     
-    // Initialize with fixed size
-    canvas.width = 500;
-    canvas.height = 400;
+    // Initialize with current size
+    canvas.width = canvasSize.width;
+    canvas.height = canvasSize.height;
 
     // Initialize Paper.js system
-    systemRef.current = new VectorParticleSystem(canvas);
+    const handleResize = (width: number, height: number) => {
+      setCanvasSize({ width, height });
+      if (canvas) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+    };
+
+    // Initialize Paper.js system with canvas resize callback
+    systemRef.current = new VectorParticleSystem(canvas, handleResize);
     isInitializedRef.current = true;
 
     // Force initial render
@@ -59,6 +75,7 @@ export default function VectorSimulationCanvas() {
       isInitializedRef.current = false;
     };
   }, []);
+
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (currentTool === 'none' || !systemRef.current) return;
@@ -210,8 +227,11 @@ export default function VectorSimulationCanvas() {
     >
       <canvas
         ref={canvasRef}
-        className="rounded-lg w-full h-full"
-        style={{ width: '500px', height: '400px' }}
+        className="rounded-lg"
+        style={{ 
+          width: `${canvasSize.width}px`, 
+          height: `${canvasSize.height}px` 
+        }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}

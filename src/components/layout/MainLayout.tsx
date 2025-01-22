@@ -16,24 +16,19 @@ export default function MainLayout() {
   return (
     <SimulationProvider>
       <ToolProvider>
-        <div className="min-h-screen bg-black relative">
-        <Navbar 
-  showUI={showUI} 
-  onToggleUI={() => setShowUI(!showUI)}
-  onSave={() => setShowSaveModal(true)}
-  onOpenProjects={() => setShowProjectsDrawer(true)}
-/>
+      <div className="min-h-screen bg-black relative">
+          <Navbar 
+            showUI={showUI} 
+            onToggleUI={() => setShowUI(!showUI)}
+            onSave={() => setShowSaveModal(true)}
+            onOpenProjects={() => setShowProjectsDrawer(true)}
+          />
           <div className="pt-12 pl-4">
-            <div 
-              className="relative bg-black/10 rounded-lg"
-              style={{ 
-                width: '500px',
-                height: '400px'
-              }}
-            >
+            <div className="relative bg-black/10 rounded-lg">
               <VectorSimulationCanvas />
             </div>
           </div>
+  
           {showUI && (
             <>
               <ControlPanel />

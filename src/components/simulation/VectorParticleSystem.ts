@@ -5,14 +5,19 @@ import { ParticleManager } from './particleManager';
 import { EraserTool } from './eraserTool';
 import { CanvasBackground } from './canvasBackground';
 
+
 export class VectorParticleSystem {
   private project: paper.Project;
   private rectangleManager: RectangleManager;
   private particleManager: ParticleManager;
   private eraserTool: EraserTool;
   private background: CanvasBackground;
+  private onResizeCallback?: (width: number, height: number) => void;
 
-  constructor(canvas: HTMLCanvasElement) {
+
+  constructor(canvas: HTMLCanvasElement, onResize?: (width: number, height: number) => void) {
+    this.onResizeCallback = onResize;
+    
     paper.setup(canvas);
     paper.view.viewSize = new paper.Size(500, 400);
     this.project = paper.project;
@@ -20,10 +25,21 @@ export class VectorParticleSystem {
     this.rectangleManager = new RectangleManager();
     this.particleManager = new ParticleManager(this.rectangleManager);
     this.eraserTool = new EraserTool();
-    this.background = new CanvasBackground(this.project.view.bounds);
+    this.background = new CanvasBackground(
+      this.project.view.bounds,
+      (width, height) => {
+        // Update Paper.js view size
+        paper.view.viewSize = new paper.Size(width, height);
+        
+        // Call the external resize callback if provided
+        if (this.onResizeCallback) {
+          this.onResizeCallback(width, height);
+        }
+      }
+    );
     
     paper.view.update();
-}
+  }
 
   setBackgroundImage(imageUrl: string): void {
     this.background.setImage(imageUrl);
