@@ -31,9 +31,8 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
   const handleRespawn = useCallback(() => {
     if (systemRef.current) {
   // Get the actual canvas dimensions
-  const dimensions = systemRef.current.getCanvasDimensions();
-  const canvasWidth = dimensions.width;
-  const canvasHeight = dimensions.height;
+  const canvasWidth = 500;
+  const canvasHeight = 400;
   
       
       systemRef.current.clearParticlesOnly();

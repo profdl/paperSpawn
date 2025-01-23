@@ -17,6 +17,16 @@ export class VectorParticleSystem {
     this.obstacleManager.clearObstacles();
   }
 
+  getViewDimensions(): { width: number; height: number } {
+    return {
+        width: paper.view.viewSize.width,
+        height: paper.view.viewSize.height
+    };
+}
+spawnParticlesWithCurrentDimensions(count: number, pattern: string): void {
+  const { width, height } = this.getViewDimensions();
+  this.particleManager.spawnParticles(count, pattern, width, height);
+}
   constructor(canvas: HTMLCanvasElement, onResize?: (width: number, height: number) => void) {
     this.onResizeCallback = onResize;
     
@@ -27,6 +37,7 @@ export class VectorParticleSystem {
     this.obstacleManager = new obstacleManager();
     this.particleManager = new ParticleManager(this.obstacleManager);
     this.eraserTool = new EraserTool();
+   
     this.background = new CanvasBackground(
       this.project.view.bounds,
       (width, height) => {

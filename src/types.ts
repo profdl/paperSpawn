@@ -45,7 +45,7 @@ export type PresetType = 'start' ;
 
 export const presets: Record<PresetType, SimulationSettings> = {
   start: {
-    count: 100,
+    count: 108,
     particleSize: 2.5,
     speed: 0.5,                  
     flockingEnabled: true,

@@ -46,24 +46,7 @@ export class ParticleManager {
     });
   }
 
-  spawnParticles(count: number, pattern: string, width: number, height: number): void {
-    this.clear();
 
-    switch (pattern) {
-      case 'scatter':
-        this.spawnScatterPattern(count, width, height);
-        break;
-      case 'grid':
-        this.spawnGridPattern(count, width, height);
-        break;
-      case 'circle':
-        this.spawnCirclePattern(count, width, height);
-        break;
-      case 'point':
-        this.spawnPointPattern(count, width, height);
-        break;
-    }
-  }
 
   createParticle(x: number, y: number, particleColor: string = '#000000', trailColor: string = '#8b8680'): paper.Group | null {
     const position = new paper.Point(x, y);
@@ -105,85 +88,6 @@ export class ParticleManager {
   }
 
 
-  private spawnScatterPattern(count: number, width: number, height: number): void {
-    let created = 0;
-    let attempts = 0;
-    const maxAttempts = count * 20; // Increase max attempts to give more chances
-
-    while (created < count && attempts < maxAttempts) {
-      // Try to find a position not inside any obstacle
-      let x = Math.random() * width;
-      let y = Math.random() * height;
-
-      const particle = this.createParticle(x, y);
-      if (particle) {
-        created++;
-      }
-      attempts++;
-
-      // If we're struggling to place particles, start trying with more spread
-      if (attempts > count * 10) {
-        // Add some padding to avoid edges
-        const padding = 20;
-        x = padding + Math.random() * (width - padding * 2);
-        y = padding + Math.random() * (height - padding * 2);
-      }
-    }
-
-    console.log(`Spawned ${created}/${count} particles in ${attempts} attempts`);
-  }
-
-  private spawnGridPattern(count: number, width: number, height: number): void {
-    const cols = Math.ceil(Math.sqrt(count * width / height));
-    const rows = Math.ceil(count / cols);
-    const cellWidth = width / cols;
-    const cellHeight = height / rows;
-
-    let created = 0;
-    for (let row = 0; row < rows && created < count; row++) {
-      for (let col = 0; col < cols && created < count; col++) {
-        const x = (col + 0.5) * cellWidth;
-        const y = (row + 0.5) * cellHeight;
-        const particle = this.createParticle(x, y);
-        if (particle) created++;
-      }
-    }
-  }
-
-  private spawnCirclePattern(count: number, width: number, height: number): void {
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const radius = Math.min(width, height) * 0.4;
-    let created = 0;
-    let attempts = 0;
-    const maxAttempts = count * 3;
-
-    while (created < count && attempts < maxAttempts) {
-      const angle = (attempts / count) * Math.PI * 2;
-      const x = centerX + Math.cos(angle) * radius;
-      const y = centerY + Math.sin(angle) * radius;
-      const particle = this.createParticle(x, y);
-      if (particle) created++;
-      attempts++;
-    }
-  }
-
-  private spawnPointPattern(count: number, width: number, height: number): void {
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const spread = 5;
-    let created = 0;
-    let attempts = 0;
-    const maxAttempts = count * 3;
-
-    while (created < count && attempts < maxAttempts) {
-      const x = centerX + (Math.random() - 0.5) * spread;
-      const y = centerY + (Math.random() - 0.5) * spread;
-      const particle = this.createParticle(x, y);
-      if (particle) created++;
-      attempts++;
-    }
-  }
 
   calculateFlockingForces(
     particle: paper.Group,

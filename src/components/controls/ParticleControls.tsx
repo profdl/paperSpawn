@@ -61,7 +61,7 @@ export default function ParticleControls() {
               value={settings.activeStateDuration}
               onChange={(value) => updateSetting('activeStateDuration', value)}
               min={0}
-              max={10000}
+              max={50000}
               step={100}
               formatValue={(v) => `${v}ms`}
             />
