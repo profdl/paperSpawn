@@ -6,22 +6,17 @@ import {
   Pause,
   Play,
   Trash2,
-  Trash,
   FileDown,
-  Square,
-  MousePointer,
   Save,
   FolderOpen,
-  ImagePlus,
-  Pen,
   Palette,
-  CloudHail
+  CloudHail,
+  MenuIcon,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import AuthModal from "../ui/AuthModal";
 import { useSimulation } from "../../contexts/SimulationContext";
 import { useTool } from "../../contexts/ToolContext";
-import paper from "paper";
 import { useProjects } from "../../hooks/useProjects";
 import { SimulationSettings } from "../../types";
 import AppearanceControls from "../controls/AppearanceControls";
@@ -32,6 +27,8 @@ interface NavbarProps {
   onToggleUI: () => void;
   onToggleAppearance: () => void;
   onOpenProjects: () => void;
+  showMenu: boolean;
+  setShowMenu: (show: boolean) => void;
 }
 
 export default function Navbar({
@@ -39,6 +36,8 @@ export default function Navbar({
   onToggleUI,
   onToggleAppearance,
   onOpenProjects,
+  showMenu,
+  setShowMenu,
 }: NavbarProps) {
   const { user, signOut } = useAuth();
   const { isPaused, setIsPaused, systemRef, settings, handleRespawn } =
@@ -50,11 +49,6 @@ export default function Navbar({
   const [showAppearancePanel, setShowAppearancePanel] = React.useState(false);
   const appearanceButtonRef = React.useRef<HTMLButtonElement>(null);
   const appearancePanelRef = React.useRef<HTMLDivElement>(null);
-
-  const handleClearObstacles = () => {
-    if (!systemRef.current) return;
-    systemRef.current.clearObstacles(); // Using the public method instead
-  };
 
   const handleSave = async () => {
     if (!user) {
@@ -111,18 +105,6 @@ export default function Navbar({
     }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !systemRef.current) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const imageUrl = event.target?.result as string;
-      systemRef.current?.setBackgroundImage(imageUrl);
-    };
-    reader.readAsDataURL(file);
-  };
-
   const handleClearParticles = () => {
     if (!systemRef.current) return;
     systemRef.current.clearParticlesOnly();
@@ -137,23 +119,6 @@ export default function Navbar({
     }
   };
 
-  const handleRectangleClick = () => {
-    if (!systemRef.current) return;
-
-    // Calculate center point of canvas
-    const centerX = 500 / 2; // canvas width / 2
-    const centerY = 400 / 2; // canvas height / 2
-
-    // Create rectangle at center
-    systemRef.current.startRectangle(centerX, centerY);
-
-    // Switch to select tool and select the new rectangle
-    setTool("select");
-
-    // Select the newly created rectangle
-    const point = new paper.Point(centerX, centerY);
-    systemRef.current.selectItemAt(point);
-  };
   const handleDownload = () => {
     if (!systemRef.current) return;
 
@@ -219,6 +184,14 @@ export default function Navbar({
               <span className="text-white font-mono text-sm">
                 Field Conditions
               </span>
+              {/* Hamburger Menu Button */}
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                className="p-1.5 rounded hover:bg-white/10 transition-colors"
+              >
+                <MenuIcon className="w-4 h-4 text-white" />
+              </button>
+
               <div className="flex items-center gap-1">
                 {/* Drawing Tools */}
                 <button
@@ -230,21 +203,21 @@ export default function Navbar({
                   }
                   title="Paint Particles (P)"
                 >
-                  <Wand className="w-4 h-4 text-cyan-500" />
-                  <span className="text-xs text-cyan-500">Spawn</span>
+                  <Wand className="w-4 h-4 " />
+                  <span className="text-xs ">Spawn</span>
                 </button>
 
                 <button
                   onClick={handleRespawn}
-                  className="p-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-1"
+                  className="p-1.5 rounded hover:bg-cyan-900  bg-white/10 transition-colors flex items-center gap-1"
                   title="Respawn Particles"
                 >
-                  <CloudHail className="w-4 h-4 text-cyan-500" />
-                  <span className="text-xs text-cyan-500">Batch Spawn</span>
+                  <CloudHail className="w-4 h-4 " />
+                  <span className="text-xs ">Batch Spawn</span>
                 </button>
 
-
-                {/* Divider */}<div className="w-px bg-white/20 mx-1" />
+                {/* Divider */}
+                <div className="w-px bg-white/20 mx-1" />
 
                 <button
                   className={`p-1.5 rounded hover:bg-white/10 transition-colors ${
@@ -255,7 +228,7 @@ export default function Navbar({
                   }
                   title="Erase Particles (E)"
                 >
-                  <Eraser className="w-4 h-4 text-cyan-500" />
+                  <Eraser className="w-4 h-4 " />
                 </button>
 
                 <button
@@ -263,10 +236,8 @@ export default function Navbar({
                   onClick={handleClearParticles}
                   title="Clear Particles"
                 >
-                  <Trash2 className="w-4 h-4 text-cyan-500" />
+                  <Trash2 className="w-4 h-4 " />
                 </button>
-
-                {/*  UI Toggle */}
 
                 <button
                   onClick={onToggleUI}
@@ -274,92 +245,15 @@ export default function Navbar({
                   title={showUI ? "Hide UI" : "Show UI"}
                 >
                   {showUI ? (
-                    <Settings className="w-4 h-4 text-cyan-500" />
+                    <Settings className="w-4 h-4 " />
                   ) : (
                     <Settings className="w-4 h-4 text-cyan-800" />
                   )}
                 </button>
 
-                {/* Divider */}<div className="w-px bg-white/20 mx-1" />
-                {/* Divider */}
-                <div className="w-px bg-white/20 mx-1" />
-                <button
-                  className={`p-1.5 rounded hover:bg-white/10 transition-colors ${
-                    currentTool === "select" ? "bg-white/20" : ""
-                  }`}
-                  onClick={() =>
-                    setTool(currentTool === "select" ? "none" : "select")
-                  }
-                  title="Select (V)"
-                >
-                  <MousePointer className="w-4 h-4  text-red-500" />
-                </button>
-
-                <button
-                  className={`p-1.5 rounded hover:bg-white/10 transition-colors ${
-                    currentTool === "freehand" ? "bg-white/20" : ""
-                  }`}
-                  onClick={() =>
-                    setTool(currentTool === "freehand" ? "none" : "freehand")
-                  }
-                  title="Draw Boundary (B)"
-                >
-                  <Pen className="w-4 h-4 text-red-500" />
-                </button>
-
-                <button
-                  className={`p-1.5 rounded hover:bg-white/10 transition-colors ${
-                    currentTool === "rectangle" ? "bg-white/20" : ""
-                  }`}
-                  onClick={handleRectangleClick}
-                  title="Draw Rectangle (R)"
-                >
-                  <Square className="w-4 h-4 text-red-500" />
-                </button>
-                <label
-                  className="p-1.5 rounded hover:bg-white/10 transition-colors cursor-pointer"
-                  title="Upload Background Image"
-                >
-                  <ImagePlus className="w-4 h-4  text-red-500" />
-                  <input
-                    type="file"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                  />
-                </label>
-                <button
-                  className="p-1.5 rounded hover:bg-white/10 transition-colors"
-                  onClick={handleClearObstacles}
-                  title="Clear Obstacles"
-                >
-                  <Trash className="w-4 h-4 text-red-500" />
-                </button>
                 {/* Divider */}
                 <div className="w-px bg-white/20 mx-1" />
 
-                {/* Project Management */}
-                <button
-                  className="p-1.5 rounded hover:bg-white/10 transition-colors"
-                  onClick={handleOpenProjects}
-                  title={user ? "Open Projects" : "Sign in to open projects"}
-                >
-                  <FolderOpen className="w-4 h-4" />
-                </button>
-                <button
-                  className="p-1.5 rounded hover:bg-white/10 transition-colors"
-                  onClick={handleSave}
-                  title={user ? "Save Project" : "Sign in to save project"}
-                >
-                  <Save className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={handleDownload}
-                  className="p-1.5 rounded hover:bg-white/10 transition-colors"
-                  title="Export as SVG"
-                >
-                  <FileDown className="w-4 h-4" />
-                </button>
                 {/* Simulation Controls */}
                 <button
                   className="p-1.5 rounded hover:bg-white/10 transition-colors"
@@ -374,60 +268,94 @@ export default function Navbar({
                 </button>
 
                 <div className="relative">
-          <button
-            ref={appearanceButtonRef}
-            onMouseEnter={() => setShowAppearancePanel(true)}
-            onClick={onToggleAppearance}
-            className="p-1.5 rounded hover:bg-white/10 transition-colors"
-            title="Appearance Settings"
-          >
-            <Palette className="w-4 h-4" />
-          </button>
-
-          {showAppearancePanel && (
-            <div
-              ref={appearancePanelRef}
-              className="fixed w-80 bg-black/90 backdrop-blur-sm rounded-lg shadow-lg border border-white/10"
-              style={{
-                top: `${panelPosition.top}px`,
-                left: `${panelPosition.left}px`,
-              }}
-              onMouseEnter={() => setShowAppearancePanel(true)}
-              onMouseLeave={() => setShowAppearancePanel(false)}
-            >
-              <div className="p-4">
-                <AppearanceControls />
+                  <button
+                    ref={appearanceButtonRef}
+                    onMouseEnter={() => setShowAppearancePanel(true)}
+                    onClick={onToggleAppearance}
+                    className="p-1.5 rounded hover:bg-white/10 transition-colors"
+                    title="Appearance Settings"
+                  >
+                    <Palette className="w-4 h-4" />
+                  </button>
+                  {showAppearancePanel && (
+                    <div
+                      ref={appearancePanelRef}
+                      className="fixed w-80 bg-black/90 backdrop-blur-sm rounded-lg shadow-lg border border-white/10"
+                      style={{
+                        top: `${panelPosition.top}px`,
+                        left: `${panelPosition.left}px`,
+                      }}
+                      onMouseEnter={() => setShowAppearancePanel(true)}
+                      onMouseLeave={() => setShowAppearancePanel(false)}
+                    >
+                      <div className="p-4">
+                        <AppearanceControls />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          )}
-        </div>
-                </div>
 
+            {/* Right Side Controls */}
+            <div className="flex items-center gap-4">
+              {user ? (
+                <button
+                  onClick={signOut}
+                  className="text-xs text-white/70 hover:text-white transition-colors"
+                >
+                  Sign Out
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowAuthModal(true)}
+                  className="text-xs text-white/70 hover:text-white transition-colors"
+                >
+                  Sign In
+                </button>
+              )}
             </div>
-         
-
-          {/* Right Side Controls */}
-          <div className="flex items-center gap-4">
-            {/* Auth */}
-            {user ? (
-              <button
-                onClick={signOut}
-                className="text-xs text-white/70 hover:text-white transition-colors"
-              >
-                Sign Out
-              </button>
-            ) : (
-              <button
-                onClick={() => setShowAuthModal(true)}
-                className="text-xs text-white/70 hover:text-white transition-colors"
-              >
-                Sign In
-              </button>
-            )}
           </div>
         </div>
-        </div>
       </nav>
+
+      {/* Menu Dropdown */}
+      {showMenu && (
+        <div className="fixed top-10 left-0 z-50 w-48 bg-black/90 backdrop-blur-sm border border-white/10 rounded-br-lg shadow-lg">
+          <div className="py-2">
+            <button
+              className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/10 flex items-center gap-2"
+              onClick={() => {
+                handleOpenProjects();
+                setShowMenu(false);
+              }}
+            >
+              <FolderOpen className="w-4 h-4" />
+              Open Projects
+            </button>
+            <button
+              className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/10 flex items-center gap-2"
+              onClick={() => {
+                handleSave();
+                setShowMenu(false);
+              }}
+            >
+              <Save className="w-4 h-4" />
+              Save Project
+            </button>
+            <button
+              className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/10 flex items-center gap-2"
+              onClick={() => {
+                handleDownload();
+                setShowMenu(false);
+              }}
+            >
+              <FileDown className="w-4 h-4" />
+              Export as SVG
+            </button>
+          </div>
+        </div>
+      )}
 
       <AuthModal
         isOpen={showAuthModal}
