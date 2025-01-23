@@ -47,7 +47,7 @@ export default function ParticleControls() {
          
         </div>
           <div className="control">
-        <label className="inline-block w-[80px] text-[10px]">Paint Mode</label>
+        <label className="inline-block w-[80px] text-[10px]">Trails</label>
         <input
           type="checkbox"
           checked={settings.paintingModeEnabled}

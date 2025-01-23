@@ -18,8 +18,8 @@ export default function MainLayout() {
   return (
     <SimulationProvider>
       <ToolProvider>
-        <div className="min-h-screen bg-black relative">
-          <div className="z-50">
+      <div className="min-h-screen bg-black relative">
+      <div className="z-50">
             <Navbar 
               showUI={showControlPanel} 
               onToggleUI={() => setShowControlPanel(!showControlPanel)}
@@ -42,7 +42,9 @@ export default function MainLayout() {
           </div>
   
           {showControlPanel && (
-            <ControlPanel />
+            <div className="absolute bottom-[100px] right-0 top-10">
+              <ControlPanel />
+            </div>
           )}
 
           <SaveProjectModal
