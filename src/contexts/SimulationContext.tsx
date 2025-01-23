@@ -16,7 +16,7 @@ interface SimulationContextType {
 const SimulationContext = createContext<SimulationContextType | undefined>(undefined);
 
 export function SimulationProvider({ children }: { children: React.ReactNode }) {
-  const [settings, setSettings] = useState<SimulationSettings>(presets.fish);
+  const [settings, setSettings] = useState<SimulationSettings>(presets.start);
   const [isPaused, setIsPaused] = useState(false);
   const systemRef = useRef<VectorParticleSystem>();
 
@@ -30,10 +30,11 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
 
   const handleRespawn = useCallback(() => {
     if (systemRef.current) {
-      const { width, height } = systemRef.current.getCanvasDimensions();
-      // Ensure we're using the correct fixed dimensions
-      const canvasWidth = 500;  // Match canvas.width
-      const canvasHeight = 400; // Match canvas.height
+  // Get the actual canvas dimensions
+  const dimensions = systemRef.current.getCanvasDimensions();
+  const canvasWidth = dimensions.width;
+  const canvasHeight = dimensions.height;
+  
       
       systemRef.current.clearParticlesOnly();
       

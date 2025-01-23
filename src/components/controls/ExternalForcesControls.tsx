@@ -24,6 +24,17 @@ export default function CanvasBehaviorsControls() {
             />
           </div>
           <div className="control">
+            <label className="inline-block w-[80px] text-[10px]">Randomize</label>
+            <DraggableNumberInput
+              value={settings.externalForceAngleRandomize}
+              onChange={(value) => updateSetting('externalForceAngleRandomize', value)}
+              min={0}
+              max={180}
+              step={1}
+              formatValue={(v) => `±${v}°`}
+            />
+          </div>
+          <div className="control">
             <label className="inline-block w-[80px] text-[10px]">Strength</label>
             <DraggableNumberInput
               value={settings.externalForceStrength}

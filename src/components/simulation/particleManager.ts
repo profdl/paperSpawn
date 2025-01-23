@@ -276,15 +276,30 @@ export class ParticleManager {
     return wanderForce.length > 0 ? wanderForce.normalize() : wanderForce;
   }
 
-  calculateExternalForce(settings: SimulationSettings): paper.Point {
-    // Use angle directly in degrees - Paper.js handles the conversion internally
-    const angle = settings.externalForceAngle || 0;
+ calculateExternalForce(settings: SimulationSettings, particle: paper.Group): paper.Point {
+    // Get base angle and randomization amount
+    const baseAngle = settings.externalForceAngle || 0;
+    const randomizeRange = settings.externalForceAngleRandomize || 0;
     const strength = settings.externalForceStrength || 0;
+  
+    // Use particle's ID to get a consistent random offset for this particle
+    let randomOffset;
+    if (!particle.data.externalForceAngleOffset) {
+      // Generate and store a random offset for this particle if it doesn't have one
+      randomOffset = (Math.random() * 2 - 1) * randomizeRange;
+      particle.data.externalForceAngleOffset = randomOffset;
+    } else {
+      // Use the stored offset to maintain consistent direction
+      randomOffset = particle.data.externalForceAngleOffset;
+    }
 
+    // Calculate final angle by adding the random offset to the base angle
+    const finalAngle = baseAngle + randomOffset;
+  
     // Create a vector using degrees - Paper.js Point constructor accepts degrees by default
     return new paper.Point({
       length: strength * 10, // Scale the strength to make it more noticeable
-      angle: angle
+      angle: finalAngle
     });
   }
 
@@ -411,13 +426,12 @@ export class ParticleManager {
 
       // External force (always applied regardless of bounce cooldown)
       if (settings.externalForceStrength > 0) {
-        const externalForce = this.calculateExternalForce(settings);
+        const externalForce = this.calculateExternalForce(settings, particle);
         if (externalForce.length > 0) {
           finalForce = finalForce.add(externalForce.multiply(settings.externalForceStrength));
           totalWeight += settings.externalForceStrength;
         }
       }
-
       // Calculate weighted average if there are any forces
       if (totalWeight > 0) {
         finalForce = finalForce.divide(totalWeight);
