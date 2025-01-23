@@ -22,7 +22,7 @@ import { useSimulation } from "../../contexts/SimulationContext";
 import { useTool } from "../../contexts/ToolContext";
 import paper from "paper";
 import { useProjects } from "../../hooks/useProjects";
-import { settings } from "paper/dist/paper-core";
+import { SimulationSettings } from "../../types";
 
 interface NavbarProps {
   showUI: boolean;
@@ -36,10 +36,11 @@ export default function Navbar({
   onOpenProjects,
 }: NavbarProps) {
   const { user, signOut } = useAuth();
-  const { isPaused, setIsPaused, systemRef } = useSimulation();
+  const { isPaused, setIsPaused, systemRef, settings } = useSimulation(); // Add settings here
   const { currentTool, setTool } = useTool();
   const [showAuthModal, setShowAuthModal] = React.useState(false);
   const { saveProject } = useProjects();
+  
   const handleClearObstacles = () => {
     if (!systemRef.current) return;
     systemRef.current.clearObstacles();  // Using the public method instead
@@ -50,12 +51,49 @@ export default function Navbar({
       setShowAuthModal(true);
       return;
     }
-
+  
     if (!systemRef.current) return;
-
+  
     try {
+      // Get all current settings from the simulation
+      const currentSettings: SimulationSettings = {
+        count: settings.count,
+        particleSize: settings.particleSize,
+        speed: settings.speed,
+        flockingEnabled: settings.flockingEnabled,
+        separation: settings.separation,
+        cohesion: settings.cohesion,
+        alignment: settings.alignment,
+        separationDistance: settings.separationDistance,
+        cohesionDistance: settings.cohesionDistance,
+        alignmentDistance: settings.alignmentDistance,
+        slimeBehavior: settings.slimeBehavior,
+        sensorAngle: settings.sensorAngle,
+        sensorDistance: settings.sensorDistance,
+        turnRate: settings.turnRate,
+        spawnPattern: settings.spawnPattern,
+        backgroundColor: settings.backgroundColor,
+        particleColor: settings.particleColor,
+        trailColor: settings.trailColor,
+        chemicalDeposit: settings.chemicalDeposit,
+        diffusionRate: settings.diffusionRate,
+        decayRate: settings.decayRate,
+        paintingModeEnabled: settings.paintingModeEnabled,
+        activeStateDuration: settings.activeStateDuration,
+        freezingDuration: settings.freezingDuration,
+        trailPersistence: settings.trailPersistence,
+        externalForceAngle: settings.externalForceAngle,
+        externalForceAngleRandomize: settings.externalForceAngleRandomize,
+        externalForceStrength: settings.externalForceStrength,
+        boundaryBehavior: settings.boundaryBehavior,
+        wanderEnabled: settings.wanderEnabled,
+        wanderStrength: settings.wanderStrength,
+        wanderSpeed: settings.wanderSpeed,
+        wanderRadius: settings.wanderRadius
+      };
+  
       const svgContent = systemRef.current.exportSVG();
-      await saveProject("Untitled", svgContent, settings);
+      await saveProject("Untitled", svgContent, currentSettings);
       onOpenProjects();
     } catch (error) {
       console.error("Error saving project:", error);

@@ -58,14 +58,40 @@ export default function ProjectsDrawer({ isOpen, onClose }: ProjectsDrawerProps)
   const loadProject = (project: Project) => {
     console.log('Loading project settings:', project.name);
     try {
-      // Validate that all required settings are present
+      // Update required settings check to match SimulationSettings interface
       const requiredSettings: (keyof SimulationSettings)[] = [
+        'count',
+        'particleSize',
         'speed',
-        'turnRate',
+        'flockingEnabled',
+        'separation',
+        'cohesion',
+        'alignment',
+        'separationDistance',
+        'cohesionDistance',
+        'alignmentDistance',
+        'slimeBehavior',
         'sensorAngle',
+        'sensorDistance',
+        'turnRate',
+        'spawnPattern',
+        'backgroundColor',
+        'particleColor',
+        'trailColor',
+        'chemicalDeposit',
+        'diffusionRate',
+        'decayRate',
         'paintingModeEnabled',
-        'activeStateDuration'
-        // Add other required settings from ParticleControls
+        'activeStateDuration',
+        'freezingDuration',
+        'trailPersistence',
+        'externalForceAngle',
+        'externalForceStrength',
+        'boundaryBehavior',
+        'wanderEnabled',
+        'wanderStrength',
+        'wanderSpeed',
+        'wanderRadius'
       ];
       
       const missingSettings = requiredSettings.filter(setting => 
