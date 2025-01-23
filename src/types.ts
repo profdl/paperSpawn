@@ -43,6 +43,12 @@ export interface SimulationSettings {
 
 export type PresetType = 'start' ;
 
+export interface EraserProperties {
+  size: number;
+  eraseParticles: boolean;
+  eraseTrails: boolean;
+}
+
 export const presets: Record<PresetType, SimulationSettings> = {
   start: {
     count: 108,

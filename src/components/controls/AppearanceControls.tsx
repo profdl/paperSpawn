@@ -48,9 +48,10 @@ function generateHarmoniousColors() {
   return colors;
 }
 
-export default function AppearanceControls() {
+export default function AppearanceControls({ style }: { style?: React.CSSProperties }) {
   const { settings, updateSetting } = useSimulation();
   const { systemRef } = useSimulation();
+
 
   const handleRandomizeColors = () => {
     const colors = generateHarmoniousColors();
@@ -60,7 +61,7 @@ export default function AppearanceControls() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" style={style}>
       <div className="control">
         <label className="block text-[10px] uppercase tracking-wider mb-2 text-white/60">
           Color Schemes

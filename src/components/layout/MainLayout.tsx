@@ -9,31 +9,32 @@ import { ToolProvider } from '../../contexts/ToolContext';
 import VectorSimulationCanvas from '../simulation/VectorSimulationCanvas';
 
 export default function MainLayout() {
-  const [showUI, setShowUI] = useState(true);
+  // Separate state for controls panel visibility
+  const [showControlPanel, setShowControlPanel] = useState(true);
+  const [showAppearance, setShowAppearance] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showProjectsDrawer, setShowProjectsDrawer] = useState(false);
 
   return (
     <SimulationProvider>
       <ToolProvider>
-      <div className="min-h-screen bg-black relative">
+        <div className="min-h-screen bg-black relative">
           <Navbar 
-            showUI={showUI} 
-            onToggleUI={() => setShowUI(!showUI)}
-            onSave={() => setShowSaveModal(true)}
+            showUI={showControlPanel} 
+            showAppearance={showAppearance}
+            onToggleUI={() => setShowControlPanel(!showControlPanel)}
+            onToggleAppearance={() => setShowAppearance(!showAppearance)}
             onOpenProjects={() => setShowProjectsDrawer(true)}
           />
-          <div className="pt-12 pl-4">
+          <ToolProperties />
+          <div className="pt-20 pl-4"> 
             <div className="relative bg-black/10 rounded-lg">
               <VectorSimulationCanvas />
             </div>
           </div>
   
-          {showUI && (
-            <>
-              <ControlPanel />
-              <ToolProperties />
-            </>
+          {showControlPanel && (
+            <ControlPanel />
           )}
 
           <SaveProjectModal

@@ -48,21 +48,8 @@ export default function ControlPanel() {
           <CanvasBehaviorsControls />
         </AccordionSection>
 
-        <AccordionSection
-          title="Spawn Properties"
-          isOpen={openSections.has('spawn')}
-          onToggle={() => toggleSection('spawn')}
-        >
-          <SpawnControls />
-        </AccordionSection>
 
-        <AccordionSection
-          title="Appearance"
-          isOpen={openSections.has('appearance')}
-          onToggle={() => toggleSection('appearance')}
-        >
-          <AppearanceControls />
-        </AccordionSection>
+
       </div>
     </div>
   );
