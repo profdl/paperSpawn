@@ -1,3 +1,5 @@
+export type ParticleState = 'active' | 'frozen' | 'stopped';
+
 export interface Particle {
   x: number;
   y: number;
@@ -5,6 +7,16 @@ export interface Particle {
   vy: number;
   life: number;
   color: string;
+  state: ParticleState;
+  createdAt: number;
+  externalForceAngleOffset?: number;
+  bounceCooldown?: number;
+}
+
+export interface FlockingForces {
+  separation: paper.Point;
+  cohesion: paper.Point;
+  alignment: paper.Point;
 }
 
 export interface ParticlePreset {
@@ -19,5 +31,31 @@ export interface ParticlePreset {
     particleSpread: number;
     particleColor: string;
     particleShape: string;
+    externalForceAngle?: number;
+    externalForceAngleRandomize?: number;
+    externalForceStrength?: number;
+    separationStrength?: number;
+    cohesionStrength?: number;
+    alignmentStrength?: number;
+    flockingRadius?: number;
+    maxSpeed?: number;
+    friction?: number;
+    bounce?: boolean;
+    wrap?: boolean;
   };
+}
+
+export interface SimulationSettings {
+  externalForceAngle?: number;
+  externalForceAngleRandomize?: number;
+  externalForceStrength?: number;
+  separationStrength?: number;
+  cohesionStrength?: number;
+  alignmentStrength?: number; 
+  flockingRadius?: number;
+  maxSpeed?: number;
+  friction?: number;
+  particleLifetime?: number;
+  bounce?: boolean;
+  wrap?: boolean;
 }
