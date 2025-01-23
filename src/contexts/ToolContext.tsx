@@ -7,11 +7,6 @@ interface EraserProperties {
   size: number;
 }
 
-interface ToolState {
-  currentTool: Tool;
-  eraserProperties: EraserProperties;
-}
-
 type ToolType = 'none' | 'paint' | 'erase' | 'rectangle' | 'select' | 'freehand';
 
 interface ToolContextType {
@@ -22,6 +17,7 @@ interface ToolContextType {
   };
   updateEraserProperties: (props: Partial<EraserProperties>) => void;
 }
+
 const ToolContext = createContext<ToolContextType | undefined>(undefined);
 
 export function ToolProvider({ children }: { children: React.ReactNode }) {
