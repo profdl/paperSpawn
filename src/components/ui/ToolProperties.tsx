@@ -1,3 +1,4 @@
+import React from "react";
 import { CloudHail } from "lucide-react";
 import DraggableNumberInput from "./DraggableNumberInput";
 import { useTool } from "../../contexts/ToolContext";
@@ -14,6 +15,10 @@ export default function ToolProperties() {
   const handleEraserUpdate = (update: Partial<EraserProperties>) => {
     updateEraserProperties(update);
   };
+
+  React.useEffect(() => {
+    // console.log("Settings in ToolProperties:", settings);
+  }, [settings]);
 
   return (
     <div className="fixed top-10 left-40 right-0 h-8 bg-black/70 z-40 flex items-center justify-left">
@@ -33,6 +38,22 @@ export default function ToolProperties() {
 
       {currentTool === "paint" && (
         <div className="flex items-center gap-4 ml-4">
+          <div className="control">
+            <label className="inline-block w-[80px] text-[10px]">
+              Spawn Rate
+            </label>
+            <DraggableNumberInput
+              value={settings.paintSpawnRate}
+              onChange={(value) => {
+                // console.log("DraggableNumberInput onChange:", value);
+                updateSetting("paintSpawnRate", value);
+              }}
+              min={1}
+              max={50}
+              step={1}
+              formatValue={(v) => `${v}`}
+            />
+          </div>
           <button
             onClick={handleRespawn}
             className="p-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-1"
@@ -42,8 +63,8 @@ export default function ToolProperties() {
             <span className="text-xs text-cyan-500">Spawn</span>
           </button>
           <div className="flex items-center gap-0">
-          <label className="text-[10px] mb-0">Count</label>
-            <DraggableNumberInput 
+            <label className="text-[10px] mb-0">Count</label>
+            <DraggableNumberInput
               value={settings.count}
               onChange={(value) => updateSetting("count", value)}
               min={0}

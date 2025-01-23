@@ -5,6 +5,7 @@ export type SpawnPattern = 'scatter' | 'grid' | 'circle' | 'point';
 export type BoundaryBehavior = 'travel-off' | 'wrap-around' | 'reflect' | 'stop';
 
 export interface SimulationSettings {
+  paintSpawnRate: number;
   count: number;
   particleSize: number;
   speed: number;
@@ -51,6 +52,7 @@ export interface EraserProperties {
 
 export const presets: Record<PresetType, SimulationSettings> = {
   start: {
+    paintSpawnRate: 5,
     count: 108,
     particleSize: 2.5,
     speed: 0.5,                  

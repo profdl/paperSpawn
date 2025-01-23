@@ -32,6 +32,12 @@ export default function VectorSimulationCanvas() {
     const viewPoint = paper.view.viewToProject(new paper.Point(x, y));
     return viewPoint;
   };
+  const currentSettingsRef = useRef(settings);
+
+  useEffect(() => {
+    currentSettingsRef.current = settings;
+    console.log('Settings updated in VectorSimulationCanvas:', settings);
+  }, [settings]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -76,6 +82,7 @@ export default function VectorSimulationCanvas() {
     };
   }, []);
 
+  console.log ('paintSpawnRate outside mouse event', settings.paintSpawnRate);  
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (currentTool === 'none' || !systemRef.current) return;
@@ -106,6 +113,9 @@ export default function VectorSimulationCanvas() {
     }
   }, [currentTool, eraserProperties.size]);
 
+  const lastSpawnTimeRef = useRef<number>(Date.now());
+
+
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (currentTool === 'none' || !systemRef.current) return;
     if (!canvasRef.current) return;
@@ -129,22 +139,32 @@ export default function VectorSimulationCanvas() {
           systemRef.current.continueFreehandPath(point);
         }
         break;
-      case 'paint':
-        if (isDrawingRef.current && lastDrawPosRef.current) {
-          const { x: lastX, y: lastY } = lastDrawPosRef.current;
-          const dx = point.x - lastX;
-          const dy = point.y - lastY;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          const steps = Math.max(1, Math.floor(distance / 5));
-
-          for (let i = 0; i < steps; i++) {
-            const px = lastX + (dx * i) / steps;
-            const py = lastY + (dy * i) / steps;
-            systemRef.current.createParticle(px, py);
+        case 'paint':
+          if (isDrawingRef.current && lastDrawPosRef.current) {
+            const currentTime = Date.now();
+            // Use the ref instead of the settings directly
+            const currentSpawnRate = currentSettingsRef.current.paintSpawnRate;
+            console.log('Current paint spawn rate in move:', currentSpawnRate);
+            
+            const spawnDelay = Math.round(100 * (1 - (currentSpawnRate - 1) / 49));
+            if (currentTime - lastSpawnTimeRef.current >= spawnDelay) {
+              const { x: lastX, y: lastY } = lastDrawPosRef.current;
+              const dx = point.x - lastX;
+              const dy = point.y - lastY;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+              const steps = Math.max(1, Math.floor(distance / 5));
+    
+              for (let i = 0; i < steps; i++) {
+                const px = lastX + (dx * i) / steps;
+                const py = lastY + (dy * i) / steps;
+                systemRef.current.createParticle(px, py);
+              }
+              
+              lastSpawnTimeRef.current = currentTime;
+            }
+            lastDrawPosRef.current = { x: point.x, y: point.y };
           }
-          lastDrawPosRef.current = { x: point.x, y: point.y };
-        }
-        break;
+          break;
       case 'erase':
         if (isDrawingRef.current) {
           systemRef.current.eraseParticlesNear(point.x, point.y, eraserProperties.size);

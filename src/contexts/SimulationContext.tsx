@@ -20,9 +20,15 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
   const [isPaused, setIsPaused] = useState(false);
   const systemRef = useRef<VectorParticleSystem>();
 
-  const updateSetting = (key: keyof SimulationSettings, value: string | number | boolean) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
-  };
+
+  const updateSetting = useCallback((key: keyof SimulationSettings, value: string | number | boolean) => {
+    // console.log(`Updating setting ${key} to:`, value);
+    setSettings(prev => {
+      const newSettings = { ...prev, [key]: value };
+      // console.log('New settings:', newSettings);
+      return newSettings;
+    });
+  }, []);
 
   const updateSettings = (newSettings: SimulationSettings) => {
     setSettings(newSettings);
@@ -98,6 +104,10 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
     systemRef
   };
 
+  React.useEffect(() => {
+    // console.log('Settings updated in context:', settings);
+  }, [settings]);
+  
   return (
     <SimulationContext.Provider value={value}>
       {children}
