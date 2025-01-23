@@ -229,6 +229,7 @@ export default function Navbar({
                   title="Paint Particles (P)"
                 >
                   <Wand className="w-4 h-4 text-cyan-500" />
+
                 </button>
 
                 <button

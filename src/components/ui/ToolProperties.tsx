@@ -41,9 +41,9 @@ export default function ToolProperties() {
             <CloudHail className="w-4 h-4 text-cyan-500" />
             <span className="text-xs text-cyan-500">Spawn</span>
           </button>
-          <div className="flex items-center gap-2">
-            <label className="text-xs">Count</label>
-            <DraggableNumberInput
+          <div className="flex items-center gap-0">
+          <label className="text-[10px] mb-0">Count</label>
+            <DraggableNumberInput 
               value={settings.count}
               onChange={(value) => updateSetting("count", value)}
               min={0}
@@ -53,17 +53,16 @@ export default function ToolProperties() {
           </div>
 
           <div className="flex items-center gap-2">
-            <label className="text-xs">Pattern</label>
             <select
-              className="bg-black/50 border border-white/20 rounded px-2 py-1 text-xs"
+              className="bg-black/50 border border-white/20 py-1 rounded text-[10px]"
               value={settings.spawnPattern}
               onChange={(e) =>
                 updateSetting("spawnPattern", e.target.value as SpawnPattern)
               }
             >
               <option value="scatter">Scatter</option>
-              <option value="grid">Grid</option>
-              <option value="circle">Circle</option>
+              <option value="grid">Grid Pattern</option>
+              <option value="circle">Circle Pattern</option>
               <option value="point">Point</option>
             </select>
           </div>
