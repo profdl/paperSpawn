@@ -23,10 +23,7 @@ export class VectorParticleSystem {
         height: paper.view.viewSize.height
     };
 }
-spawnParticlesWithCurrentDimensions(count: number, pattern: string): void {
-  const { width, height } = this.getViewDimensions();
-  this.particleManager.spawnParticles(count, pattern, width, height);
-}
+
   constructor(canvas: HTMLCanvasElement, onResize?: (width: number, height: number) => void) {
     this.onResizeCallback = onResize;
     
