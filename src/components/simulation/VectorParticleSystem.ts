@@ -1,7 +1,7 @@
 import paper from 'paper';
 import { SimulationSettings } from '../../types';
 import { obstacleManager } from './obstacleManager';
-import { ParticleManager } from './particleManager';
+import { ParticleManager } from './ParticleManager';
 import { EraserTool } from './eraserTool';
 import { CanvasBackground } from './canvasBackground';
 
@@ -17,6 +17,10 @@ export class VectorParticleSystem {
     this.obstacleManager.clearObstacles();
   }
 
+  getClosedPaths(): paper.Path[] {
+    return this.obstacleManager.getAllClosedPaths();
+  }
+  
   getViewDimensions(): { width: number; height: number } {
     return {
         width: paper.view.viewSize.width,

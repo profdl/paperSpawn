@@ -1,10 +1,20 @@
-import React, { createContext, useContext, useCallback, useState, useRef } from 'react';
-import { SimulationSettings, presets } from '../types';
-import { VectorParticleSystem } from '../components/simulation/VectorParticleSystem';
+import React, {
+  createContext,
+  useContext,
+  useCallback,
+  useState,
+  useRef,
+} from "react";
+import { SimulationSettings, presets } from "../types";
+import { VectorParticleSystem } from "../components/simulation/VectorParticleSystem";
+import paper from "paper";
 
 interface SimulationContextType {
   settings: SimulationSettings;
-  updateSetting: (key: keyof SimulationSettings, value: string | number | boolean) => void;
+  updateSetting: (
+    key: keyof SimulationSettings,
+    value: string | number | boolean
+  ) => void;
   updateSettings: (newSettings: SimulationSettings) => void;
   isPaused: boolean;
   setIsPaused: (paused: boolean) => void;
@@ -13,22 +23,30 @@ interface SimulationContextType {
   systemRef: React.MutableRefObject<VectorParticleSystem | undefined>;
 }
 
-const SimulationContext = createContext<SimulationContextType | undefined>(undefined);
+const SimulationContext = createContext<SimulationContextType | undefined>(
+  undefined
+);
 
-export function SimulationProvider({ children }: { children: React.ReactNode }) {
+export function SimulationProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [settings, setSettings] = useState<SimulationSettings>(presets.start);
   const [isPaused, setIsPaused] = useState(false);
   const systemRef = useRef<VectorParticleSystem>();
 
-
-  const updateSetting = useCallback((key: keyof SimulationSettings, value: string | number | boolean) => {
-    // console.log(`Updating setting ${key} to:`, value);
-    setSettings(prev => {
-      const newSettings = { ...prev, [key]: value };
-      // console.log('New settings:', newSettings);
-      return newSettings;
-    });
-  }, []);
+  const updateSetting = useCallback(
+    (key: keyof SimulationSettings, value: string | number | boolean) => {
+      // console.log(`Updating setting ${key} to:`, value);
+      setSettings((prev) => {
+        const newSettings = { ...prev, [key]: value };
+        // console.log('New settings:', newSettings);
+        return newSettings;
+      });
+    },
+    []
+  );
 
   const updateSettings = (newSettings: SimulationSettings) => {
     setSettings(newSettings);
@@ -36,53 +54,82 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
 
   const handleRespawn = useCallback(() => {
     if (systemRef.current) {
-  // Get the actual canvas dimensions
-  const canvasWidth = 500;
-  const canvasHeight = 400;
-  
-      
+      const canvasWidth = 500;
+      const canvasHeight = 400;
+
       systemRef.current.clearParticlesOnly();
-      
-      for (let i = 0; i < settings.count; i++) {
+
+      // Get all closed paths from the obstacle manager
+      const closedPaths = systemRef.current.getClosedPaths();
+
+      // Helper function to check if a point is inside any obstacle
+      const isPointInsideObstacle = (x: number, y: number): boolean => {
+        const point = new paper.Point(x, y);
+        return closedPaths.some((path) => path.contains(point));
+      };
+
+      let attemptCount = 0;
+      const maxAttempts = settings.count * 3; // Prevent infinite loops
+      let particlesCreated = 0;
+
+      while (particlesCreated < settings.count && attemptCount < maxAttempts) {
+        let x: number, y: number;
+
         switch (settings.spawnPattern) {
-          case 'scatter': {
-            const x = Math.random() * canvasWidth;
-            const y = Math.random() * canvasHeight;
-            systemRef.current.createParticle(x, y);
+          case "scatter": {
+            x = Math.random() * canvasWidth;
+            y = Math.random() * canvasHeight;
             break;
           }
-          case 'grid': {
-            const cols = Math.ceil(Math.sqrt(settings.count * canvasWidth / canvasHeight));
+          case "grid": {
+            const cols = Math.ceil(
+              Math.sqrt((settings.count * canvasWidth) / canvasHeight)
+            );
             const rows = Math.ceil(settings.count / cols);
             const cellWidth = canvasWidth / cols;
             const cellHeight = canvasHeight / rows;
-            const col = i % cols;
-            const row = Math.floor(i / cols);
-            const x = (col + 0.5) * cellWidth;
-            const y = (row + 0.5) * cellHeight;
-            systemRef.current.createParticle(x, y);
+            const col = particlesCreated % cols;
+            const row = Math.floor(particlesCreated / cols);
+            x = (col + 0.5) * cellWidth;
+            y = (row + 0.5) * cellHeight;
             break;
           }
-          case 'circle': {
+          case "circle": {
             const centerX = canvasWidth / 2;
             const centerY = canvasHeight / 2;
             const radius = Math.min(canvasWidth, canvasHeight) * 0.4;
-            const angle = (i / settings.count) * Math.PI * 2;
-            const x = centerX + Math.cos(angle) * radius;
-            const y = centerY + Math.sin(angle) * radius;
-            systemRef.current.createParticle(x, y);
+            const angle = (particlesCreated / settings.count) * Math.PI * 2;
+            x = centerX + Math.cos(angle) * radius;
+            y = centerY + Math.sin(angle) * radius;
             break;
           }
-          case 'point': {
+          case "point": {
             const centerX = canvasWidth / 2;
             const centerY = canvasHeight / 2;
             const spread = 5;
-            const x = centerX + (Math.random() - 0.5) * spread;
-            const y = centerY + (Math.random() - 0.5) * spread;
-            systemRef.current.createParticle(x, y);
+            x = centerX + (Math.random() - 0.5) * spread;
+            y = centerY + (Math.random() - 0.5) * spread;
             break;
           }
+          default: {
+            x = 0;
+            y = 0;
+          }
         }
+
+        // Only create particle if point is not inside any obstacle
+        if (!isPointInsideObstacle(x, y)) {
+          systemRef.current.createParticle(x, y);
+          particlesCreated++;
+        }
+
+        attemptCount++;
+      }
+      // Log if we couldn't create all particles
+      if (particlesCreated < settings.count) {
+        console.warn(
+          `Only created ${particlesCreated} particles out of ${settings.count} due to obstacles`
+        );
       }
     }
   }, [settings.count, settings.spawnPattern]);
@@ -101,13 +148,13 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
     setIsPaused,
     handleRespawn,
     handleClear,
-    systemRef
+    systemRef,
   };
 
   React.useEffect(() => {
     // console.log('Settings updated in context:', settings);
   }, [settings]);
-  
+
   return (
     <SimulationContext.Provider value={value}>
       {children}
@@ -118,7 +165,7 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
 export const useSimulation = () => {
   const context = useContext(SimulationContext);
   if (!context) {
-    throw new Error('useSimulation must be used within a SimulationProvider');
+    throw new Error("useSimulation must be used within a SimulationProvider");
   }
   return context;
 };
