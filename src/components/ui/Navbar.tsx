@@ -9,7 +9,6 @@ import {
   FileDown,
   Save,
   FolderOpen,
-  Palette,
   CloudHail,
   MenuIcon,
 } from "lucide-react";
@@ -19,13 +18,10 @@ import { useSimulation } from "../../contexts/SimulationContext";
 import { useTool } from "../../contexts/ToolContext";
 import { useProjects } from "../../hooks/useProjects";
 import { SimulationSettings } from "../../types";
-import AppearanceControls from "../controls/AppearanceControls";
 
 interface NavbarProps {
   showUI: boolean;
-  showAppearance: boolean;
   onToggleUI: () => void;
-  onToggleAppearance: () => void;
   onOpenProjects: () => void;
   showMenu: boolean;
   setShowMenu: (show: boolean) => void;
@@ -34,7 +30,6 @@ interface NavbarProps {
 export default function Navbar({
   showUI,
   onToggleUI,
-  onToggleAppearance,
   onOpenProjects,
   showMenu,
   setShowMenu,
@@ -46,9 +41,6 @@ export default function Navbar({
   const { currentTool, setTool } = useTool();
   const [showAuthModal, setShowAuthModal] = React.useState(false);
   const { saveProject } = useProjects();
-  const [showAppearancePanel, setShowAppearancePanel] = React.useState(false);
-  const appearanceButtonRef = React.useRef<HTMLButtonElement>(null);
-  const appearancePanelRef = React.useRef<HTMLDivElement>(null);
 
   const handleSave = async () => {
     if (!user) {
@@ -134,46 +126,8 @@ export default function Navbar({
     URL.revokeObjectURL(link.href);
   };
 
-  const [panelPosition, setPanelPosition] = React.useState<{
-    top: number;
-    left: number;
-  }>({ top: 0, left: 0 });
 
-  const updatePanelPosition = React.useCallback(() => {
-    if (!appearanceButtonRef.current || !appearancePanelRef.current) return;
 
-    const buttonRect = appearanceButtonRef.current.getBoundingClientRect();
-    const panelRect = appearancePanelRef.current.getBoundingClientRect();
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
-
-    // Calculate initial positions
-    let left = buttonRect.left;
-    let top = buttonRect.bottom + 8; // 8px margin
-
-    // Check right edge
-    if (left + panelRect.width > windowWidth) {
-      left = windowWidth - panelRect.width - 16; // 16px margin from right edge
-    }
-
-    // Check bottom edge
-    if (top + panelRect.height > windowHeight) {
-      top = buttonRect.top - panelRect.height - 8; // Show above the button
-    }
-
-    // Ensure left isn't negative
-    left = Math.max(16, left); // 16px minimum margin from left edge
-
-    setPanelPosition({ top, left });
-  }, []);
-
-  React.useEffect(() => {
-    if (showAppearancePanel) {
-      updatePanelPosition();
-      window.addEventListener("resize", updatePanelPosition);
-      return () => window.removeEventListener("resize", updatePanelPosition);
-    }
-  }, [showAppearancePanel, updatePanelPosition]);
 
   return (
     <>
@@ -267,33 +221,7 @@ export default function Navbar({
                   )}
                 </button>
 
-                <div className="relative">
-                  <button
-                    ref={appearanceButtonRef}
-                    onMouseEnter={() => setShowAppearancePanel(true)}
-                    onClick={onToggleAppearance}
-                    className="p-1.5 rounded hover:bg-white/10 transition-colors"
-                    title="Appearance Settings"
-                  >
-                    <Palette className="w-4 h-4" />
-                  </button>
-                  {showAppearancePanel && (
-                    <div
-                      ref={appearancePanelRef}
-                      className="fixed w-80 bg-black/90 backdrop-blur-sm rounded-lg shadow-lg border border-white/10"
-                      style={{
-                        top: `${panelPosition.top}px`,
-                        left: `${panelPosition.left}px`,
-                      }}
-                      onMouseEnter={() => setShowAppearancePanel(true)}
-                      onMouseLeave={() => setShowAppearancePanel(false)}
-                    >
-                      <div className="p-4">
-                        <AppearanceControls />
-                      </div>
-                    </div>
-                  )}
-                </div>
+
               </div>
             </div>
 

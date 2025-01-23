@@ -8,32 +8,33 @@ import VerticalToolbar from '../ui/VerticalToolbar';
 import { SimulationProvider } from '../../contexts/SimulationContext';
 import { ToolProvider } from '../../contexts/ToolContext';
 import VectorSimulationCanvas from '../simulation/VectorSimulationCanvas';
-import { Menu } from '../ui/Menu';
 
 export default function MainLayout() {
   const [showControlPanel, setShowControlPanel] = useState(true);
-  const [showAppearance, setShowAppearance] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showProjectsDrawer, setShowProjectsDrawer] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);  // Add this new state
+  const [showMenu, setShowMenu] = useState(false);
 
   return (
     <SimulationProvider>
       <ToolProvider>
         <div className="min-h-screen bg-black relative">
-        <Navbar 
-            showUI={showControlPanel} 
-            showAppearance={showAppearance}
-            onToggleUI={() => setShowControlPanel(!showControlPanel)}
-            onToggleAppearance={() => setShowAppearance(!showAppearance)}
-            onOpenProjects={() => setShowProjectsDrawer(true)}
-            showMenu={showMenu}
-            setShowMenu={setShowMenu}
-          />
-          <ToolProperties />
-          <div className="flex">
-            <VerticalToolbar />
-            <div className="flex-1 pt-20 pr-4"> 
+          <div className="z-50">
+            <Navbar 
+              showUI={showControlPanel} 
+              onToggleUI={() => setShowControlPanel(!showControlPanel)}
+              onOpenProjects={() => setShowProjectsDrawer(true)}
+              showMenu={showMenu}
+              setShowMenu={setShowMenu}
+            />
+            <ToolProperties />
+          </div>
+          
+          <div className="flex relative">
+            <div className="z-40">
+              <VerticalToolbar />
+            </div>
+            <div className="flex-1 pt-20 pr-4 z-0"> 
               <div className="relative bg-black/10 rounded-lg">
                 <VectorSimulationCanvas />
               </div>

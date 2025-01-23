@@ -52,7 +52,7 @@ export interface EraserProperties {
 
 export const presets: Record<PresetType, SimulationSettings> = {
   start: {
-    paintSpawnRate: 5,
+    paintSpawnRate: 50,
     count: 108,
     particleSize: 2.5,
     speed: 0.5,                  

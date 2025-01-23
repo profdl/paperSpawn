@@ -1,11 +1,15 @@
 import React from 'react';
-import { MousePointer, Pen, Square, ImagePlus, Trash } from "lucide-react";
+import { MousePointer, Palette, Pen, Square, ImagePlus, Trash } from "lucide-react";
 import { useTool } from "../../contexts/ToolContext";
 import { useSimulation } from "../../contexts/SimulationContext";
+import AppearanceControls from '../controls/AppearanceControls';
+
 
 export default function VerticalToolbar() {
   const { currentTool, setTool } = useTool();
   const { systemRef } = useSimulation();
+  const [showAppearanceControls, setShowAppearanceControls] = React.useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   const handleRectangleClick = () => {
     if (!systemRef.current) return;
@@ -38,8 +42,9 @@ export default function VerticalToolbar() {
   };
 
   return (
-    <div className="pt-20 pl-4 bg-black/70 backdrop-blur-sm h-screen">
+    <div ref={containerRef} className="relative pt-20 pl-4 bg-black/70 backdrop-blur-sm h-screen">
       <div className="flex flex-col gap-1">
+       
         <button
           className={`p-2 rounded hover:bg-white/10 transition-colors ${
             currentTool === "select" ? "bg-white/20" : ""
@@ -90,6 +95,33 @@ export default function VerticalToolbar() {
         >
           <Trash className="w-4 h-4" />
         </button>
+
+        <div className="relative">
+          <button
+            className={`p-2 rounded hover:bg-white/10 transition-colors ${
+              showAppearanceControls ? "bg-white/20" : ""
+            }`}
+            onClick={() => setShowAppearanceControls(!showAppearanceControls)}
+            title="Appearance Settings"
+          >
+            <Palette className="w-4 h-4 text-white" />
+          </button>
+
+          {showAppearanceControls && (
+            <div 
+              className="absolute left-full ml-2 w-80 bg-black/90 backdrop-blur-sm rounded-lg shadow-lg border border-white/10 text-white"
+              style={{
+                zIndex: 20,
+                pointerEvents: 'auto',
+                top: '-130px'
+              }}
+            >
+              <div className="p-4">
+                <AppearanceControls />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

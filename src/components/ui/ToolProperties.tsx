@@ -20,7 +20,7 @@ export default function ToolProperties() {
   }, [settings]);
 
   return (
-    <div className="fixed top-10   h-8 bg-black/70 z-40 flex items-left justify-left">
+    <div className="fixed top-10 left-10  h-8 bg-black/70 z-30 flex items-left justify-left">
       {currentTool === "erase" && (
         <div className="flex items-center gap-0">
           <label className="text-xs">Size</label>

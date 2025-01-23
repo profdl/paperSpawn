@@ -47,11 +47,9 @@ function generateHarmoniousColors() {
 
   return colors;
 }
-
 export default function AppearanceControls({ style }: { style?: React.CSSProperties }) {
   const { settings, updateSetting } = useSimulation();
   const { systemRef } = useSimulation();
-
 
   const handleRandomizeColors = () => {
     const colors = generateHarmoniousColors();
@@ -61,7 +59,7 @@ export default function AppearanceControls({ style }: { style?: React.CSSPropert
   };
 
   return (
-    <div className="space-y-4" style={style}>
+    <div className="space-y-4 text-white" style={style}>
       <div className="control">
         <label className="block text-[10px] uppercase tracking-wider mb-2 text-white/60">
           Color Schemes
@@ -97,7 +95,7 @@ export default function AppearanceControls({ style }: { style?: React.CSSPropert
           </span>
           <button
             onClick={handleRandomizeColors}
-            className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] bg-white/10 hover:bg-white/20 rounded transition-colors"
+            className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] bg-white/10 hover:bg-white/20 rounded transition-colors text-white"
             title="Generate Harmonious Colors"
           >
             <Shuffle className="w-3 h-3" />
@@ -106,21 +104,21 @@ export default function AppearanceControls({ style }: { style?: React.CSSPropert
         </div>
         <div className="space-y-1.5">
           <div className="control">
-            <label className="inline-block w-[80px] text-[10px]">Background</label>
+            <label className="inline-block w-[80px] text-[10px] text-white">Background</label>
             <ColorPicker
               value={settings.backgroundColor}
               onChange={(value) => updateSetting('backgroundColor', value)}
             />
           </div>
           <div className="control">
-            <label className="inline-block w-[80px] text-[10px]">Particles</label>
+            <label className="inline-block w-[80px] text-[10px] text-white">Particles</label>
             <ColorPicker
               value={settings.particleColor}
               onChange={(value) => updateSetting('particleColor', value)}
             />
           </div>
           <div className="control">
-            <label className="inline-block w-[80px] text-[10px]">Trails</label>
+            <label className="inline-block w-[80px] text-[10px] text-white">Trails</label>
             <ColorPicker
               value={settings.trailColor}
               onChange={(value) => updateSetting('trailColor', value)}
@@ -135,7 +133,7 @@ export default function AppearanceControls({ style }: { style?: React.CSSPropert
         </div>
         <div className="space-y-1.5">
           <div className="control">
-            <label className="inline-block w-[80px] text-[10px]">Radius</label>
+            <label className="inline-block w-[80px] text-[10px] text-white">Radius</label>
             <DraggableNumberInput
               value={settings.particleSize}
               onChange={(value) => {
@@ -149,7 +147,7 @@ export default function AppearanceControls({ style }: { style?: React.CSSPropert
             />
           </div>
           <div className="control">
-            <label className="inline-block w-[80px] text-[10px]">Trail Width</label>
+            <label className="inline-block w-[80px] text-[10px] text-white">Trail Width</label>
             <DraggableNumberInput
               value={settings.chemicalDeposit}
               onChange={(value) => {
