@@ -1,5 +1,4 @@
 import React from "react";
-import { CloudHail } from "lucide-react";
 import DraggableNumberInput from "./DraggableNumberInput";
 import { useTool } from "../../contexts/ToolContext";
 import { useSimulation } from "../../contexts/SimulationContext";
@@ -7,7 +6,7 @@ import { EraserProperties, SpawnPattern } from "../../types";
 
 export default function ToolProperties() {
   const { currentTool, eraserProperties, updateEraserProperties } = useTool();
-  const { settings, updateSetting, handleRespawn } = useSimulation();
+  const { settings, updateSetting  } = useSimulation();
 
   if (!currentTool || (currentTool !== "erase" && currentTool !== "paint"))
     return null;
@@ -21,7 +20,7 @@ export default function ToolProperties() {
   }, [settings]);
 
   return (
-    <div className="fixed top-10 left-40 right-0 h-8 bg-black/70 z-40 flex items-center justify-left">
+    <div className="fixed top-10   h-8 bg-black/70 z-40 flex items-left justify-left">
       {currentTool === "erase" && (
         <div className="flex items-center gap-0">
           <label className="text-xs">Size</label>
@@ -36,16 +35,15 @@ export default function ToolProperties() {
         </div>
       )}
 
-      {currentTool === "paint" && (
+{currentTool === "paint" && (
         <div className="flex items-center gap-4 ml-4">
           <div className="control">
-            <label className="inline-block w-[80px] text-[10px]">
-              Spawn Rate
+            <label className="inline-block  text-[10px]">
+              Paint Spawn Rate
             </label>
             <DraggableNumberInput
               value={settings.paintSpawnRate}
               onChange={(value) => {
-                // console.log("DraggableNumberInput onChange:", value);
                 updateSetting("paintSpawnRate", value);
               }}
               min={1}
@@ -54,16 +52,8 @@ export default function ToolProperties() {
               formatValue={(v) => `${v}`}
             />
           </div>
-          <button
-            onClick={handleRespawn}
-            className="p-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-1"
-            title="Respawn Particles"
-          >
-            <CloudHail className="w-4 h-4 text-cyan-500" />
-            <span className="text-xs text-cyan-500">Spawn</span>
-          </button>
           <div className="flex items-center gap-0">
-            <label className="text-[10px] mb-0">Count</label>
+            <label className="text-[10px] mb-0">Batch Spawn</label>
             <DraggableNumberInput
               value={settings.count}
               onChange={(value) => updateSetting("count", value)}

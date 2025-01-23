@@ -15,6 +15,7 @@ import {
   ImagePlus,
   Pen,
   Palette,
+  CloudHail
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import AuthModal from "../ui/AuthModal";
@@ -99,6 +100,7 @@ export default function Navbar({
         wanderStrength: settings.wanderStrength,
         wanderSpeed: settings.wanderSpeed,
         wanderRadius: settings.wanderRadius,
+        paintSpawnRate: settings.paintSpawnRate,
       };
 
       const svgContent = systemRef.current.exportSVG();
@@ -222,15 +224,27 @@ export default function Navbar({
                 <button
                   className={`p-1.5 rounded hover:bg-white/10 transition-colors ${
                     currentTool === "paint" ? "bg-white/20" : ""
-                  }`}
+                  } flex items-center gap-1`}
                   onClick={() =>
                     setTool(currentTool === "paint" ? "none" : "paint")
                   }
                   title="Paint Particles (P)"
                 >
                   <Wand className="w-4 h-4 text-cyan-500" />
-
+                  <span className="text-xs text-cyan-500">Spawn</span>
                 </button>
+
+                <button
+                  onClick={handleRespawn}
+                  className="p-1.5 rounded hover:bg-white/10 transition-colors flex items-center gap-1"
+                  title="Respawn Particles"
+                >
+                  <CloudHail className="w-4 h-4 text-cyan-500" />
+                  <span className="text-xs text-cyan-500">Batch Spawn</span>
+                </button>
+
+
+                {/* Divider */}<div className="w-px bg-white/20 mx-1" />
 
                 <button
                   className={`p-1.5 rounded hover:bg-white/10 transition-colors ${
@@ -266,8 +280,7 @@ export default function Navbar({
                   )}
                 </button>
 
-                {/* Divider */}
-                <div className="w-px bg-white/20 mx-1" />
+                {/* Divider */}<div className="w-px bg-white/20 mx-1" />
                 {/* Divider */}
                 <div className="w-px bg-white/20 mx-1" />
                 <button
