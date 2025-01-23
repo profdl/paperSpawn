@@ -1,111 +1,111 @@
 import { useSimulation } from '../../contexts/SimulationContext';
 import DraggableNumberInput from '../ui/DraggableNumberInput';
+import { BoundaryBehavior } from '../../types';
 
 export default function BehaviorControls() {
   const { settings, updateSetting } = useSimulation();
 
   return (
-<div className="space-y-4">
-  <div>
-  <div className="text-[10px] uppercase tracking-wider mb-2 text-white/60">
-  Flocking
-    </div>
-    <div className="space-y-1.5">
-      {/* Separation Controls */}
+    <div className="space-y-6">
+      {/* Flocking Section */}
       <div>
-        <div className="control">
-          <label className="inline-block w-[80px] text-[10px] mb-1">Separation</label>
-          <DraggableNumberInput
-            value={settings.separation}
-            onChange={(value) => updateSetting('separation', value)}
-            min={0}
-            max={1}
-            step={0.01}
-            formatValue={(v) => `${(v * 100).toFixed(0)}%`}
-          />
+        <div className="text-[10px] uppercase tracking-wider mb-2 text-white/60">
+          Flocking
         </div>
-        <div className="control">
-          <label className="inline-block w-[80px] text-[10px] "></label>
-          <DraggableNumberInput
-            value={settings.separationDistance}
-            onChange={(value) => updateSetting('separationDistance', value)}
-            min={1}
-            max={100}
-            step={1}
-            formatValue={(v) => `${v}px`}
-          />
+        <div className="space-y-3">
+          {/* Separation Controls */}
+          <div>
+            <div className="control">
+              <label className="inline-block w-[80px] text-[10px] mb-1">Separation</label>
+              <DraggableNumberInput
+                value={settings.separation}
+                onChange={(value) => updateSetting('separation', value)}
+                min={0}
+                max={1}
+                step={0.01}
+                formatValue={(v) => `${(v * 100).toFixed(0)}%`}
+              />
+            </div>
+            <div className="control">
+              <label className="inline-block w-[80px] text-[10px] "></label>
+              <DraggableNumberInput
+                value={settings.separationDistance}
+                onChange={(value) => updateSetting('separationDistance', value)}
+                min={1}
+                max={100}
+                step={1}
+                formatValue={(v) => `${v}px`}
+              />
+            </div>
+          </div>
+
+          {/* Cohesion Controls */}
+          <div>
+            <div className="control">
+              <label className="inline-block w-[80px] text-[10px] mb-1">Cohesion</label>
+              <DraggableNumberInput
+                value={settings.cohesion}
+                onChange={(value) => updateSetting('cohesion', value)}
+                min={0}
+                max={1}
+                step={0.01}
+                formatValue={(v) => `${(v * 100).toFixed(0)}%`}
+              />
+            </div>
+            <div className="control">
+              <label className="inline-block w-[80px] text-[10px]"></label>
+              <DraggableNumberInput
+                value={settings.cohesionDistance}
+                onChange={(value) => updateSetting('cohesionDistance', value)}
+                min={1}
+                max={200}
+                step={1}
+                formatValue={(v) => `${v}px`}
+              />
+            </div>
+          </div>
+
+          {/* Alignment Controls */}
+          <div>
+            <div className="control">
+              <label className="inline-block w-[80px] text-[10px] mb-1">Alignment</label>
+              <DraggableNumberInput
+                value={settings.alignment}
+                onChange={(value) => updateSetting('alignment', value)}
+                min={0}
+                max={1}
+                step={0.01}
+                formatValue={(v) => `${(v * 100).toFixed(0)}%`}
+              />
+            </div>
+            <div className="control">
+              <label className="inline-block w-[80px] text-[10px]"></label>
+              <DraggableNumberInput
+                value={settings.alignmentDistance}
+                onChange={(value) => updateSetting('alignmentDistance', value)}
+                min={1}
+                max={150}
+                step={1}
+                formatValue={(v) => `${v}px`}
+              />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Cohesion Controls */}
-      <div>
-        <div className="control">
-          <label className="inline-block w-[80px] text-[10px] mb-1">Cohesion</label>
-          <DraggableNumberInput
-            value={settings.cohesion}
-            onChange={(value) => updateSetting('cohesion', value)}
-            min={0}
-            max={1}
-            step={0.01}
-            formatValue={(v) => `${(v * 100).toFixed(0)}%`}
-          />
-        </div>
-        <div className="control">
-          <label className="inline-block w-[80px] text-[10px]"></label>
-          <DraggableNumberInput
-            value={settings.cohesionDistance}
-            onChange={(value) => updateSetting('cohesionDistance', value)}
-            min={1}
-            max={200}
-            step={1}
-            formatValue={(v) => `${v}px`}
-          />
-        </div>
-      </div>
-
-      {/* Alignment Controls */}
-      <div>
-        <div className="control">
-          <label className="inline-block w-[80px] text-[10px] mb-1">Alignment</label>
-          <DraggableNumberInput
-            value={settings.alignment}
-            onChange={(value) => updateSetting('alignment', value)}
-            min={0}
-            max={1}
-            step={0.01}
-            formatValue={(v) => `${(v * 100).toFixed(0)}%`}
-          />
-        </div>
-        <div className="control">
-          <label className="inline-block w-[80px] text-[10px]"></label>
-          <DraggableNumberInput
-            value={settings.alignmentDistance}
-            onChange={(value) => updateSetting('alignmentDistance', value)}
-            min={1}
-            max={150}
-            step={1}
-            formatValue={(v) => `${v}px`}
-          />
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-
+      {/* Wander Section */}
       <div>
         <div className="text-[10px] uppercase tracking-wider mb-2 text-white/60">
           Wander
         </div>
         <div className="space-y-1.5">
-
           <div className="control">
             <label className="inline-block w-[80px] text-[10px]">Strength</label>
             <DraggableNumberInput
               value={settings.wanderStrength}
               onChange={(value) => updateSetting('wanderStrength', value)}
               min={0}
-              max={3} 
+              max={3}
               step={0.01}
               formatValue={(v) => `${(v * 100).toFixed(0)}%`}
             />
@@ -133,6 +133,65 @@ export default function BehaviorControls() {
             />
           </div>
         </div>
+      </div>
+
+      {/* External Forces Section */}
+      <div>
+        <div className="text-[10px] uppercase tracking-wider mb-2 text-white/60">
+          External Forces
+        </div>
+        <div className="space-y-1.5">
+          <div className="control">
+            <label className="inline-block w-[80px] text-[10px]">Angle</label>
+            <DraggableNumberInput
+              value={settings.externalForceAngle}
+              onChange={(value) => updateSetting('externalForceAngle', value)}
+              min={0}
+              max={360}
+              step={1}
+              formatValue={(v) => `${v}°`}
+            />
+          </div>
+          <div className="control">
+            <label className="inline-block w-[80px] text-[10px]">Randomize</label>
+            <DraggableNumberInput
+              value={settings.externalForceAngleRandomize}
+              onChange={(value) => updateSetting('externalForceAngleRandomize', value)}
+              min={0}
+              max={180}
+              step={1}
+              formatValue={(v) => `±${v}°`}
+            />
+          </div>
+          <div className="control">
+            <label className="inline-block w-[80px] text-[10px]">Strength</label>
+            <DraggableNumberInput
+              value={settings.externalForceStrength}
+              onChange={(value) => updateSetting('externalForceStrength', value)}
+              min={0}
+              max={2}
+              step={0.01}
+              formatValue={(v) => `${(v * 100).toFixed(0)}%`}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Boundary Behavior Section */}
+      <div>
+        <div className="text-[10px] uppercase tracking-wider mb-2 text-white/60">
+          Boundary Behavior
+        </div>
+        <select
+          className="w-full bg-black/50 border border-white/20 rounded px-2 py-1 text-xs"
+          value={settings.boundaryBehavior}
+          onChange={(e) => updateSetting('boundaryBehavior', e.target.value as BoundaryBehavior)}
+        >
+          <option value="travel-off">Travel Off</option>
+          <option value="wrap-around">Wrap Around</option>
+          <option value="reflect">Reflect</option>
+          <option value="stop">Stop</option>
+        </select>
       </div>
     </div>
   );

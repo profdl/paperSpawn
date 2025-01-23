@@ -3,7 +3,6 @@ import AccordionSection from './AccordionSection';
 import ParticleControls from '../controls/ParticleControls';
 import BehaviorControls from '../controls/BehaviorControls';
 
-import CanvasBehaviorsControls from '../controls/ExternalForcesControls';
 
 export default function ControlPanel() {
   const [openSections, setOpenSections] = useState<Set<string>>(
@@ -39,17 +38,6 @@ export default function ControlPanel() {
         >
           <BehaviorControls />
         </AccordionSection>
-
-        <AccordionSection
-          title="Canvas Behaviors"
-          isOpen={openSections.has('canvas-behaviors')}
-          onToggle={() => toggleSection('canvas-behaviors')}
-        >
-          <CanvasBehaviorsControls />
-        </AccordionSection>
-
-
-
       </div>
     </div>
   );
