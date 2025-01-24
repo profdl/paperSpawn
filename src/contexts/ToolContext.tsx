@@ -7,16 +7,15 @@ interface EraserProperties {
   size: number;
 }
 
-type ToolType = 'none' | 'paint' | 'erase' | 'rectangle' | 'select' | 'freehand';
-
 interface ToolContextType {
-  currentTool: ToolType;
-  setTool: (tool: ToolType) => void;
-  eraserProperties: {
-    size: number;
-  };
+  currentTool: Tool;
+  setTool: (tool: Tool) => void;
+  eraserProperties: EraserProperties;
   updateEraserProperties: (props: Partial<EraserProperties>) => void;
 }
+
+
+
 
 const ToolContext = createContext<ToolContextType | undefined>(undefined);
 

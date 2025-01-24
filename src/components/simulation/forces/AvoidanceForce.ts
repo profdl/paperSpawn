@@ -1,11 +1,11 @@
 import paper from 'paper';
 import { SimulationSettings } from '../../../types';
-import { obstacleManager } from '../obstacleManager';
+import { ObstacleManager } from '../obstacleManager';
 
 export class AvoidanceForce {
   static calculate(
     position: paper.Point, 
-    obstacleManager: obstacleManager,
+    obstacleManager: ObstacleManager,
     settings: SimulationSettings
   ): paper.Point {
     if (!settings.avoidanceEnabled) return new paper.Point(0, 0);

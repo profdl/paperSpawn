@@ -2,7 +2,7 @@ import paper from 'paper';
 import { TransformHandles } from './transformHandles';
 import { SimulationSettings } from '../../types';  
 
-export class obstacleManager {
+export class ObstacleManager {
   private rectangles: paper.Path.Rectangle[] = [];
   private paths: paper.Path[] = [];
   private selectedItem: paper.Path.Rectangle | paper.Path | null = null;

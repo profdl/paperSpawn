@@ -1,16 +1,16 @@
 import paper from 'paper';
 import { SimulationSettings } from '../../types';
-import { obstacleManager } from './obstacleManager';
+import { ObstacleManager } from './obstacleManager';
 import { ParticleCreator } from './particle/ParticleCreator';
 import { ParticleUpdater } from './particle/ParticleUpdater';
 
 export class ParticleManager {
   private particles: paper.Group;
-  private obstacleManager: obstacleManager;
+  private obstacleManager: ObstacleManager;
   private _particleRadius: number = 2;
   private _trailWidth: number = 1;
 
-  constructor(obstacleManager: obstacleManager) {
+  constructor(obstacleManager: ObstacleManager) {
     this.particles = new paper.Group();
     this.obstacleManager = obstacleManager;
   }

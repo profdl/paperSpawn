@@ -4,6 +4,18 @@
 export type SpawnPattern = 'scatter' | 'grid' | 'circle' | 'point';
 export type BoundaryBehavior = 'travel-off' | 'wrap-around' | 'reflect' | 'stop';
 
+export interface ParticleProperties {
+  velocity: paper.Point;
+  position: paper.Point;
+  radius: number;
+}
+
+export interface TransformableItem {
+  bounds: paper.Rectangle;
+  position: paper.Point;
+  rotation: number;
+}
+
 export interface SimulationSettings {
   paintSpawnRate: number;
   count: number;
@@ -37,9 +49,9 @@ export interface SimulationSettings {
   boundaryBehavior: BoundaryBehavior;
   // New wander behavior settings
   wanderEnabled: boolean;
-  wanderStrength: number;
   wanderSpeed: number;
   wanderRadius: number;
+  wanderStrength: number;
   //Avoidance settings
   avoidanceEnabled: boolean;
   avoidanceDistance: number;

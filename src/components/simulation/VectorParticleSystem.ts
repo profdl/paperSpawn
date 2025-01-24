@@ -1,82 +1,61 @@
 import paper from 'paper';
 import { SimulationSettings } from '../../types';
-import { obstacleManager } from './obstacleManager';
-import { ParticleManager } from './ParticleManager';
+import { ObstacleManager } from './obstacleManager';
+import { ParticleManager } from './particleManager';
 import { EraserTool } from './eraserTool';
 import { CanvasBackground } from './canvasBackground';
-
+import { CanvasManager } from './canvasManager';
+import { SVGManager } from './svgManager';
 
 export class VectorParticleSystem {
-  private project: paper.Project;
-  private obstacleManager: obstacleManager;
+  private canvasManager: CanvasManager;
+  private obstacleManager: ObstacleManager;
   private particleManager: ParticleManager;
   private eraserTool: EraserTool;
   private background: CanvasBackground;
-  private onResizeCallback?: (width: number, height: number) => void;
-  public clearObstacles(): void {
-    this.obstacleManager.clearObstacles();
+  private svgManager: SVGManager;
+
+
+  constructor(canvas: HTMLCanvasElement, onResize?: (width: number, height: number) => void) {
+    this.canvasManager = new CanvasManager(canvas, onResize);
+    
+    this.obstacleManager = new ObstacleManager();
+    this.particleManager = new ParticleManager(this.obstacleManager);
+    this.eraserTool = new EraserTool();
+    
+    this.background = new CanvasBackground(
+      this.canvasManager.getProject().view.bounds,
+      this.canvasManager.handleResize.bind(this.canvasManager)
+    );
+    
+    this.svgManager = new SVGManager(
+      this.canvasManager.getProject(),
+      this.particleManager,
+      this.obstacleManager
+    );
   }
 
+  // Delegate methods to appropriate managers
+  loadSVG(svgElement: SVGElement): void {
+    this.svgManager.loadSVG(svgElement);
+  }
+
+
+  
   getClosedPaths(): paper.Path[] {
     return this.obstacleManager.getAllClosedPaths();
   }
   
   getViewDimensions(): { width: number; height: number } {
-    return {
-        width: paper.view.viewSize.width,
-        height: paper.view.viewSize.height
-    };
-}
-
-  constructor(canvas: HTMLCanvasElement, onResize?: (width: number, height: number) => void) {
-    this.onResizeCallback = onResize;
-    
-    paper.setup(canvas);
-    paper.view.viewSize = new paper.Size(500, 400);
-    this.project = paper.project;
-    
-    this.obstacleManager = new obstacleManager();
-    this.particleManager = new ParticleManager(this.obstacleManager);
-    this.eraserTool = new EraserTool();
-   
-    this.background = new CanvasBackground(
-      this.project.view.bounds,
-      (width, height) => {
-        // Update Paper.js view size
-        paper.view.viewSize = new paper.Size(width, height);
-        
-        // Call the external resize callback if provided
-        if (this.onResizeCallback) {
-          this.onResizeCallback(width, height);
-        }
-      }
-    );
-    
-    paper.view.update();
+    return this.canvasManager.getViewDimensions();
   }
+
+ 
 
   setBackgroundImage(imageUrl: string): void {
     this.background.setImage(imageUrl);
   }
 
-  loadSVG(svgElement: SVGElement): void {
-    this.clear();
-    const item = this.project.importSVG(svgElement);
-    item.children.forEach((child: paper.Item) => {
-      if (child instanceof paper.Group && child.data.isParticle) {
-        const position = child.position;
-        this.createParticle(position.x, position.y);
-        child.remove();
-      } else if (child instanceof paper.Path && child.data.isObstacle) {
-        const rectangle = new paper.Path.Rectangle(child.bounds);
-        rectangle.rotation = child.rotation;
-        this.obstacleManager.importRectangle(rectangle);
-        child.remove();
-      }
-    });
-    item.remove();
-    paper.view.update();
-  }
 
 
   
@@ -90,12 +69,9 @@ export class VectorParticleSystem {
       this.obstacleManager.handleTransform(point, delta, shiftKey);
     }
   }
+
   getCanvasDimensions(): { width: number; height: number } {
-    const canvas = this.project.view.element as HTMLCanvasElement;
-    return {
-      width: canvas.width,
-      height: canvas.height
-    };
+    return this.canvasManager.getCanvasDimensions();
   }
 
   setBackgroundColor(color: string): void {
@@ -103,8 +79,8 @@ export class VectorParticleSystem {
   }
 
   createParticle(x: number, y: number): paper.Group {
-    const particleColor = this.project.view.element.dataset.particleColor || '#000000';
-    const trailColor = this.project.view.element.dataset.trailColor || '#8b8680';
+    const particleColor = this.canvasManager.getProject().view.element.dataset.particleColor || '#000000';
+    const trailColor = this.canvasManager.getProject().view.element.dataset.trailColor || '#8b8680';
     const particle = this.particleManager.createParticle(x, y, particleColor, trailColor);
     if (!particle) {
       throw new Error('Failed to create particle');
@@ -113,14 +89,14 @@ export class VectorParticleSystem {
   }
 
   updateParticles(settings: SimulationSettings): void {
-    const view = this.project.view;
+    const view = this.canvasManager.getProject().view;
     this.particleManager.updateParticles(
-      settings,  // Pass settings here
+      settings,
       view.bounds.width,
       view.bounds.height
     );
   }
-  // Rectangle-related methods
+
   startRectangle(x: number, y: number): paper.Path.Rectangle {
     return this.obstacleManager.create(x, y);
 }
@@ -173,9 +149,7 @@ export class VectorParticleSystem {
     paper.view.update();
   }
 
-  exportSVG(): string {
-    return this.project.exportSVG({ asString: true }) as string;
-  }
+ 
 
   endTransform(): void {
     if (this.obstacleManager) {
