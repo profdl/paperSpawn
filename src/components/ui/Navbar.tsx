@@ -18,6 +18,7 @@ import { useSimulation } from "../../contexts/SimulationContext";
 import { useTool } from "../../contexts/ToolContext";
 import { useProjects } from "../../hooks/useProjects";
 import { SimulationSettings } from "../../types";
+import DraggableNumberInput from "./DraggableNumberInput";
 
 interface NavbarProps {
   showUI: boolean;
@@ -35,12 +36,11 @@ export default function Navbar({
   setShowMenu,
 }: NavbarProps) {
   const { user, signOut } = useAuth();
-  const { isPaused, setIsPaused, systemRef, settings, handleRespawn } =
-    useSimulation();
-
-  const { currentTool, setTool } = useTool();
+  const { isPaused, setIsPaused, systemRef, settings, handleRespawn } = useSimulation();
+  const { currentTool, setTool, eraserProperties, updateEraserProperties } = useTool();
   const [showAuthModal, setShowAuthModal] = React.useState(false);
   const { saveProject } = useProjects();
+
 
   const handleSave = async () => {
     if (!user) {
@@ -177,17 +177,31 @@ export default function Navbar({
                 {/* Divider */}
                 <div className="w-px bg-white/20 mx-1" />
 
-                <button
-                  className={`p-1.5 rounded hover:bg-white/10 transition-colors ${
-                    currentTool === "erase" ? "bg-white/20" : ""
-                  }`}
-                  onClick={() =>
-                    setTool(currentTool === "erase" ? "none" : "erase")
-                  }
-                  title="Erase Particles (E)"
-                >
-                  <Eraser className="w-4 h-4 " />
-                </button>
+                <div className="flex items-center">
+                  <button
+                    className={`p-1.5 rounded hover:bg-white/10 transition-colors ${
+                      currentTool === "erase" ? "bg-white/20" : ""
+                    }`}
+                    onClick={() =>
+                      setTool(currentTool === "erase" ? "none" : "erase")
+                    }
+                    title="Erase Particles (E)"
+                  >
+                    <Eraser className="w-4 h-4 " />
+                  </button>
+                  {currentTool === "erase" && (
+                    <div className="flex items-center ml-1">
+                      <DraggableNumberInput
+                        value={eraserProperties.size}
+                        onChange={(value) => updateEraserProperties({ size: value })}
+                        min={5}
+                        max={100}
+                        step={1}
+                        formatValue={(v) => `${v}px`}
+                      />
+                    </div>
+                  )}
+                </div>
 
                 <button
                   className="p-1.5 rounded hover:bg-white/10 transition-colors"

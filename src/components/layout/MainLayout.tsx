@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import Navbar from '../ui/Navbar';
 import ControlPanel from '../ui/ControlPanel';
-import ToolProperties from '../ui/ToolProperties';
-import SaveProjectModal from '../ui/SaveProjectModal';
 import ProjectsDrawer from '../ui/ProjectsDrawer';
 import VerticalToolbar from '../ui/VerticalToolbar';
 import { SimulationProvider } from '../../contexts/SimulationContext';
@@ -27,7 +25,6 @@ export default function MainLayout() {
               showMenu={showMenu}
               setShowMenu={setShowMenu}
             />
-            <ToolProperties />
           </div>
           
           <div className="flex relative">
@@ -51,10 +48,7 @@ export default function MainLayout() {
             )}
           </div>
 
-          <SaveProjectModal
-            isOpen={showSaveModal}
-            onClose={() => setShowSaveModal(false)}
-          />
+
           
           <ProjectsDrawer
             isOpen={showProjectsDrawer}
