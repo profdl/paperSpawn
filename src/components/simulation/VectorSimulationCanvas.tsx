@@ -36,7 +36,6 @@ export default function VectorSimulationCanvas() {
 
   useEffect(() => {
     currentSettingsRef.current = settings;
-    console.log('Settings updated in VectorSimulationCanvas:', settings);
   }, [settings]);
 
   useEffect(() => {
@@ -82,7 +81,6 @@ export default function VectorSimulationCanvas() {
     };
   }, []);
 
-  console.log ('paintSpawnRate outside mouse event', settings.paintSpawnRate);  
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (currentTool === 'none' || !systemRef.current) return;
@@ -101,7 +99,6 @@ export default function VectorSimulationCanvas() {
         }
         break;
         case 'freehand':
-          console.log('Starting freehand path'); // Debug log
           systemRef.current.startFreehandPath(point);
           break;
       case 'paint':
@@ -135,7 +132,6 @@ export default function VectorSimulationCanvas() {
         break;
       case 'freehand':
         if (isDrawingRef.current) {
-          console.log('Continuing freehand path'); 
           systemRef.current.continueFreehandPath(point);
         }
         break;
@@ -144,7 +140,6 @@ export default function VectorSimulationCanvas() {
             const currentTime = Date.now();
             // Use the ref instead of the settings directly
             const currentSpawnRate = currentSettingsRef.current.paintSpawnRate;
-            console.log('Current paint spawn rate in move:', currentSpawnRate);
             
             const spawnDelay = Math.round(100 * (1 - (currentSpawnRate - 1) / 49));
             if (currentTime - lastSpawnTimeRef.current >= spawnDelay) {
@@ -177,7 +172,6 @@ export default function VectorSimulationCanvas() {
     if (!systemRef.current) return;
     
     if (currentTool === 'freehand' && isDrawingRef.current) {
-      console.log('Ending freehand path'); // Debug log
       systemRef.current.endFreehandPath();
     }
     

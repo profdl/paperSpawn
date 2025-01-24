@@ -56,7 +56,6 @@ export default function ProjectsDrawer({ isOpen, onClose }: ProjectsDrawerProps)
   }, [projects]);
 
   const loadProject = (project: Project) => {
-    console.log('Loading project settings:', project.name);
     try {
       // Update required settings check to match SimulationSettings interface
       const requiredSettings: (keyof SimulationSettings)[] = [
@@ -103,7 +102,6 @@ export default function ProjectsDrawer({ isOpen, onClose }: ProjectsDrawerProps)
       }
   
       updateSettings(project.settings);
-      console.log('Settings updated successfully');
       onClose();
     } catch (error) {
       console.error('Error loading project settings:', error);

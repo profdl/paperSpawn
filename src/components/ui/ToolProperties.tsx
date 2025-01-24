@@ -16,7 +16,6 @@ export default function ToolProperties() {
   };
 
   React.useEffect(() => {
-    // console.log("Settings in ToolProperties:", settings);
   }, [settings]);
 
   return (

@@ -38,10 +38,8 @@ export function SimulationProvider({
 
   const updateSetting = useCallback(
     (key: keyof SimulationSettings, value: string | number | boolean) => {
-      // console.log(`Updating setting ${key} to:`, value);
       setSettings((prev) => {
         const newSettings = { ...prev, [key]: value };
-        // console.log('New settings:', newSettings);
         return newSettings;
       });
     },
@@ -152,7 +150,6 @@ export function SimulationProvider({
   };
 
   React.useEffect(() => {
-    // console.log('Settings updated in context:', settings);
   }, [settings]);
 
   return (

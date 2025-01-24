@@ -50,7 +50,6 @@ clearObstacles(): void {
   }
 
   startFreehandPath(point: paper.Point): void {
-    console.log('RM: Starting freehand path'); // Debug log
     this.currentPath = new paper.Path({
       segments: [point],
       strokeColor: '#000000',
@@ -62,7 +61,6 @@ clearObstacles(): void {
   }
 
   continueFreehandPath(point: paper.Point): void {
-    console.log('RM: Continuing freehand path', this.currentPath ? 'path exists' : 'no path'); // Debug log
     if (this.currentPath) {
       const lastPoint = this.currentPath.lastSegment.point;
       const minDistance = 5;
@@ -74,9 +72,7 @@ clearObstacles(): void {
   }
 
   endFreehandPath(): void {
-    console.log('RM: Ending freehand path', this.currentPath ? 'path exists' : 'no path');
     if (this.currentPath && this.currentPath.segments.length >= 3) {
-      console.log('RM: Path has enough segments:', this.currentPath.segments.length);
       
       const firstPoint = this.currentPath.firstSegment.point;
       const lastPoint = this.currentPath.lastSegment.point;
@@ -91,21 +87,17 @@ clearObstacles(): void {
       this.currentPath.closed = true;
       
       // Log before and after segments count
-      console.log('Before smooth/simplify:', this.currentPath.segments.length);
       this.currentPath.smooth({ type: 'continuous' });
       this.currentPath.simplify(25); 
-      console.log('After smooth/simplify:', this.currentPath.segments.length);
       
       this.currentPath.fillColor = new paper.Color('#00000010');
       this.currentPath.strokeColor = new paper.Color('#000000');
       this.currentPath.strokeWidth = 1;
       
       this.paths.push(this.currentPath);
-      console.log('RM: Added closed path. Segments:', this.currentPath.segments.length, 'Closed:', this.currentPath.closed);
       
       this.currentPath = null;
     } else if (this.currentPath) {
-      console.log('RM: Path too short, removing');
       this.currentPath.remove();
       this.currentPath = null;
     }

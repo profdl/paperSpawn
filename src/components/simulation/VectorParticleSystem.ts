@@ -40,7 +40,9 @@ export class VectorParticleSystem {
     this.svgManager.loadSVG(svgElement);
   }
 
-
+  exportSVG(): string {
+    return this.svgManager.exportSVG();
+  }
   
   getClosedPaths(): paper.Path[] {
     return this.obstacleManager.getAllClosedPaths();
