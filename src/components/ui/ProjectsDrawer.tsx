@@ -133,7 +133,7 @@ export default function ProjectsDrawer({ isOpen, onClose }: ProjectsDrawerProps)
       >
         <div className="h-full flex flex-col">
           <div className="flex items-center justify-between p-4 border-b border-white/10">
-            <h2 className="text-white text-lg font-medium">Saved Projects</h2>
+            <h2 className="text-white text-lg font-medium">Saved Settings</h2>
             <button
               onClick={onClose}
               className="p-1 rounded hover:bg-white/10 transition-colors"

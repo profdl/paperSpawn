@@ -75,6 +75,18 @@ export default function VerticalToolbar() {
           <Square className="w-4 h-4" />
         </button>
 
+
+
+        <button
+          className="p-2 rounded hover:bg-white/10 transition-colors"
+          onClick={handleClearObstacles}
+          title="Clear Obstacles"
+        >
+          <Trash className="w-4 h-4" />
+        </button>
+
+<div className="p-2"></div>
+
         <label
           className="p-2 rounded hover:bg-white/10 transition-colors cursor-pointer"
           title="Upload Background Image"
@@ -87,14 +99,6 @@ export default function VerticalToolbar() {
             onChange={handleImageUpload}
           />
         </label>
-
-        <button
-          className="p-2 rounded hover:bg-white/10 transition-colors"
-          onClick={handleClearObstacles}
-          title="Clear Obstacles"
-        >
-          <Trash className="w-4 h-4" />
-        </button>
 
         <div className="relative">
           <button

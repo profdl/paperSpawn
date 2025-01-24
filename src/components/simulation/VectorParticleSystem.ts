@@ -40,6 +40,11 @@ export class VectorParticleSystem {
     this.svgManager.loadSVG(svgElement);
   }
 
+  clearObstacles(): void {
+    this.obstacleManager.clearObstacles();
+  }
+
+
   exportSVG(): string {
     return this.svgManager.exportSVG();
   }

@@ -275,7 +275,7 @@ export default function Navbar({
               }}
             >
               <FolderOpen className="w-4 h-4" />
-              Open Projects
+              Open Settings
             </button>
             <button
               className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/10 flex items-center gap-2"
@@ -285,7 +285,7 @@ export default function Navbar({
               }}
             >
               <Save className="w-4 h-4" />
-              Save Project
+              Save Settings
             </button>
             <button
               className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/10 flex items-center gap-2"
