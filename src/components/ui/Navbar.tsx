@@ -263,9 +263,9 @@ export default function Navbar({
         </div>
       </nav>
 
-      {/* Menu Dropdown */}
-      {showMenu && (
-        <div className="fixed top-10 left-0 z-50 w-48 bg-black/90 backdrop-blur-sm border border-white/10 rounded-br-lg shadow-lg">
+    {/* Menu Dropdown */}
+    {showMenu && (
+        <div className="fixed top-10 left-4 z-50 w-48 bg-black/90 backdrop-blur-sm border border-white/10 rounded-br-lg shadow-lg sm:left-[calc(6rem+16px)] lg:left-[calc(8rem+16px)]">
           <div className="py-2">
             <button
               className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/10 flex items-center gap-2"
