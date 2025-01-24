@@ -40,6 +40,11 @@ export interface SimulationSettings {
   wanderStrength: number;
   wanderSpeed: number;
   wanderRadius: number;
+  //Avoidance settings
+  avoidanceEnabled: boolean;
+  avoidanceDistance: number;
+  avoidanceStrength: number;
+  avoidancePushMultiplier: number;
 }
 
 export type PresetType = 'start' ;
@@ -85,7 +90,11 @@ export const presets: Record<PresetType, SimulationSettings> = {
     wanderEnabled: true,       
     wanderStrength: 0,        
     wanderSpeed: 1.0,
-    wanderRadius: 50
+    wanderRadius: 50,
+    avoidanceEnabled: true,
+    avoidanceDistance: 30,
+    avoidanceStrength: 1.0,
+    avoidancePushMultiplier: 3.0,
   }
 };
 

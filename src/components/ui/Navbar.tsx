@@ -87,6 +87,11 @@ export default function Navbar({
         wanderSpeed: settings.wanderSpeed,
         wanderRadius: settings.wanderRadius,
         paintSpawnRate: settings.paintSpawnRate,
+        // Add the missing avoidance properties
+        avoidanceEnabled: settings.avoidanceEnabled,
+        avoidanceDistance: settings.avoidanceDistance,
+        avoidanceStrength: settings.avoidanceStrength,
+        avoidancePushMultiplier: settings.avoidancePushMultiplier,
       };
 
       const svgContent = systemRef.current.exportSVG();
@@ -126,9 +131,6 @@ export default function Navbar({
     URL.revokeObjectURL(link.href);
   };
 
-
-
-
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 bg-black/70 backdrop-blur-sm h-10">
@@ -152,9 +154,11 @@ export default function Navbar({
                   className={`p-1.5 rounded hover:bg-white/10 transition-colors ${
                     currentTool === "paint" ? "bg-white/20" : ""
                   } flex items-center gap-1`}
-                  onClick={() =>
-                    setTool(currentTool === "paint" ? "none" : "paint")
-                  }
+                  onClick={() => {
+                    if (currentTool !== "paint") {
+                      setTool("paint");
+                    }
+                  }}
                   title="Paint Particles (P)"
                 >
                   <Wand className="w-4 h-4 " />
@@ -220,8 +224,6 @@ export default function Navbar({
                     <Pause className="w-4 h-4" />
                   )}
                 </button>
-
-
               </div>
             </div>
 

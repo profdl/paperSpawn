@@ -114,14 +114,12 @@ export class VectorParticleSystem {
 
   updateParticles(settings: SimulationSettings): void {
     const view = this.project.view;
-    // Simplified call without passing avoidance calculation
     this.particleManager.updateParticles(
-      settings, 
-      view.bounds.width, 
+      settings,  // Pass settings here
+      view.bounds.width,
       view.bounds.height
     );
   }
-
   // Rectangle-related methods
   startRectangle(x: number, y: number): paper.Path.Rectangle {
     return this.obstacleManager.create(x, y);

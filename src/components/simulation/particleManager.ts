@@ -78,7 +78,7 @@ export class ParticleManager {
       ParticleUpdater.update(
         particle as paper.Group,
         this.particles,
-        settings,
+        settings,  // Pass settings here
         width,
         height,
         this.obstacleManager

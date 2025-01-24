@@ -1,12 +1,16 @@
 import paper from 'paper';
+import { SimulationSettings } from '../../../types';
 import { obstacleManager } from '../obstacleManager';
 
 export class AvoidanceForce {
-  static calculate(position: paper.Point, obstacleManager: obstacleManager): paper.Point {
-    const avoidanceForce = new paper.Point(0, 0);
-    const avoidanceDistance = 30;
-    const maxForce = 1.0;
+  static calculate(
+    position: paper.Point, 
+    obstacleManager: obstacleManager,
+    settings: SimulationSettings
+  ): paper.Point {
+    if (!settings.avoidanceEnabled) return new paper.Point(0, 0);
 
+    const avoidanceForce = new paper.Point(0, 0);
     const obstacles = obstacleManager.getAllClosedPaths();
 
     for (const obstacle of obstacles) {
@@ -14,16 +18,20 @@ export class AvoidanceForce {
       const diff = position.subtract(nearestPoint);
       const distance = diff.length;
 
-      if (distance < avoidanceDistance) {
+      if (distance < settings.avoidanceDistance) {
         const isInside = obstacle.contains(position);
 
         if (isInside) {
           avoidanceForce.set(
-            avoidanceForce.x + diff.x * maxForce * 3,
-            avoidanceForce.y + diff.y * maxForce * 3
+            avoidanceForce.x + diff.x * settings.avoidanceStrength * settings.avoidancePushMultiplier,
+            avoidanceForce.y + diff.y * settings.avoidanceStrength * settings.avoidancePushMultiplier
           );
         } else {
-          const force = Math.min(maxForce, Math.pow(avoidanceDistance - distance, 2) / (avoidanceDistance * avoidanceDistance));
+          const force = Math.min(
+            settings.avoidanceStrength,
+            Math.pow(settings.avoidanceDistance - distance, 2) / 
+            (settings.avoidanceDistance * settings.avoidanceDistance)
+          );
           const normalizedForce = diff.normalize().multiply(force);
           avoidanceForce.set(
             avoidanceForce.x + normalizedForce.x,
@@ -33,8 +41,8 @@ export class AvoidanceForce {
       }
     }
 
-    if (avoidanceForce.length > maxForce) {
-      avoidanceForce.length = maxForce;
+    if (avoidanceForce.length > settings.avoidanceStrength) {
+      avoidanceForce.length = settings.avoidanceStrength;
     }
 
     return avoidanceForce;

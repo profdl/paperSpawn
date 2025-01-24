@@ -1,7 +1,6 @@
 import paper from 'paper';
 import { TransformHandles } from './transformHandles';
-
-
+import { SimulationSettings } from '../../types';  
 
 export class obstacleManager {
   private rectangles: paper.Path.Rectangle[] = [];
@@ -75,7 +74,7 @@ clearObstacles(): void {
   }
 
   endFreehandPath(): void {
-    console.log('RM: Ending freehand path', this.currentPath ? 'path exists' : 'no path'); // Debug log
+    console.log('RM: Ending freehand path', this.currentPath ? 'path exists' : 'no path');
     if (this.currentPath && this.currentPath.segments.length >= 3) {
       console.log('RM: Path has enough segments:', this.currentPath.segments.length);
       
@@ -88,10 +87,14 @@ clearObstacles(): void {
       } else {
         this.currentPath.add(firstPoint);
       }
-
+  
       this.currentPath.closed = true;
+      
+      // Log before and after segments count
+      console.log('Before smooth/simplify:', this.currentPath.segments.length);
       this.currentPath.smooth({ type: 'continuous' });
-      this.currentPath.simplify(2.5);
+      this.currentPath.simplify(25); 
+      console.log('After smooth/simplify:', this.currentPath.segments.length);
       
       this.currentPath.fillColor = new paper.Color('#00000010');
       this.currentPath.strokeColor = new paper.Color('#000000');
@@ -108,10 +111,10 @@ clearObstacles(): void {
     }
   }
 
-  calculateAvoidanceForce(position: paper.Point, ): paper.Point {
+  calculateAvoidanceForce(position: paper.Point, settings: SimulationSettings): paper.Point {
+    if (!settings.avoidanceEnabled) return new paper.Point(0, 0);
+    
     const avoidanceForce = new paper.Point(0, 0);
-    const avoidanceDistance = 30;
-    const maxForce = 1.0;
 
     // Check paths
     for (const path of this.paths) {
@@ -122,12 +125,16 @@ clearObstacles(): void {
         const diff = position.subtract(nearestPoint);
         const distance = diff.length;
 
-        if (distance < avoidanceDistance || isInside) {
+        if (distance < settings.avoidanceDistance || isInside) {
             let forceVector;
             if (isInside) {
-                forceVector = diff.multiply(maxForce * 3);
+                forceVector = diff.multiply(settings.avoidanceStrength * settings.avoidancePushMultiplier);
             } else {
-                const force = Math.min(maxForce, Math.pow(avoidanceDistance - distance, 2) / (avoidanceDistance * avoidanceDistance));
+                const force = Math.min(
+                    settings.avoidanceStrength,
+                    Math.pow(settings.avoidanceDistance - distance, 2) / 
+                    (settings.avoidanceDistance * settings.avoidanceDistance)
+                );
                 forceVector = diff.normalize().multiply(force);
             }
             avoidanceForce.add(forceVector);
@@ -145,12 +152,16 @@ clearObstacles(): void {
         const distance = diff.length;
         const isInside = bounds.contains(position);
 
-        if (distance < avoidanceDistance || isInside) {
+        if (distance < settings.avoidanceDistance || isInside) {
             let forceVector;
             if (isInside) {
-                forceVector = diff.multiply(maxForce * 3);
+                forceVector = diff.multiply(settings.avoidanceStrength * settings.avoidancePushMultiplier);
             } else {
-                const force = Math.min(maxForce, Math.pow(avoidanceDistance - distance, 2) / (avoidanceDistance * avoidanceDistance));
+                const force = Math.min(
+                    settings.avoidanceStrength,
+                    Math.pow(settings.avoidanceDistance - distance, 2) / 
+                    (settings.avoidanceDistance * settings.avoidanceDistance)
+                );
                 forceVector = diff.normalize().multiply(force);
             }
             avoidanceForce.add(forceVector);
@@ -158,8 +169,8 @@ clearObstacles(): void {
     }
 
     // Limit the maximum force
-    if (avoidanceForce.length > maxForce) {
-        avoidanceForce.length = maxForce;
+    if (avoidanceForce.length > settings.avoidanceStrength) {
+        avoidanceForce.length = settings.avoidanceStrength;
     }
 
     return avoidanceForce;

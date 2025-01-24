@@ -215,14 +215,14 @@ export default function VectorSimulationCanvas() {
 
     const animate = () => {
       if (!isPaused) {
-        systemRef.current?.updateParticles(settings);
+        systemRef.current?.updateParticles(settings); // Make sure settings are passed
       }
       animationFrameRef.current = requestAnimationFrame(animate);
     };
-
+  
     animate();
     paper.view.update();
-
+  
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);

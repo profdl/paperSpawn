@@ -1,6 +1,6 @@
-import { useSimulation } from '../../contexts/SimulationContext';
-import DraggableNumberInput from '../ui/DraggableNumberInput';
-import { BoundaryBehavior } from '../../types';
+import { useSimulation } from "../../contexts/SimulationContext";
+import DraggableNumberInput from "../ui/DraggableNumberInput";
+import { BoundaryBehavior } from "../../types";
 
 export default function BehaviorControls() {
   const { settings, updateSetting } = useSimulation();
@@ -16,10 +16,12 @@ export default function BehaviorControls() {
           {/* Separation Controls */}
           <div>
             <div className="control">
-              <label className="inline-block w-[80px] text-[10px] mb-1">Separation</label>
+              <label className="inline-block w-[80px] text-[10px] mb-1">
+                Separation
+              </label>
               <DraggableNumberInput
                 value={settings.separation}
-                onChange={(value) => updateSetting('separation', value)}
+                onChange={(value) => updateSetting("separation", value)}
                 min={0}
                 max={1}
                 step={0.01}
@@ -30,7 +32,7 @@ export default function BehaviorControls() {
               <label className="inline-block w-[80px] text-[10px] "></label>
               <DraggableNumberInput
                 value={settings.separationDistance}
-                onChange={(value) => updateSetting('separationDistance', value)}
+                onChange={(value) => updateSetting("separationDistance", value)}
                 min={1}
                 max={100}
                 step={1}
@@ -42,10 +44,12 @@ export default function BehaviorControls() {
           {/* Cohesion Controls */}
           <div>
             <div className="control">
-              <label className="inline-block w-[80px] text-[10px] mb-1">Cohesion</label>
+              <label className="inline-block w-[80px] text-[10px] mb-1">
+                Cohesion
+              </label>
               <DraggableNumberInput
                 value={settings.cohesion}
-                onChange={(value) => updateSetting('cohesion', value)}
+                onChange={(value) => updateSetting("cohesion", value)}
                 min={0}
                 max={1}
                 step={0.01}
@@ -56,7 +60,7 @@ export default function BehaviorControls() {
               <label className="inline-block w-[80px] text-[10px]"></label>
               <DraggableNumberInput
                 value={settings.cohesionDistance}
-                onChange={(value) => updateSetting('cohesionDistance', value)}
+                onChange={(value) => updateSetting("cohesionDistance", value)}
                 min={1}
                 max={200}
                 step={1}
@@ -68,10 +72,12 @@ export default function BehaviorControls() {
           {/* Alignment Controls */}
           <div>
             <div className="control">
-              <label className="inline-block w-[80px] text-[10px] mb-1">Alignment</label>
+              <label className="inline-block w-[80px] text-[10px] mb-1">
+                Alignment
+              </label>
               <DraggableNumberInput
                 value={settings.alignment}
-                onChange={(value) => updateSetting('alignment', value)}
+                onChange={(value) => updateSetting("alignment", value)}
                 min={0}
                 max={1}
                 step={0.01}
@@ -82,7 +88,7 @@ export default function BehaviorControls() {
               <label className="inline-block w-[80px] text-[10px]"></label>
               <DraggableNumberInput
                 value={settings.alignmentDistance}
-                onChange={(value) => updateSetting('alignmentDistance', value)}
+                onChange={(value) => updateSetting("alignmentDistance", value)}
                 min={1}
                 max={150}
                 step={1}
@@ -100,10 +106,12 @@ export default function BehaviorControls() {
         </div>
         <div className="space-y-1.5">
           <div className="control">
-            <label className="inline-block w-[80px] text-[10px]">Strength</label>
+            <label className="inline-block w-[80px] text-[10px]">
+              Strength
+            </label>
             <DraggableNumberInput
               value={settings.wanderStrength}
-              onChange={(value) => updateSetting('wanderStrength', value)}
+              onChange={(value) => updateSetting("wanderStrength", value)}
               min={0}
               max={3}
               step={0.01}
@@ -114,7 +122,7 @@ export default function BehaviorControls() {
             <label className="inline-block w-[80px] text-[10px]">Speed</label>
             <DraggableNumberInput
               value={settings.wanderSpeed}
-              onChange={(value) => updateSetting('wanderSpeed', value)}
+              onChange={(value) => updateSetting("wanderSpeed", value)}
               min={0}
               max={4}
               step={0.1}
@@ -125,7 +133,7 @@ export default function BehaviorControls() {
             <label className="inline-block w-[80px] text-[10px]">Radius</label>
             <DraggableNumberInput
               value={settings.wanderRadius}
-              onChange={(value) => updateSetting('wanderRadius', value)}
+              onChange={(value) => updateSetting("wanderRadius", value)}
               min={0}
               max={300}
               step={1}
@@ -145,7 +153,7 @@ export default function BehaviorControls() {
             <label className="inline-block w-[80px] text-[10px]">Angle</label>
             <DraggableNumberInput
               value={settings.externalForceAngle}
-              onChange={(value) => updateSetting('externalForceAngle', value)}
+              onChange={(value) => updateSetting("externalForceAngle", value)}
               min={0}
               max={360}
               step={1}
@@ -153,10 +161,14 @@ export default function BehaviorControls() {
             />
           </div>
           <div className="control">
-            <label className="inline-block w-[80px] text-[10px]">Randomize</label>
+            <label className="inline-block w-[80px] text-[10px]">
+              Randomize
+            </label>
             <DraggableNumberInput
               value={settings.externalForceAngleRandomize}
-              onChange={(value) => updateSetting('externalForceAngleRandomize', value)}
+              onChange={(value) =>
+                updateSetting("externalForceAngleRandomize", value)
+              }
               min={0}
               max={180}
               step={1}
@@ -164,14 +176,79 @@ export default function BehaviorControls() {
             />
           </div>
           <div className="control">
-            <label className="inline-block w-[80px] text-[10px]">Strength</label>
+            <label className="inline-block w-[80px] text-[10px]">
+              Strength
+            </label>
             <DraggableNumberInput
               value={settings.externalForceStrength}
-              onChange={(value) => updateSetting('externalForceStrength', value)}
+              onChange={(value) =>
+                updateSetting("externalForceStrength", value)
+              }
               min={0}
               max={2}
               step={0.01}
               formatValue={(v) => `${(v * 100).toFixed(0)}%`}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Obstacle Avoidance Section */}
+      <div>
+        <div className="text-[10px] uppercase tracking-wider mb-2 text-white/60">
+          Obstacle Avoidance
+        </div>
+        <div className="space-y-1.5">
+          <div className="control">
+            <label className="inline-block w-[80px] text-[10px]">Enable</label>
+            <input
+              type="checkbox"
+              checked={settings.avoidanceEnabled}
+              onChange={(e) =>
+                updateSetting("avoidanceEnabled", e.target.checked)
+              }
+              className="ml-2"
+            />
+          </div>
+          <div className="control">
+            <label className="inline-block w-[80px] text-[10px]">
+              Distance
+            </label>
+            <DraggableNumberInput
+              value={settings.avoidanceDistance}
+              onChange={(value) => updateSetting("avoidanceDistance", value)}
+              min={0}
+              max={100}
+              step={1}
+              formatValue={(v) => `${v}px`}
+            />
+          </div>
+          <div className="control">
+            <label className="inline-block w-[80px] text-[10px]">
+              Strength
+            </label>
+            <DraggableNumberInput
+              value={settings.avoidanceStrength}
+              onChange={(value) => updateSetting("avoidanceStrength", value)}
+              min={0}
+              max={2}
+              step={0.01}
+              formatValue={(v) => `${(v * 100).toFixed(0)}%`}
+            />
+          </div>
+          <div className="control">
+            <label className="inline-block w-[80px] text-[10px]">
+              Push Force
+            </label>
+            <DraggableNumberInput
+              value={settings.avoidancePushMultiplier}
+              onChange={(value) =>
+                updateSetting("avoidancePushMultiplier", value)
+              }
+              min={1}
+              max={5}
+              step={0.1}
+              formatValue={(v) => `${v}x`}
             />
           </div>
         </div>
@@ -185,7 +262,12 @@ export default function BehaviorControls() {
         <select
           className="w-full bg-black/50 border border-white/20 rounded px-2 py-1 text-xs"
           value={settings.boundaryBehavior}
-          onChange={(e) => updateSetting('boundaryBehavior', e.target.value as BoundaryBehavior)}
+          onChange={(e) =>
+            updateSetting(
+              "boundaryBehavior",
+              e.target.value as BoundaryBehavior
+            )
+          }
         >
           <option value="travel-off">Travel Off</option>
           <option value="wrap-around">Wrap Around</option>
