@@ -57,6 +57,8 @@ export interface SimulationSettings {
   avoidanceDistance: number;
   avoidanceStrength: number;
   avoidancePushMultiplier: number;
+
+  bounceEnergy: number;
 }
 
 export type PresetType = 'start' ;
@@ -107,6 +109,7 @@ export const presets: Record<PresetType, SimulationSettings> = {
     avoidanceDistance: 30,
     avoidanceStrength: 1.0,
     avoidancePushMultiplier: 3.0,
+    bounceEnergy: 10,
   }
 };
 

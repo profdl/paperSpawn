@@ -34,98 +34,136 @@ export class ParticleUpdater {
       trail.visible = false;
     }
 
-    if (particle.data.state === 'active') {
-      let finalForce = new paper.Point(0, 0);
-      let totalWeight = 0;
+// Track reflection state in particle data
+if (!particle.data.hasOwnProperty('isReflected')) {
+  particle.data.isReflected = false;
+}
 
-      const bounceComplete = !particle.data.bounceCooldown ||
-        Date.now() > particle.data.bounceCooldown;
+if (particle.data.state === 'active') {
+  let finalForce = new paper.Point(0, 0);
+  let totalWeight = 0;
 
-      if (bounceComplete) {
-        if (settings.flockingEnabled) {
-          const flockingForces = FlockingForce.calculate(particle, particles, settings);
+  const bounceComplete = !particle.data.bounceCooldown ||
+    Date.now() > particle.data.bounceCooldown;
 
-          const separationForce = flockingForces.separation.multiply(settings.separation);
-          const cohesionForce = flockingForces.cohesion.multiply(settings.cohesion);
-          const alignmentForce = flockingForces.alignment.multiply(settings.alignment);
+  if (bounceComplete) {
+    if (settings.flockingEnabled) {
+      const flockingForces = FlockingForce.calculate(particle, particles, settings);
+      
+      // Process each flocking force
+      const forces = [
+        { force: flockingForces.separation.multiply(settings.separation), weight: settings.separation },
+        { force: flockingForces.cohesion.multiply(settings.cohesion), weight: settings.cohesion },
+        { force: flockingForces.alignment.multiply(settings.alignment), weight: settings.alignment }
+      ];
 
-          if (separationForce.length > 0) {
-            finalForce = finalForce.add(separationForce);
-            totalWeight += settings.separation;
+      for (const { force, weight } of forces) {
+        if (force.length > 0) {
+          if (particle.data.isReflected) {
+            // Use velocity directly for dot product
+            const dot = force.dot(velocity.normalize());
+            // If the force is opposing the velocity, reduce its effect but don't eliminate it
+            const blendFactor = dot < 0 ? 0.3 : 1.0;
+            finalForce = finalForce.add(force.multiply(blendFactor));
+          } else {
+            finalForce = finalForce.add(force);
           }
-          if (cohesionForce.length > 0) {
-            finalForce = finalForce.add(cohesionForce);
-            totalWeight += settings.cohesion;
-          }
-          if (alignmentForce.length > 0) {
-            finalForce = finalForce.add(alignmentForce);
-            totalWeight += settings.alignment;
-          }
-        }
-
-        if (settings.wanderEnabled && settings.wanderStrength > 0) {
-          const wanderForce = WanderForce.calculate(particle, settings);
-          if (wanderForce.length > 0) {
-            finalForce = finalForce.add(wanderForce.multiply(settings.wanderStrength));
-            totalWeight += settings.wanderStrength;
-          }
+          totalWeight += weight;
         }
       }
+    }
 
-      if (settings.externalForceStrength > 0) {
-        const externalForce = ExternalForce.calculate(settings, particle);
-        if (externalForce.length > 0) {
+    if (settings.wanderEnabled && settings.wanderStrength > 0) {
+      const wanderForce = WanderForce.calculate(particle, settings);
+      if (wanderForce.length > 0) {
+        if (particle.data.isReflected) {
+          const dot = wanderForce.dot(velocity.normalize());
+          const blendFactor = dot < 0 ? 0.3 : 1.0;
+          finalForce = finalForce.add(wanderForce.multiply(settings.wanderStrength * blendFactor));
+        } else {
+          finalForce = finalForce.add(wanderForce.multiply(settings.wanderStrength));
+        }
+        totalWeight += settings.wanderStrength;
+      }
+    }
+
+    if (settings.externalForceStrength > 0) {
+      const externalForce = ExternalForce.calculate(settings, particle);
+      if (externalForce.length > 0) {
+        if (particle.data.isReflected) {
+          const dot = externalForce.dot(velocity.normalize());
+          const blendFactor = dot < 0 ? 0.3 : 1.0;
+          finalForce = finalForce.add(externalForce.multiply(settings.externalForceStrength * blendFactor));
+        } else {
           finalForce = finalForce.add(externalForce.multiply(settings.externalForceStrength));
-          totalWeight += settings.externalForceStrength;
         }
+        totalWeight += settings.externalForceStrength;
       }
+    }
+  }
 
-      if (totalWeight > 0) {
-        finalForce = finalForce.divide(totalWeight);
-      }
+  if (totalWeight > 0) {
+    finalForce = finalForce.divide(totalWeight);
+  }
 
-      finalForce = finalForce.multiply(settings.speed);
+  finalForce = finalForce.multiply(settings.speed);
 
-      const avoidanceForce = AvoidanceForce.calculate(position, obstacleManager, settings);
-      finalForce = finalForce.add(avoidanceForce);
+  // Apply avoidance force normally
+  const avoidanceForce = AvoidanceForce.calculate(point.position, obstacleManager, settings);
+  finalForce = finalForce.add(avoidanceForce);
 
-      velocity = velocity.add(finalForce);
+  // Blend the final force with the current velocity for reflected particles
+  if (particle.data.isReflected) {
+    // Blend current velocity with new forces
+    velocity = velocity.multiply(0).add(finalForce.multiply(-1));
+  } else {
+    velocity = velocity.add(finalForce);
+  }
 
-      const maxVelocity = settings.speed * 1;
-      if (velocity.length > maxVelocity) {
-        velocity = velocity.normalize().multiply(maxVelocity);
-      }
+  // Speed control
+  if (particle.data.isReflected) {
+    const currentSpeed = particle.data.reflectedSpeed || (settings.speed * 1);
+    velocity = velocity.normalize().multiply(currentSpeed);
+  } else {
+    const maxVelocity = settings.speed * 1;
+    if (velocity.length > maxVelocity) {
+      velocity = velocity.normalize().multiply(maxVelocity);
+    }
+  }
 
-      const newPosition = point.position.add(velocity);
+
+
+  const newPosition = point.position.add(velocity);
+
+
 
       switch (settings.boundaryBehavior) {
+        case 'reflect':
+          let reflected = false;
+          
+          if (newPosition.x < 0 || newPosition.x > width) {
+            velocity.x *= -1;
+            newPosition.x = newPosition.x < 0 ? 0 : width;
+            reflected = true;
+          }
+          
+          if (newPosition.y < 0 || newPosition.y > height) {
+            velocity.y *= -1;
+            newPosition.y = newPosition.y < 0 ? 0 : height;
+            reflected = true;
+          }
+          
+          if (reflected) {
+            particle.data.isReflected = true;
+            particle.data.reflectedSpeed = velocity.length;
+            particle.data.velocity = velocity;
+          }
+          break;
+
         case 'wrap-around':
           newPosition.x = ((newPosition.x + width) % width);
           newPosition.y = ((newPosition.y + height) % height);
           break;
-
-          case 'reflect':
-            // Check and handle reflection for X boundaries
-            if (newPosition.x < 0) {
-              newPosition.x = -newPosition.x; // Mirror position back into bounds
-              velocity.x = Math.abs(velocity.x); // Ensure velocity is pointing inward
-            } else if (newPosition.x > width) {
-              newPosition.x = width - (newPosition.x - width); // Mirror position back
-              velocity.x = -Math.abs(velocity.x); // Ensure velocity is pointing inward
-            }
-  
-            // Check and handle reflection for Y boundaries
-            if (newPosition.y < 0) {
-              newPosition.y = -newPosition.y; // Mirror position back into bounds
-              velocity.y = Math.abs(velocity.y); // Ensure velocity is pointing inward
-            } else if (newPosition.y > height) {
-              newPosition.y = height - (newPosition.y - height); // Mirror position back
-              velocity.y = -Math.abs(velocity.y); // Ensure velocity is pointing inward
-            }
-            break;
-  
-       
-       
             case 'stop':
           if (newPosition.x < 0 || newPosition.x > width ||
               newPosition.y < 0 || newPosition.y > height) {
