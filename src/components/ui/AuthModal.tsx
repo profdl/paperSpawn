@@ -70,7 +70,7 @@ export default function AuthModal({ isOpen, onClose }: Props) {
 
               <form onSubmit={handleSubmit} className="mt-4">
                 {error && (
-                  <div className="mb-4 p-2 text-sm text-red-600 bg-red-50 rounded">
+                  <div className="mb-4 p-2 text-sm text-red-400 bg-red-50 rounded">
                     {error}
                   </div>
                 )}
@@ -108,14 +108,14 @@ export default function AuthModal({ isOpen, onClose }: Props) {
                 <div className="mt-6 flex flex-col gap-2">
                   <button
                     type="submit"
-                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-400 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     {isLogin ? 'Sign In' : 'Create Account'}
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsLogin(!isLogin)}
-                    className="text-sm text-indigo-600 hover:text-indigo-500"
+                    className="text-sm text-indigo-400 hover:text-indigo-500"
                   >
                     {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
                   </button>

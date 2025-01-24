@@ -7,7 +7,7 @@ export class CanvasManager {
   constructor(canvas: HTMLCanvasElement, onResize?: (width: number, height: number) => void) {
     this.onResizeCallback = onResize;
     paper.setup(canvas);
-    paper.view.viewSize = new paper.Size(500, 400);
+    // paper.view.viewSize = new paper.Size(500, 400);
     this.project = paper.project;
   }
 
