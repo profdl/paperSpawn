@@ -1,5 +1,5 @@
 import paper from 'paper';
-import { obstacleManager } from '../obstacleManager';
+import { ObstacleManager } from '../obstacleManager';
 
 export class ParticleCreator {
   static create(
@@ -9,7 +9,7 @@ export class ParticleCreator {
     trailColor: string,
     particleRadius: number,
     trailWidth: number,
-    obstacleManager: obstacleManager
+    obstacleManager: ObstacleManager
   ): paper.Group | null {
     const position = new paper.Point(x, y);
 

@@ -4,7 +4,7 @@ import { FlockingForce } from '../forces/FlockingForce';
 import { WanderForce } from '../forces/WanderForce';
 import { ExternalForce } from '../forces/ExternalForce';
 import { AvoidanceForce } from '../forces/AvoidanceForce';
-import { obstacleManager } from '../obstacleManager';
+import { ObstacleManager } from '../obstacleManager';
 
 export class ParticleUpdater {
   static update(
@@ -13,7 +13,7 @@ export class ParticleUpdater {
     settings: SimulationSettings,
     width: number,
     height: number,
-    obstacleManager: obstacleManager
+    obstacleManager: ObstacleManager
   ): void {
     const point = particle.children[0] as paper.Path.Circle;
     const position = point.position;  
@@ -104,18 +104,29 @@ export class ParticleUpdater {
           newPosition.y = ((newPosition.y + height) % height);
           break;
 
-        case 'reflect':
-          if (newPosition.x < 0 || newPosition.x > width) {
-            velocity.x *= -1;
-            newPosition.x = newPosition.x < 0 ? 0 : width;
-          }
-          if (newPosition.y < 0 || newPosition.y > height) {
-            velocity.y *= -1;
-            newPosition.y = newPosition.y < 0 ? 0 : height;
-          }
-          break;
-
-        case 'stop':
+          case 'reflect':
+            // Check and handle reflection for X boundaries
+            if (newPosition.x < 0) {
+              newPosition.x = -newPosition.x; // Mirror position back into bounds
+              velocity.x = Math.abs(velocity.x); // Ensure velocity is pointing inward
+            } else if (newPosition.x > width) {
+              newPosition.x = width - (newPosition.x - width); // Mirror position back
+              velocity.x = -Math.abs(velocity.x); // Ensure velocity is pointing inward
+            }
+  
+            // Check and handle reflection for Y boundaries
+            if (newPosition.y < 0) {
+              newPosition.y = -newPosition.y; // Mirror position back into bounds
+              velocity.y = Math.abs(velocity.y); // Ensure velocity is pointing inward
+            } else if (newPosition.y > height) {
+              newPosition.y = height - (newPosition.y - height); // Mirror position back
+              velocity.y = -Math.abs(velocity.y); // Ensure velocity is pointing inward
+            }
+            break;
+  
+       
+       
+            case 'stop':
           if (newPosition.x < 0 || newPosition.x > width ||
               newPosition.y < 0 || newPosition.y > height) {
             velocity.set(0, 0);
