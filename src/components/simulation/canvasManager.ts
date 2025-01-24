@@ -1,15 +1,16 @@
 import paper from 'paper';
+import { CANVAS_DIMENSIONS } from '../layout/constants';
 
 export class CanvasManager {
-  private project: paper.Project;
-  private onResizeCallback?: (width: number, height: number) => void;
-
   constructor(canvas: HTMLCanvasElement, onResize?: (width: number, height: number) => void) {
     this.onResizeCallback = onResize;
     paper.setup(canvas);
-    // paper.view.viewSize = new paper.Size(500, 400);
+    paper.view.viewSize = new paper.Size(CANVAS_DIMENSIONS.WIDTH, CANVAS_DIMENSIONS.HEIGHT);
     this.project = paper.project;
   }
+  
+  private project: paper.Project;
+  private onResizeCallback?: (width: number, height: number) => void;
 
   getViewDimensions(): { width: number; height: number } {
     return {

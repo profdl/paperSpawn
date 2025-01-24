@@ -3,6 +3,7 @@ import paper from "paper";
 import { useSimulation } from "../../contexts/SimulationContext";
 import { useTool } from "../../contexts/ToolContext";
 import { VectorParticleSystem } from "./VectorParticleSystem";
+import { CANVAS_DIMENSIONS } from '../layout/constants';
 
 interface CanvasSize {
   width: number;
@@ -19,8 +20,8 @@ export default function VectorSimulationCanvas() {
   const isInitializedRef = useRef(false);
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
   const [canvasSize, setCanvasSize] = useState<CanvasSize>({
-    width: 500,
-    height: 400,
+    width: CANVAS_DIMENSIONS.WIDTH,
+    height: CANVAS_DIMENSIONS.HEIGHT,
   });
 
   const getViewPoint = (
@@ -221,7 +222,7 @@ export default function VectorSimulationCanvas() {
 
     // Ensure view exists and is properly sized
     if (paper.view) {
-      paper.view.viewSize = new paper.Size(500, 400);
+      paper.view.viewSize = new paper.Size( CANVAS_DIMENSIONS.WIDTH, CANVAS_DIMENSIONS.HEIGHT,);
     }
 
     const animate = () => {

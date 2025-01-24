@@ -8,6 +8,8 @@ import React, {
 import { SimulationSettings, presets } from "../types";
 import { VectorParticleSystem } from "../components/simulation/VectorParticleSystem";
 import paper from "paper";
+import { CANVAS_DIMENSIONS } from '../components/layout/constants';
+
 
 interface SimulationContextType {
   settings: SimulationSettings;
@@ -52,8 +54,9 @@ export function SimulationProvider({
 
   const handleRespawn = useCallback(() => {
     if (systemRef.current) {
-      const canvasWidth = 500;
-      const canvasHeight = 400;
+      const canvasWidth = CANVAS_DIMENSIONS.WIDTH;
+      const canvasHeight = CANVAS_DIMENSIONS.HEIGHT;
+  
 
       systemRef.current.clearParticlesOnly();
 
