@@ -18,8 +18,8 @@ export default function MainLayout() {
   return (
     <SimulationProvider>
       <ToolProvider>
-      <div className="min-h-screen bg-black relative">
-      <div className="z-50">
+        <div className="min-h-screen bg-black relative">
+          <div className="z-50">
             <Navbar 
               showUI={showControlPanel} 
               onToggleUI={() => setShowControlPanel(!showControlPanel)}
@@ -31,21 +31,25 @@ export default function MainLayout() {
           </div>
           
           <div className="flex relative">
-            <div className="z-40">
+            {/* Left Toolbar */}
+            <div className="z-40 w-16 flex-shrink-0">
               <VerticalToolbar />
             </div>
-            <div className="flex-1 pt-20 pr-4 z-0"> 
+
+            {/* Center Canvas Container */}
+            <div className="flex-1 flex justify-center pt-20"> 
               <div className="relative bg-black/10 rounded-lg">
                 <VectorSimulationCanvas />
               </div>
             </div>
+
+            {/* Right Control Panel */}
+            {showControlPanel && (
+              <div className="w-[260px] flex-shrink-0">
+                <ControlPanel />
+              </div>
+            )}
           </div>
-  
-          {showControlPanel && (
-            <div className="absolute bottom-[100px] right-0 top-10">
-              <ControlPanel />
-            </div>
-          )}
 
           <SaveProjectModal
             isOpen={showSaveModal}
