@@ -22,6 +22,7 @@ export interface SimulationSettings {
   particleSize: number;
   speed: number;
   flockingEnabled: boolean;
+  externalForcesEnabled: boolean;
   separation: number;
   cohesion: number;
   alignment: number;
@@ -76,6 +77,7 @@ export const presets: Record<PresetType, SimulationSettings> = {
     particleSize: 2.5,
     speed: .6,                  
     flockingEnabled: true,
+    externalForcesEnabled: true,
     separation: .15,            
     cohesion: .10,             
     alignment: .10,              

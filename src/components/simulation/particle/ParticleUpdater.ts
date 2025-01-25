@@ -47,10 +47,10 @@ export class ParticleUpdater {
         Date.now() > particle.data.bounceCooldown;
 
       if (bounceComplete) {
+        // Only calculate flocking forces if enabled
         if (settings.flockingEnabled) {
           const flockingForces = FlockingForce.calculate(particle, particles, settings);
-
-          // Process each flocking force
+          
           const forces = [
             { force: flockingForces.separation.multiply(settings.separation), weight: settings.separation },
             { force: flockingForces.cohesion.multiply(settings.cohesion), weight: settings.cohesion },
@@ -60,9 +60,7 @@ export class ParticleUpdater {
           for (const { force, weight } of forces) {
             if (force.length > 0) {
               if (particle.data.isReflected) {
-                // Use velocity directly for dot product
                 const dot = force.dot(velocity.normalize());
-                // If the force is opposing the velocity, reduce its effect but don't eliminate it
                 const blendFactor = dot < 0 ? 0.3 : 1.0;
                 finalForce = finalForce.add(force.multiply(blendFactor));
               } else {
@@ -73,6 +71,7 @@ export class ParticleUpdater {
           }
         }
 
+        // Only calculate wander forces if enabled
         if (settings.wanderEnabled && settings.wanderStrength > 0) {
           const wanderForce = WanderForce.calculate(particle, settings);
           if (wanderForce.length > 0) {
@@ -87,7 +86,8 @@ export class ParticleUpdater {
           }
         }
 
-        if (settings.externalForceStrength > 0) {
+        // Only calculate external forces if enabled
+        if (settings.externalForcesEnabled && settings.externalForceStrength > 0) {
           const externalForce = ExternalForce.calculate(settings, particle);
           if (externalForce.length > 0) {
             if (particle.data.isReflected) {
@@ -108,9 +108,11 @@ export class ParticleUpdater {
 
       finalForce = finalForce.multiply(settings.speed);
 
-      // Apply avoidance force normally
-      const avoidanceForce = AvoidanceForce.calculate(point.position, obstacleManager, settings);
-      finalForce = finalForce.add(avoidanceForce);
+      // Only calculate avoidance forces if enabled
+      if (settings.avoidanceEnabled) {
+        const avoidanceForce = AvoidanceForce.calculate(point.position, obstacleManager, settings);
+        finalForce = finalForce.add(avoidanceForce);
+      }
 
       // Blend the final force with the current velocity for reflected particles
       if (particle.data.isReflected) {
