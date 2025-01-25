@@ -39,7 +39,6 @@ export class ParticleCreator {
     trail.add(new paper.Point(x, y));
 
     particle.addChildren([point, trail]);
-    point.bringToFront();
     particle.data = {
       velocity: new paper.Point(0, 0),
       createdAt: Date.now(),
