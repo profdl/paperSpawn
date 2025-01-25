@@ -116,6 +116,9 @@ export class VectorParticleSystem {
     this.obstacleManager.clearSelection();
   }
 
+  removeBackgroundImage(): void {
+    this.background.removeBackgroundImage();
+  }
   handleKeyboardShortcut(event: KeyboardEvent): void {
     this.obstacleManager.handleKeyboardShortcut(event);
   }

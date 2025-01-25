@@ -1,5 +1,5 @@
 import React from 'react';
-import { MousePointer, Palette, Pen, Square, ImagePlus, Trash } from "lucide-react";
+import { MousePointer, ImageOff, Palette, Pen, Square, ImagePlus, Trash } from "lucide-react";
 import { useTool } from "../../contexts/ToolContext";
 import { useSimulation } from "../../contexts/SimulationContext";
 import AppearanceControls from '../controls/AppearanceControls';
@@ -9,6 +9,7 @@ export default function VerticalToolbar() {
   const { currentTool, setTool } = useTool();
   const { systemRef } = useSimulation();
   const [showAppearanceControls, setShowAppearanceControls] = React.useState(false);
+  const [hasBackgroundImage, setHasBackgroundImage] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   const handleRectangleClick = () => {
@@ -32,8 +33,15 @@ export default function VerticalToolbar() {
     reader.onload = (event) => {
       const imageUrl = event.target?.result as string;
       systemRef.current?.setBackgroundImage(imageUrl);
+      setHasBackgroundImage(true);
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleRemoveBackgroundImage = () => {
+    if (!systemRef.current) return;
+    systemRef.current.removeBackgroundImage();
+    setHasBackgroundImage(false);
   };
 
   const handleClearObstacles = () => {
@@ -85,7 +93,7 @@ export default function VerticalToolbar() {
           <Trash className="w-4 h-4" />
         </button>
 
-<div className="p-2"></div>
+        <div className="p-2"></div>
 
         <label
           className="p-2 rounded hover:bg-white/10 transition-colors cursor-pointer"
@@ -99,6 +107,16 @@ export default function VerticalToolbar() {
             onChange={handleImageUpload}
           />
         </label>
+
+        {hasBackgroundImage && (
+          <button
+            className="p-2 rounded hover:bg-white/10 transition-colors"
+            onClick={handleRemoveBackgroundImage}
+            title="Remove Background Image"
+          >
+            <ImageOff className="w-4 h-4" />
+          </button>
+        )}
 
         <div className="relative">
           <button

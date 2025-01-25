@@ -1,4 +1,5 @@
 import paper from 'paper';
+import { CANVAS_DIMENSIONS } from '../layout/constants';
 
 export class CanvasBackground {
   private background: paper.Path.Rectangle;
@@ -22,30 +23,34 @@ export class CanvasBackground {
   }
 
   setImage(imageUrl: string): void {
-    // Remove existing background image if any
     if (this.backgroundImage) {
       this.backgroundImage.remove();
     }
-
-    // Create new raster from image URL
+  
     this.backgroundImage = new paper.Raster({
       source: imageUrl,
       position: paper.view.center
     });
-
-    // Once the image is loaded, resize canvas and scale image
+  
     this.backgroundImage.onLoad = () => {
-      // Get the image dimensions
-      const imageWidth = this.backgroundImage!.width;
-      const imageHeight = this.backgroundImage!.height;
-
-      // Resize the canvas to match image dimensions
+      const canvasWidth = CANVAS_DIMENSIONS.WIDTH; // Use constant width
+      const imageAspectRatio = this.backgroundImage!.width / this.backgroundImage!.height;
+      
+      // Calculate new dimensions maintaining aspect ratio
+      const newWidth = canvasWidth;
+      const newHeight = canvasWidth / imageAspectRatio;
+  
+      // Scale the image
+      const scale = newWidth / this.backgroundImage!.width;
+      this.backgroundImage!.scale(scale);
+  
+      // Update view and canvas size
       if (this.onCanvasResize) {
-        this.onCanvasResize(imageWidth, imageHeight);
+        this.onCanvasResize(newWidth, newHeight);
       }
-
+  
       // Update view bounds
-      paper.view.viewSize = new paper.Size(imageWidth, imageHeight);
+      paper.view.viewSize = new paper.Size(newWidth, newHeight);
       
       // Update background rectangle
       this.background.remove();
@@ -53,8 +58,8 @@ export class CanvasBackground {
         rectangle: paper.view.bounds,
         fillColor: this.background.fillColor
       });
-
-      // Position the image
+  
+      // Center the image
       this.backgroundImage!.position = paper.view.center;
       this.backgroundImage!.opacity = 1;
       this.backgroundImage!.sendToBack();
@@ -62,5 +67,24 @@ export class CanvasBackground {
       
       paper.view.update();
     };
+  }
+
+  removeBackgroundImage(): void {
+    if (this.backgroundImage) {
+      this.backgroundImage.remove();
+      this.backgroundImage = null;
+    }
+    
+    // Reset view to original dimensions if needed
+    paper.view.viewSize = new paper.Size(500, 400); // or whatever your default size is
+    
+    // Update background rectangle
+    this.background.remove();
+    this.background = new paper.Path.Rectangle({
+      rectangle: paper.view.bounds,
+      fillColor: this.background.fillColor
+    });
+    
+    paper.view.update();
   }
 }
