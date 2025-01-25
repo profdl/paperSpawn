@@ -155,39 +155,11 @@ export default function BehaviorControls() {
       />
     </div>
 
-    <div className="control">
-      <label className="inline-block w-[80px] text-[10px]">Min Distance</label>
-      <DraggableNumberInput
-        value={settings.magneticMinDistance}
-        onChange={(value) => updateSetting("magneticMinDistance", value)}
-        min={1}
-        max={50}
-        step={1}
-        formatValue={(v) => `${v}px`}
-      />
-    </div>
 
-    <div className="flex items-center justify-between">
-      <label className="text-[10px]">Use Polarity</label>
-      <Switch
-        size="xs"
-        checked={settings.magneticPolarityEnabled}
-        onCheckedChange={(checked) =>
-          updateSetting("magneticPolarityEnabled", checked)
-        }
-      />
-    </div>
 
-    <div className="flex items-center justify-between">
-      <label className="text-[10px]">Show Field</label>
-      <Switch
-        size="xs"
-        checked={settings.showMagneticField}
-        onCheckedChange={(checked) =>
-          updateSetting("showMagneticField", checked)
-        }
-      />
-    </div>
+ 
+
+   
   </div>
 )}
       </div>
