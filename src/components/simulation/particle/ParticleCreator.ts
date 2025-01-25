@@ -32,16 +32,18 @@ export class ParticleCreator {
       strokeColor: trailColor,
       strokeWidth: trailWidth,
       strokeCap: 'round',
-      opacity: 1
+      opacity: 1,
+      fillColor: null,  // Explicitly set no fill
+      closed: false     // Ensure path is not closed
     });
     trail.add(new paper.Point(x, y));
 
     particle.addChildren([point, trail]);
+    point.bringToFront();
     particle.data = {
       velocity: new paper.Point(0, 0),
       createdAt: Date.now(),
-      state: 'active',
-      activeTrail: trail 
+      state: 'active'
     };
 
     return particle;

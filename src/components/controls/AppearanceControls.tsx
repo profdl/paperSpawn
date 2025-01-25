@@ -132,20 +132,7 @@ export default function AppearanceControls({ style }: { style?: React.CSSPropert
           Particle Properties
         </div>
         <div className="space-y-1.5">
-          <div className="control">
-            <label className="inline-block w-[80px] text-[10px] text-white">Radius</label>
-            <DraggableNumberInput
-              value={settings.particleSize}
-              onChange={(value) => {
-                updateSetting('particleSize', value);
-                systemRef.current?.setParticleRadius(value);
-              }}
-              min={0.5}
-              max={10}
-              step={0.5}
-              formatValue={(v) => `${v}px`}
-            />
-          </div>
+         
           <div className="control">
             <label className="inline-block w-[80px] text-[10px] text-white">Trail Width</label>
             <DraggableNumberInput

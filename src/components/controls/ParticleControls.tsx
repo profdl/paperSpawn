@@ -3,7 +3,7 @@ import DraggableNumberInput from '../ui/DraggableNumberInput';
 import { SpawnPattern } from '../../types';
 
 export default function ParticleControls() {
-  const { settings, updateSetting } = useSimulation();
+  const { settings, updateSetting, systemRef } = useSimulation();
 
   return (
     <div className="pb-1 space-y-4">
@@ -18,17 +18,18 @@ export default function ParticleControls() {
           className="ml-4"
         />
       </div>
-          <div className="control">
-            <label className="inline-block w-[80px] text-[10px]">Spawn Rate</label>
+      <label className="inline-block w-[80px] text-[10px]">Particle Size</label>
             <DraggableNumberInput
-              value={settings.paintSpawnRate}
-              onChange={(value) => updateSetting("paintSpawnRate", value)}
-              min={1}
-              max={50}
-              step={1}
-              formatValue={(v) => `${v}`}
+              value={settings.particleSize}
+              onChange={(value) => {
+                updateSetting('particleSize', value);
+                systemRef.current?.setParticleRadius(value);
+              }}
+              min={0.5}
+              max={10}
+              step={0.5}
+              formatValue={(v) => `${v}px`}
             />
-          </div>
 
          
 
@@ -41,6 +42,17 @@ export default function ParticleControls() {
               max={1}
               step={0.01}
               formatValue={(v) => `${(v * 100).toFixed(0)}%`}
+            />
+          </div>
+          <div className="control">
+            <label className="inline-block w-[80px] text-[10px]">Active Time</label>
+            <DraggableNumberInput
+              value={settings.activeStateDuration}
+              onChange={(value) => updateSetting('activeStateDuration', value)}
+              min={0}
+              max={50000}
+              step={100}
+              formatValue={(v) => `${v}ms`}
             />
           </div>
           <div className="control">
@@ -69,18 +81,18 @@ export default function ParticleControls() {
          
         </div>
          
+
           <div className="control">
-            <label className="inline-block w-[80px] text-[10px]">Active Time</label>
+            <label className="inline-block w-[80px] text-[10px]">Spawn Rate</label>
             <DraggableNumberInput
-              value={settings.activeStateDuration}
-              onChange={(value) => updateSetting('activeStateDuration', value)}
-              min={0}
-              max={50000}
-              step={100}
-              formatValue={(v) => `${v}ms`}
+              value={settings.paintSpawnRate}
+              onChange={(value) => updateSetting("paintSpawnRate", value)}
+              min={1}
+              max={50}
+              step={1}
+              formatValue={(v) => `${v}`}
             />
           </div>
-         
           <div className="pt-3 text-[10px] uppercase tracking-wider mb-2 text-white/60">
           Batch Spawn
         </div>
