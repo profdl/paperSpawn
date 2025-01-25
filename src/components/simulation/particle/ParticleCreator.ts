@@ -40,7 +40,8 @@ export class ParticleCreator {
     particle.data = {
       velocity: new paper.Point(0, 0),
       createdAt: Date.now(),
-      state: 'active'
+      state: 'active',
+      activeTrail: trail 
     };
 
     return particle;
