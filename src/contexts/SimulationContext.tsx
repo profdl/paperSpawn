@@ -5,7 +5,8 @@ import React, {
   useState,
   useRef,
 } from "react";
-import { SimulationSettings, presets } from "../types";
+import { SimulationSettings } from "../types";
+import { presets } from "../components/simulation/presets";
 import { VectorParticleSystem } from "../components/simulation/VectorParticleSystem";
 import paper from "paper";
 import { CANVAS_DIMENSIONS } from '../components/layout/constants';

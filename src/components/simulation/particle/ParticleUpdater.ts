@@ -1,6 +1,7 @@
 import paper from 'paper';
 import { SimulationSettings } from '../../../types';
 import { FlockingForce } from '../forces/FlockingForce';
+import { MagnetismForce } from '../forces/MagnetismForce';
 import { WanderForce } from '../forces/WanderForce';
 import { ExternalForce } from '../forces/ExternalForce';
 import { AvoidanceForce } from '../forces/AvoidanceForce';
@@ -17,7 +18,6 @@ export class ParticleUpdater {
   ): void {
     const trail = particle.children[0] as paper.Path;
     const point = particle.children[1] as paper.Path.Circle;
-    const position = point.position;
     const age = Date.now() - particle.data.createdAt;
     let velocity = particle.data.velocity;
 
@@ -47,10 +47,12 @@ export class ParticleUpdater {
         Date.now() > particle.data.bounceCooldown;
 
       if (bounceComplete) {
+
+
         // Only calculate flocking forces if enabled
         if (settings.flockingEnabled) {
           const flockingForces = FlockingForce.calculate(particle, particles, settings);
-          
+
           const forces = [
             { force: flockingForces.separation.multiply(settings.separation), weight: settings.separation },
             { force: flockingForces.cohesion.multiply(settings.cohesion), weight: settings.cohesion },
@@ -68,6 +70,21 @@ export class ParticleUpdater {
               }
               totalWeight += weight;
             }
+          }
+        }
+
+        // Only calculate Magnatism forces if enabled
+        if (settings.magnetismEnabled && settings.magnetismStrength > 0) {
+          const magneticForce = MagnetismForce.calculate(particle, particles, settings);
+          if (magneticForce.length > 0) {
+            if (particle.data.isReflected) {
+              const dot = magneticForce.dot(velocity.normalize());
+              const blendFactor = dot < 0 ? 0.3 : 1.0;
+              finalForce = finalForce.add(magneticForce.multiply(settings.magnetismStrength * blendFactor));
+            } else {
+              finalForce = finalForce.add(magneticForce.multiply(settings.magnetismStrength));
+            }
+            totalWeight += settings.magnetismStrength;
           }
         }
 
@@ -100,12 +117,12 @@ export class ParticleUpdater {
             totalWeight += settings.externalForceStrength;
           }
         }
+
       }
 
       if (totalWeight > 0) {
         finalForce = finalForce.divide(totalWeight);
       }
-
       finalForce = finalForce.multiply(settings.speed);
 
       // Only calculate avoidance forces if enabled
@@ -162,43 +179,42 @@ export class ParticleUpdater {
           }
           break;
 
-          case 'wrap-around':
-            let wrapped = false;
-            
-            if (newPosition.x < 0) {
-              newPosition.x = width;
-              wrapped = true;
-            } else if (newPosition.x > width) {
-              newPosition.x = 0;
-              wrapped = true;
-            }
-            
-            if (newPosition.y < 0) {
-              newPosition.y = height;
-              wrapped = true;
-            } else if (newPosition.y > height) {
-              newPosition.y = 0;
-              wrapped = true;
-            }
-            
-            if (wrapped) {
-              // Clear existing trail
-              trail.removeSegments();
-              // Start new trail at wrapped position
-              trail.add(newPosition);
-            }
-            
-            point.position = newPosition;
-            
-            if (!wrapped && settings.paintingModeEnabled && particle.data.state === 'active') {
-              trail.visible = true;
-              trail.add(newPosition);
-              trail.smooth();
-            }
-            break;
-    
-          case 'stop':
-            case 'stop':
+        case 'wrap-around':
+          let wrapped = false;
+
+          if (newPosition.x < 0) {
+            newPosition.x = width;
+            wrapped = true;
+          } else if (newPosition.x > width) {
+            newPosition.x = 0;
+            wrapped = true;
+          }
+
+          if (newPosition.y < 0) {
+            newPosition.y = height;
+            wrapped = true;
+          } else if (newPosition.y > height) {
+            newPosition.y = 0;
+            wrapped = true;
+          }
+
+          if (wrapped) {
+            // Clear existing trail
+            trail.removeSegments();
+            // Start new trail at wrapped position
+            trail.add(newPosition);
+          }
+
+          point.position = newPosition;
+
+          if (!wrapped && settings.paintingModeEnabled && particle.data.state === 'active') {
+            trail.visible = true;
+            trail.add(newPosition);
+            trail.smooth();
+          }
+          break;
+
+        case 'stop':
           if (newPosition.x < 0 || newPosition.x > width ||
             newPosition.y < 0 || newPosition.y > height) {
             velocity.set(0, 0);

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { useAuth } from './useAuth';
-import { SimulationSettings } from '../types/particle';
+import { SimulationSettings } from '../types';
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL as string,

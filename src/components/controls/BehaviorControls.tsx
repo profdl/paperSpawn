@@ -17,7 +17,9 @@ export default function BehaviorControls() {
           <Switch
             size="xs"
             checked={settings.flockingEnabled}
-            onCheckedChange={(checked) => updateSetting("flockingEnabled", checked)}
+            onCheckedChange={(checked) =>
+              updateSetting("flockingEnabled", checked)
+            }
           />
         </div>
         {settings.flockingEnabled && (
@@ -41,7 +43,9 @@ export default function BehaviorControls() {
                 <label className="inline-block w-[80px] text-[10px] "></label>
                 <DraggableNumberInput
                   value={settings.separationDistance}
-                  onChange={(value) => updateSetting("separationDistance", value)}
+                  onChange={(value) =>
+                    updateSetting("separationDistance", value)
+                  }
                   min={1}
                   max={100}
                   step={1}
@@ -97,7 +101,9 @@ export default function BehaviorControls() {
                 <label className="inline-block w-[80px] text-[10px]"></label>
                 <DraggableNumberInput
                   value={settings.alignmentDistance}
-                  onChange={(value) => updateSetting("alignmentDistance", value)}
+                  onChange={(value) =>
+                    updateSetting("alignmentDistance", value)
+                  }
                   min={1}
                   max={150}
                   step={1}
@@ -109,6 +115,83 @@ export default function BehaviorControls() {
         )}
       </div>
 
+      {/* Magnetism Section */}
+      <div>
+        <div className="flex justify-between items-center mb-2">
+          <div className="text-[10px] uppercase tracking-wider text-white/60">
+            Magnetism
+          </div>
+          <Switch
+            size="xs"
+            checked={settings.magnetismEnabled}
+            onCheckedChange={(checked) =>
+              updateSetting("magnetismEnabled", checked)
+            }
+          />
+        </div>
+        {settings.magnetismEnabled && (
+  <div className="space-y-1.5">
+    <div className="control">
+      <label className="inline-block w-[80px] text-[10px]">Strength</label>
+      <DraggableNumberInput
+        value={settings.magnetismStrength}
+        onChange={(value) => updateSetting("magnetismStrength", value)}
+        min={0}
+        max={1}
+        step={0.01}
+        formatValue={(v) => `${(v * 100).toFixed(0)}%`}
+      />
+    </div>
+
+    <div className="control">
+      <label className="inline-block w-[80px] text-[10px]">Distance</label>
+      <DraggableNumberInput
+        value={settings.magnetismDistance}
+        onChange={(value) => updateSetting("magnetismDistance", value)}
+        min={0}
+        max={300}
+        step={1}
+        formatValue={(v) => `${v}px`}
+      />
+    </div>
+
+    <div className="control">
+      <label className="inline-block w-[80px] text-[10px]">Min Distance</label>
+      <DraggableNumberInput
+        value={settings.magneticMinDistance}
+        onChange={(value) => updateSetting("magneticMinDistance", value)}
+        min={1}
+        max={50}
+        step={1}
+        formatValue={(v) => `${v}px`}
+      />
+    </div>
+
+    <div className="flex items-center justify-between">
+      <label className="text-[10px]">Use Polarity</label>
+      <Switch
+        size="xs"
+        checked={settings.magneticPolarityEnabled}
+        onCheckedChange={(checked) =>
+          updateSetting("magneticPolarityEnabled", checked)
+        }
+      />
+    </div>
+
+    <div className="flex items-center justify-between">
+      <label className="text-[10px]">Show Field</label>
+      <Switch
+        size="xs"
+        checked={settings.showMagneticField}
+        onCheckedChange={(checked) =>
+          updateSetting("showMagneticField", checked)
+        }
+      />
+    </div>
+  </div>
+)}
+      </div>
+
       {/* Wander Section */}
       <div>
         <div className="flex justify-between items-center mb-2">
@@ -118,7 +201,9 @@ export default function BehaviorControls() {
           <Switch
             size="xs"
             checked={settings.wanderEnabled}
-            onCheckedChange={(checked) => updateSetting("wanderEnabled", checked)}
+            onCheckedChange={(checked) =>
+              updateSetting("wanderEnabled", checked)
+            }
           />
         </div>
         {settings.wanderEnabled && (
@@ -148,7 +233,9 @@ export default function BehaviorControls() {
               />
             </div>
             <div className="control">
-              <label className="inline-block w-[80px] text-[10px]">Radius</label>
+              <label className="inline-block w-[80px] text-[10px]">
+                Radius
+              </label>
               <DraggableNumberInput
                 value={settings.wanderRadius}
                 onChange={(value) => updateSetting("wanderRadius", value)}
@@ -171,7 +258,9 @@ export default function BehaviorControls() {
           <Switch
             size="xs"
             checked={settings.externalForcesEnabled}
-            onCheckedChange={(checked) => updateSetting("externalForcesEnabled", checked)}
+            onCheckedChange={(checked) =>
+              updateSetting("externalForcesEnabled", checked)
+            }
           />
         </div>
         {settings.externalForcesEnabled && (
@@ -230,7 +319,9 @@ export default function BehaviorControls() {
           <Switch
             size="xs"
             checked={settings.avoidanceEnabled}
-            onCheckedChange={(checked) => updateSetting("avoidanceEnabled", checked)}
+            onCheckedChange={(checked) =>
+              updateSetting("avoidanceEnabled", checked)
+            }
           />
         </div>
         {settings.avoidanceEnabled && (

@@ -68,16 +68,21 @@ export default function ParticleControls() {
           </div>
           <div className="space-y-1.5">
           <div className="control">
-            <label className="inline-block w-[80px] text-[10px]">Angle Sensor</label>
-            <DraggableNumberInput
-              value={settings.sensorAngle}
-              onChange={(value) => updateSetting('sensorAngle', value)}
-              min={0}
-              max={180}
-              step={1}
-              formatValue={(v) => `${v}°`}
-            />
-          </div>
+  <label className="inline-block w-[80px] text-[10px]">
+    Sensor Angle
+  </label>
+  <DraggableNumberInput
+    value={settings.sensorAngle}
+    onChange={(value) => {
+      updateSetting('sensorAngle', value);
+      updateSetting('magnetismAngle', value); // Update both angles
+    }}
+    min={0}
+    max={180}
+    step={1}
+    formatValue={(v) => `${v}°`}
+  />
+</div>
          
         </div>
          
