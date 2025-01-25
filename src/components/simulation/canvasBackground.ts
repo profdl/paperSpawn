@@ -33,34 +33,34 @@ export class CanvasBackground {
     });
   
     this.backgroundImage.onLoad = () => {
-      const canvasWidth = CANVAS_DIMENSIONS.WIDTH; // Use constant width
+      // Calculate new dimensions based on fitting to canvas width
+      const canvasWidth = CANVAS_DIMENSIONS.WIDTH;
       const imageAspectRatio = this.backgroundImage!.width / this.backgroundImage!.height;
-      
-      // Calculate new dimensions maintaining aspect ratio
       const newWidth = canvasWidth;
-      const newHeight = canvasWidth / imageAspectRatio;
+      const newHeight = Math.round(canvasWidth / imageAspectRatio); // Round to prevent fractional pixels
   
-      // Scale the image
-      const scale = newWidth / this.backgroundImage!.width;
-      this.backgroundImage!.scale(scale);
+      // Scale the image to exactly match the new dimensions
+      this.backgroundImage!.scaling = new paper.Point(newWidth / this.backgroundImage!.width, newWidth / this.backgroundImage!.width);
+      
+      // Important: Set BOTH view size and background rectangle to exactly match
+      paper.view.viewSize = new paper.Size(newWidth, newHeight);
+      
+      // Ensure background rectangle exactly matches view bounds
+      this.background.remove();
+      this.background = new paper.Path.Rectangle({
+        rectangle: new paper.Rectangle(0, 0, newWidth, newHeight),
+        fillColor: this.background.fillColor
+      });
   
-      // Update view and canvas size
+      // Center everything precisely
+      this.backgroundImage!.position = new paper.Point(newWidth / 2, newHeight / 2);
+      
+      // Call resize callback with exact dimensions
       if (this.onCanvasResize) {
         this.onCanvasResize(newWidth, newHeight);
       }
   
-      // Update view bounds
-      paper.view.viewSize = new paper.Size(newWidth, newHeight);
-      
-      // Update background rectangle
-      this.background.remove();
-      this.background = new paper.Path.Rectangle({
-        rectangle: paper.view.bounds,
-        fillColor: this.background.fillColor
-      });
-  
-      // Center the image
-      this.backgroundImage!.position = paper.view.center;
+      // Style settings
       this.backgroundImage!.opacity = 1;
       this.backgroundImage!.sendToBack();
       this.background.sendToBack();
