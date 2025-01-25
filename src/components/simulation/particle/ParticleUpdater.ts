@@ -162,42 +162,43 @@ export class ParticleUpdater {
           }
           break;
 
-        case 'wrap-around':
-          // Check if we need to wrap
-          if (newPosition.x < 0 || newPosition.x > width ||
-            newPosition.y < 0 || newPosition.y > height) {
-            // Complete current trail segment before wrapping
-            if (settings.paintingModeEnabled && particle.data.state === 'active') {
-              trail.add(point.position);
+          case 'wrap-around':
+            let wrapped = false;
+            
+            if (newPosition.x < 0) {
+              newPosition.x = width;
+              wrapped = true;
+            } else if (newPosition.x > width) {
+              newPosition.x = 0;
+              wrapped = true;
+            }
+            
+            if (newPosition.y < 0) {
+              newPosition.y = height;
+              wrapped = true;
+            } else if (newPosition.y > height) {
+              newPosition.y = 0;
+              wrapped = true;
+            }
+            
+            if (wrapped) {
+              // Clear existing trail
+              trail.removeSegments();
+              // Start new trail at wrapped position
+              trail.add(newPosition);
+            }
+            
+            point.position = newPosition;
+            
+            if (!wrapped && settings.paintingModeEnabled && particle.data.state === 'active') {
+              trail.visible = true;
+              trail.add(newPosition);
               trail.smooth();
             }
-
-            // Calculate wrapped position
-            newPosition.x = ((newPosition.x + width) % width);
-            newPosition.y = ((newPosition.y + height) % height);
-
-            // Create new trail
-            const newTrail = new paper.Path({
-              strokeColor: trail.strokeColor,
-              strokeWidth: trail.strokeWidth,
-              strokeCap: 'round',
-              opacity: trail.opacity
-            });
-            newTrail.add(newPosition);
-
-            // Replace old trail with new one
-            trail.remove();
-            particle.addChild(newTrail);
-            particle.children[1] = newTrail;
-          } else if (settings.paintingModeEnabled && particle.data.state === 'active') {
-            // Normal trail behavior when not wrapping
-            trail.visible = true;
-            trail.add(newPosition);
-            trail.smooth();
-          }
-          break;
-
-        case 'stop':
+            break;
+    
+          case 'stop':
+            case 'stop':
           if (newPosition.x < 0 || newPosition.x > width ||
             newPosition.y < 0 || newPosition.y > height) {
             velocity.set(0, 0);
