@@ -22,23 +22,25 @@ export class ParticleCreator {
 
     const particle = new paper.Group();
 
+    // Create trail first so it renders behind the point
+    const trail = new paper.Path({
+      strokeColor: trailColor,
+      strokeWidth: trailWidth,
+      strokeCap: 'round',
+      opacity: 1
+    });
+    trail.add(new paper.Point(x, y));
+    
+    // Create point after trail so it renders on top
     const point = new paper.Path.Circle({
       center: position,
       radius: particleRadius,
       fillColor: particleColor
     });
 
-    const trail = new paper.Path({
-      strokeColor: trailColor,
-      strokeWidth: trailWidth,
-      strokeCap: 'round',
-      opacity: 1,
-      fillColor: null,  // Explicitly set no fill
-      closed: false     // Ensure path is not closed
-    });
-    trail.add(new paper.Point(x, y));
-
-    particle.addChildren([point, trail]);
+    // Add children in reverse order from before: trail first, then point
+    particle.addChildren([trail, point]);
+    
     particle.data = {
       velocity: new paper.Point(0, 0),
       createdAt: Date.now(),

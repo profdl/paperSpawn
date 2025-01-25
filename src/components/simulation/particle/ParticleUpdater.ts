@@ -15,9 +15,9 @@ export class ParticleUpdater {
     height: number,
     obstacleManager: ObstacleManager
   ): void {
-    const point = particle.children[0] as paper.Path.Circle;
+    const trail = particle.children[0] as paper.Path;
+    const point = particle.children[1] as paper.Path.Circle;
     const position = point.position;
-    const trail = particle.children[1] as paper.Path;
     const age = Date.now() - particle.data.createdAt;
     let velocity = particle.data.velocity;
 
