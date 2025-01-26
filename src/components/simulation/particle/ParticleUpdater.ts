@@ -7,6 +7,8 @@ import { ExternalForce } from '../forces/ExternalForce';
 import { AvoidanceForce } from '../forces/AvoidanceForce';
 import { ObstacleManager } from '../obstacleManager';
 import { AggregationForce } from '../forces/AggregateForce';
+import { DLAggregateForce } from '../forces/DLAggregateForce';
+
 
 export class ParticleUpdater {
   static update(
@@ -75,13 +77,17 @@ export class ParticleUpdater {
         }
 
         // Calculate Agregator, if enabled
-        if (settings.aggregationEnabled) {
-          const aggregationForce = AggregationForce.calculate(particle, particles, settings);
-          if (aggregationForce.length > 0) {
-            finalForce = finalForce.add(aggregationForce);
-            totalWeight += 1; // Or some appropriate weight for aggregation
-          }
-        }
+// In the forces calculation section of ParticleUpdater.ts
+if (settings.aggregationEnabled) {
+  const aggregationForce = settings.isDLA 
+    ? DLAggregateForce.calculate(particle, particles, settings)
+    : AggregationForce.calculate(particle, particles, settings);
+    
+  if (aggregationForce.length > 0) {
+    finalForce = finalForce.add(aggregationForce);
+    totalWeight += 1;
+  }
+}
 
 
         // Only calculate Magnatism forces if enabled

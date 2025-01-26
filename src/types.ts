@@ -73,7 +73,8 @@ export interface ParticlePreset {
     showMagneticField?: boolean;
     magneticPolarityEnabled?: boolean;
     aggregationEnabled: boolean;
-    aggregationDistance: number; 
+    aggregationDistance: number;
+
   };
 }
 
@@ -131,6 +132,9 @@ export interface SimulationSettings {
   aggregationEnabled: boolean;
   aggregationDistance: number;
   aggregationLineColor: string;
+  isDLA: boolean;
+  aggregationSeedCount: number;
+
 }
 
 export type PresetType = 'start';

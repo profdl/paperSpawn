@@ -10,6 +10,7 @@ import { presets } from "../components/simulation/presets";
 import { VectorParticleSystem } from "../components/simulation/VectorParticleSystem";
 import paper from "paper";
 import { CANVAS_DIMENSIONS } from '../components/layout/constants';
+import { DLAggregateForce } from "../components/simulation/forces/DLAggregateForce";
 
 
 interface SimulationContextType {
@@ -30,6 +31,15 @@ const SimulationContext = createContext<SimulationContextType | undefined>(
   undefined
 );
 
+export const useSimulation = () => {
+  const context = useContext(SimulationContext);
+  if (!context) {
+    throw new Error("useSimulation must be used within a SimulationProvider");
+  }
+  return context;
+};
+
+
 export function SimulationProvider({
   children,
 }: {
@@ -38,6 +48,7 @@ export function SimulationProvider({
   const [settings, setSettings] = useState<SimulationSettings>(presets.start);
   const [isPaused, setIsPaused] = useState(false);
   const systemRef = useRef<VectorParticleSystem>();
+
 
   const updateSetting = useCallback(
     (key: keyof SimulationSettings, value: string | number | boolean) => {
@@ -58,22 +69,29 @@ export function SimulationProvider({
       const canvasWidth = CANVAS_DIMENSIONS.WIDTH;
       const canvasHeight = CANVAS_DIMENSIONS.HEIGHT;
   
-
       systemRef.current.clearParticlesOnly();
-
+  
+      // Reset DLA states if DLA mode is enabled
+      if (settings.isDLA) {
+        const particles = systemRef.current.getParticles();
+        if (particles) {
+          DLAggregateForce.resetParticleStates(particles);
+        }
+      }
+  
       // Get all closed paths from the obstacle manager
       const closedPaths = systemRef.current.getClosedPaths();
-
+  
       // Helper function to check if a point is inside any obstacle
       const isPointInsideObstacle = (x: number, y: number): boolean => {
         const point = new paper.Point(x, y);
         return closedPaths.some((path) => path.contains(point));
       };
-
+  
       let attemptCount = 0;
       const maxAttempts = settings.count * 3; // Prevent infinite loops
       let particlesCreated = 0;
-
+  
       while (particlesCreated < settings.count && attemptCount < maxAttempts) {
         let x: number, y: number;
 
@@ -127,20 +145,33 @@ export function SimulationProvider({
 
         attemptCount++;
       }
-      // Log if we couldn't create all particles
-      if (particlesCreated < settings.count) {
-        console.warn(
-          `Only created ${particlesCreated} particles out of ${settings.count} due to obstacles`
-        );
+
+      // Initialize new seeds if DLA mode is enabled
+      if (settings.isDLA && particlesCreated > 0) {
+        const particles = systemRef.current.getParticles();
+        if (particles) {
+          DLAggregateForce.ensureSeeds(particles, settings);
+        }
       }
     }
-  }, [settings.count, settings.spawnPattern]);
+  }, [settings]);
+
+
+
+
 
   const handleClear = useCallback(() => {
     if (systemRef.current) {
       systemRef.current.clear();
+      // Reset DLA states if DLA mode is enabled
+      if (settings.isDLA) {
+        const particles = systemRef.current.getParticles();
+        if (particles) {
+          DLAggregateForce.resetParticleStates(particles);
+        }
+      }
     }
-  }, []);
+  }, [settings.isDLA]);
 
   const value = {
     settings,
@@ -153,9 +184,6 @@ export function SimulationProvider({
     systemRef,
   };
 
-  React.useEffect(() => {
-  }, [settings]);
-
   return (
     <SimulationContext.Provider value={value}>
       {children}
@@ -163,10 +191,3 @@ export function SimulationProvider({
   );
 }
 
-export const useSimulation = () => {
-  const context = useContext(SimulationContext);
-  if (!context) {
-    throw new Error("useSimulation must be used within a SimulationProvider");
-  }
-  return context;
-};

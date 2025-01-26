@@ -24,6 +24,7 @@ export class ParticleManager {
   }
 
 
+
   setColors(particleColor: string, trailColor: string): void {
     this.particles.children.forEach(particle => {
       const point = particle.children[0] as paper.Path.Circle;
@@ -46,19 +47,22 @@ export class ParticleManager {
     });
   }
 
-  createParticle(
-    x: number,
-    y: number,
-    particleColor: string = '#000000',
-    trailColor: string = '#8b8680'
-  ): paper.Group | null {
+  getParticles(): paper.Group {
+    return this.particles;
+  }
+
+  clear(): void {
+    this.particles.removeChildren();
+  }
+
+
+  createParticle(x: number, y: number, particleColor: string, trailColor: string): paper.Group | null {
     const particle = ParticleCreator.create(
-      x,
-      y,
+      x, y,
       particleColor,
       trailColor,
-      this._particleRadius,
-      this._trailWidth,
+      this.particleRadius,
+      this.trailWidth,
       this.obstacleManager
     );
 
@@ -78,7 +82,7 @@ export class ParticleManager {
       ParticleUpdater.update(
         particle as paper.Group,
         this.particles,
-        settings,  
+        settings,
         width,
         height,
         this.obstacleManager
@@ -86,9 +90,7 @@ export class ParticleManager {
     });
   }
 
-  clear(): void {
-    this.particles.removeChildren();
-  }
+
 
   removeParticlesInRadius(center: paper.Point, radius: number): void {
     const particlesToRemove: paper.Group[] = [];

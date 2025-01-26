@@ -6,6 +6,7 @@ import { EraserTool } from './eraserTool';
 import { CanvasBackground } from './canvasBackground';
 import { CanvasManager } from './canvasManager';
 import { SVGManager } from './svgManager';
+import { DLAggregateForce } from './forces/DLAggregateForce';
 
 export class VectorParticleSystem {
   private canvasManager: CanvasManager;
@@ -14,6 +15,7 @@ export class VectorParticleSystem {
   private eraserTool: EraserTool;
   private background: CanvasBackground;
   private svgManager: SVGManager;
+  private particles!: paper.Group;
 
 
   constructor(canvas: HTMLCanvasElement, onResize?: (width: number, height: number) => void) {
@@ -92,11 +94,35 @@ export class VectorParticleSystem {
     if (!particle) {
       throw new Error('Failed to create particle');
     }
+    
+    // Initialize DLA state for the new particle
+    if (!particle.data.aggregationState) {
+      particle.data.aggregationState = {
+        isStuck: false,
+        isSeed: false,
+        stickingProbability: Math.random(),
+        aggregatedWith: new Set<number>()
+      };
+    }
     return particle;
+  }
+
+  getParticles(): paper.Group {
+    return this.particleManager.getParticles();
   }
 
   updateParticles(settings: SimulationSettings): void {
     const view = this.canvasManager.getProject().view;
+    
+    // Check if particles exist and if DLA is enabled
+    if (settings.aggregationEnabled && settings.isDLA && this.particleManager.getParticles()) {
+      // Ensure seeds are maintained
+      DLAggregateForce.ensureSeeds(
+        this.particleManager.getParticles(),
+        settings
+      );
+    }
+    
     this.particleManager.updateParticles(
       settings,
       view.bounds.width,
@@ -104,6 +130,8 @@ export class VectorParticleSystem {
     );
   }
 
+
+  
   startRectangle(x: number, y: number): paper.Path.Rectangle {
     return this.obstacleManager.create(x, y);
 }
@@ -136,9 +164,17 @@ export class VectorParticleSystem {
 
   // General methods
   clearParticlesOnly(): void {
+    // Reset DLA states before clearing particles
+    if (this.particles) {
+      DLAggregateForce.resetParticleStates(this.particles);
+    }
     this.particleManager.clear();
   }
+  
   clear(): void {
+    if (this.particles) {
+      DLAggregateForce.resetParticleStates(this.particles);
+    }
     this.particleManager.clear();
     this.obstacleManager.clear();
     paper.view.update();

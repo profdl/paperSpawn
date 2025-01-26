@@ -116,36 +116,62 @@ export default function BehaviorControls() {
       </div>
 {/* Aggregation Section */}
 <div>
-        <div className="flex justify-between items-center mb-2">
-          <div className="text-[10px] uppercase tracking-wider text-white/60">
-            Aggregation
-          </div>
-          <Switch
-            size="xs"
-            checked={settings.aggregationEnabled}
-            onCheckedChange={(checked) =>
-              updateSetting("aggregationEnabled", checked)
-            }
+  <div className="flex justify-between items-center mb-2">
+    <div className="text-[10px] uppercase tracking-wider text-white/60">
+      Aggregation
+    </div>
+    <Switch
+      size="xs"
+      checked={settings.aggregationEnabled}
+      onCheckedChange={(checked) =>
+        updateSetting("aggregationEnabled", checked)
+      }
+    />
+  </div>
+  {settings.aggregationEnabled && (
+    <div className="space-y-1.5">
+      <div className="control">
+        <label className="inline-block w-[80px] text-[10px]">
+          Distance
+        </label>
+        <DraggableNumberInput
+          value={settings.aggregationDistance}
+          onChange={(value) => updateSetting("aggregationDistance", value)}
+          min={1}
+          max={50}
+          step={1}
+          formatValue={(v) => `${v}px`}
+        />
+      </div>
+      <div className="control">
+        <label className="inline-block w-[80px] text-[10px]">
+          DLA Mode
+        </label>
+        <input
+          type="checkbox"
+          checked={settings.isDLA}
+          onChange={(e) => updateSetting('isDLA', e.target.checked)}
+          className="ml-4"
+        />
+      </div>
+      {settings.isDLA && (
+        <div className="control">
+          <label className="inline-block w-[80px] text-[10px]">
+            Seed Count
+          </label>
+          <DraggableNumberInput
+            value={settings.aggregationSeedCount}
+            onChange={(value) => updateSetting("aggregationSeedCount", value)}
+            min={1}
+            max={10}
+            step={1}
+            formatValue={(v) => `${v}`}
           />
         </div>
-        {settings.aggregationEnabled && (
-          <div className="space-y-1.5">
-            <div className="control">
-              <label className="inline-block w-[80px] text-[10px]">
-                Distance
-              </label>
-              <DraggableNumberInput
-                value={settings.aggregationDistance}
-                onChange={(value) => updateSetting("aggregationDistance", value)}
-                min={1}
-                max={50}
-                step={1}
-                formatValue={(v) => `${v}px`}
-              />
-            </div>
-          </div>
-        )}
-      </div>
+      )}
+    </div>
+  )}
+</div>
       {/* Magnetism Section */}
       <div>
         <div className="flex justify-between items-center mb-2">
@@ -161,38 +187,36 @@ export default function BehaviorControls() {
           />
         </div>
         {settings.magnetismEnabled && (
-  <div className="space-y-1.5">
-    <div className="control">
-      <label className="inline-block w-[80px] text-[10px]">Strength</label>
-      <DraggableNumberInput
-        value={settings.magnetismStrength}
-        onChange={(value) => updateSetting("magnetismStrength", value)}
-        min={0}
-        max={1}
-        step={0.01}
-        formatValue={(v) => `${(v * 100).toFixed(0)}%`}
-      />
-    </div>
+          <div className="space-y-1.5">
+            <div className="control">
+              <label className="inline-block w-[80px] text-[10px]">
+                Strength
+              </label>
+              <DraggableNumberInput
+                value={settings.magnetismStrength}
+                onChange={(value) => updateSetting("magnetismStrength", value)}
+                min={0}
+                max={1}
+                step={0.01}
+                formatValue={(v) => `${(v * 100).toFixed(0)}%`}
+              />
+            </div>
 
-    <div className="control">
-      <label className="inline-block w-[80px] text-[10px]">Distance</label>
-      <DraggableNumberInput
-        value={settings.magnetismDistance}
-        onChange={(value) => updateSetting("magnetismDistance", value)}
-        min={0}
-        max={300}
-        step={1}
-        formatValue={(v) => `${v}px`}
-      />
-    </div>
-
-
-
- 
-
-   
-  </div>
-)}
+            <div className="control">
+              <label className="inline-block w-[80px] text-[10px]">
+                Distance
+              </label>
+              <DraggableNumberInput
+                value={settings.magnetismDistance}
+                onChange={(value) => updateSetting("magnetismDistance", value)}
+                min={0}
+                max={300}
+                step={1}
+                formatValue={(v) => `${v}px`}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Wander Section */}

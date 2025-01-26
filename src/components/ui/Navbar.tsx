@@ -14,11 +14,12 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import AuthModal from "../ui/AuthModal";
-import { useSimulation } from "../../contexts/SimulationContext";
 import { useTool } from "../../contexts/ToolContext";
 import { useProjects } from "../../hooks/useProjects";
 import { SimulationSettings } from "../../types";
 import DraggableNumberInput from "./DraggableNumberInput";
+import { DLAggregateForce } from "../../components/simulation/forces/DLAggregateForce";
+import { useSimulation } from "../../contexts/SimulationContext";
 
 interface NavbarProps {
   showUI: boolean;
@@ -87,11 +88,27 @@ export default function Navbar({
         wanderSpeed: settings.wanderSpeed,
         wanderRadius: settings.wanderRadius,
         paintSpawnRate: settings.paintSpawnRate,
-        // Add the missing avoidance properties
         avoidanceEnabled: settings.avoidanceEnabled,
         avoidanceDistance: settings.avoidanceDistance,
         avoidanceStrength: settings.avoidanceStrength,
         avoidancePushMultiplier: settings.avoidancePushMultiplier,
+        externalForcesEnabled: settings.externalForcesEnabled,
+        bounceEnergy: settings.bounceEnergy,
+        magnetismEnabled: settings.magnetismEnabled,
+        magnetismStrength: settings.magnetismStrength,
+        magnetismDistance: settings.magnetismDistance,
+        magneticFieldStrength: settings.magneticFieldStrength,
+        magneticMinDistance: settings.magneticMinDistance,
+        showMagneticField: settings.showMagneticField,
+        magneticPolarityEnabled: settings.magneticPolarityEnabled,
+        particleLifetime: settings.particleLifetime,
+        maxSpeed: settings.maxSpeed,
+        friction: settings.friction,
+        aggregationEnabled: settings.aggregationEnabled,
+        aggregationDistance: settings.aggregationDistance,
+        aggregationLineColor: settings.aggregationLineColor,
+        isDLA: settings.isDLA,
+        aggregationSeedCount: settings.aggregationSeedCount
       };
 
       const svgContent = systemRef.current.exportSVG();
@@ -105,7 +122,11 @@ export default function Navbar({
   const handleClearParticles = () => {
     if (!systemRef.current) return;
     systemRef.current.clearParticlesOnly();
+    if (settings.isDLA) {
+      DLAggregateForce.resetParticleStates(systemRef.current.getParticles());
+    }
   };
+
 
   const handleOpenProjects = () => {
     if (user) {
@@ -308,3 +329,4 @@ export default function Navbar({
     </>
   );
 }
+
