@@ -8,8 +8,8 @@ const defaultSettings: Partial<SimulationSettings> = {
   backgroundColor: '#FFFFFF',
   particleColor: '#000000',
   trailColor: '#8b8680',
-  boundaryBehavior: 'wrap-around',
-  paintingModeEnabled: true,
+  boundaryBehavior: 'stop',
+  paintingModeEnabled: false,
   activeStateDuration: 3000,
   freezingDuration: 1000,
 };
@@ -18,7 +18,7 @@ export const presets: Record<PresetType | string, SimulationSettings> = {
   // Original start preset
   start: {
     ...defaultSettings,
-    flockingEnabled: true,
+    flockingEnabled: false,
     separation: 0.12,
     cohesion: 0.1,
     alignment: 0.12,
@@ -34,9 +34,9 @@ export const presets: Record<PresetType | string, SimulationSettings> = {
     diffusionRate: 1,
     decayRate: 0.1,
     trailPersistence: 1,
-    externalForcesEnabled: false,
+    externalForcesEnabled: true,
     externalForceAngle: 90,
-    externalForceAngleRandomize: 45,
+    externalForceAngleRandomize: 180,
     externalForceStrength: 0.01,
     wanderEnabled: false,
     wanderSpeed: 1,
@@ -51,10 +51,10 @@ export const presets: Record<PresetType | string, SimulationSettings> = {
     magnetismStrength: 1,
     magnetismDistance: 150,
     magnetismAngle: 360,
-    aggregationEnabled: false,
-    aggregationDistance: 15,
+    aggregationEnabled: true,
+    aggregationDistance: 25,
     aggregationLineColor: '#444444',
-    aggregationSpacing: 2.0
+    aggregationSpacing: 10
   } as SimulationSettings,
 
  

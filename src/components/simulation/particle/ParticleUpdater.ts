@@ -51,7 +51,7 @@ export class ParticleUpdater {
       if (bounceComplete) {
 
 
-        // Only calculate flocking forces if enabled
+        // FLOCKING
         if (settings.flockingEnabled) {
           const flockingForces = FlockingForce.calculate(particle, particles, settings);
 
@@ -75,21 +75,24 @@ export class ParticleUpdater {
           }
         }
 
+        //AGGREGATION
         if (settings.aggregationEnabled) {
           const aggregationForce = AggregationForce.calculate(particle, particles, settings);
           if (aggregationForce.length > 0) {
+            // Give higher priority to aggregation forces
+            const aggregationWeight = 2.0; // Increased weight for aggregation
             if (particle.data.isReflected) {
               const dot = aggregationForce.dot(velocity.normalize());
               const blendFactor = dot < 0 ? 0.3 : 1.0;
-              finalForce = finalForce.add(aggregationForce.multiply(blendFactor));
+              finalForce = finalForce.add(aggregationForce.multiply(blendFactor * aggregationWeight));
             } else {
-              finalForce = finalForce.add(aggregationForce);
+              finalForce = finalForce.add(aggregationForce.multiply(aggregationWeight));
             }
-            totalWeight += 1; // Using weight of 1 for aggregation force
+            totalWeight += aggregationWeight;
           }
         }
 
-        // Only calculate Magnatism forces if enabled
+        // MAGNETISM
         if (settings.magnetismEnabled && settings.magnetismStrength > 0) {
           const magneticForce = MagnetismForce.calculate(particle, particles, settings);
           if (magneticForce.length > 0) {
@@ -104,7 +107,7 @@ export class ParticleUpdater {
           }
         }
 
-        // Only calculate wander forces if enabled
+        // WANDER
         if (settings.wanderEnabled && settings.wanderStrength > 0) {
           const wanderForce = WanderForce.calculate(particle, settings);
           if (wanderForce.length > 0) {
@@ -119,7 +122,7 @@ export class ParticleUpdater {
           }
         }
 
-        // Only calculate external forces if enabled
+        // EXTERNAL FORCES
         if (settings.externalForcesEnabled && settings.externalForceStrength > 0) {
           const externalForce = ExternalForce.calculate(settings, particle);
           if (externalForce.length > 0) {
@@ -141,13 +144,13 @@ export class ParticleUpdater {
       }
       finalForce = finalForce.multiply(settings.speed);
 
-      // Only calculate avoidance forces if enabled
+      // AVOIDANCE
       if (settings.avoidanceEnabled) {
         const avoidanceForce = AvoidanceForce.calculate(point.position, obstacleManager, settings);
         finalForce = finalForce.add(avoidanceForce);
       }
 
-      // Blend the final force with the current velocity for reflected particles
+      // REFLECTION
       if (particle.data.isReflected) {
         // Blend current velocity with new forces
         velocity = velocity.multiply(0).add(finalForce.multiply(-1));
@@ -155,7 +158,7 @@ export class ParticleUpdater {
         velocity = velocity.add(finalForce);
       }
 
-      // Speed control
+      // SPEED
       if (particle.data.isReflected) {
         const currentSpeed = particle.data.reflectedSpeed || (settings.speed * 1);
         velocity = velocity.normalize().multiply(currentSpeed);
@@ -170,8 +173,7 @@ export class ParticleUpdater {
 
       const newPosition = point.position.add(velocity);
 
-
-
+      // BOUNDARY BEHAVIOR
       switch (settings.boundaryBehavior) {
         case 'reflect':
           let reflected = false;
