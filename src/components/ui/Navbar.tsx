@@ -19,6 +19,7 @@ import { useProjects } from "../../hooks/useProjects";
 import { SimulationSettings } from "../../types";
 import DraggableNumberInput from "./DraggableNumberInput";
 import { useSimulation } from "../../contexts/SimulationContext";
+import { AggregationForce } from "../simulation/forces/AggregateForce";
 
 interface NavbarProps {
   showUI: boolean;
@@ -106,6 +107,7 @@ export default function Navbar({
         aggregationEnabled: settings.aggregationEnabled,
         aggregationDistance: settings.aggregationDistance,
         aggregationLineColor: settings.aggregationLineColor,
+        aggregationSpacing: settings.aggregationSpacing,
 
       };
 
@@ -119,8 +121,14 @@ export default function Navbar({
 
   const handleClearParticles = () => {
     if (!systemRef.current) return;
+    
+    // Clear aggregation lines before removing particles
+    const particles = systemRef.current.getParticles().children;
+    particles.forEach(particle => {
+      AggregationForce.cleanup(particle.id, systemRef.current!.getParticles());
+    });
+    
     systemRef.current.clearParticlesOnly();
-   
   };
 
 
