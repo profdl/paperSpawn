@@ -20,11 +20,10 @@ export interface ParticleData {
   state: ParticleState;
   externalForceAngleOffset?: number;
   bounceCooldown?: number;
-  aggregatedWith?: Set<number>;
-  aggregationLines?: paper.Path[];
-  isAggregationLeader?: boolean;
+  aggregatedParticles: Set<number>; 
+  isReflected?: boolean;
+  reflectedSpeed?: number;
 }
-
 
 // interface for magnetic field visualization
 export interface MagneticFieldProperties {
@@ -132,8 +131,7 @@ export interface SimulationSettings {
   aggregationEnabled: boolean;
   aggregationDistance: number;
   aggregationLineColor: string;
-  isDLA: boolean;
-  aggregationSeedCount: number;
+  aggregationSpacing: number;
 
 }
 

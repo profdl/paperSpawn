@@ -6,7 +6,6 @@ import { EraserTool } from './eraserTool';
 import { CanvasBackground } from './canvasBackground';
 import { CanvasManager } from './canvasManager';
 import { SVGManager } from './svgManager';
-import { DLAggregateForce } from './forces/DLAggregateForce';
 
 export class VectorParticleSystem {
   private canvasManager: CanvasManager;
@@ -116,15 +115,7 @@ export class VectorParticleSystem {
   updateParticles(settings: SimulationSettings): void {
     const view = this.canvasManager.getProject().view;
     
-    // Check if particles exist and if DLA is enabled
-    if (settings.aggregationEnabled && settings.isDLA && this.particleManager.getParticles()) {
-      // Pass the obstacleManager when calling ensureSeeds
-      DLAggregateForce.ensureSeeds(
-        this.particleManager.getParticles(),
-        settings,
-        this.obstacleManager
-      );
-    }
+
     
     this.particleManager.updateParticles(
       settings,
@@ -182,8 +173,6 @@ export class VectorParticleSystem {
         }
       });
   
-      // Reset DLA states
-      DLAggregateForce.resetParticleStates(particles);
       
       // Then clear the particles
       this.particleManager.clear();
@@ -191,9 +180,7 @@ export class VectorParticleSystem {
   }
   
   clear(): void {
-    if (this.particles) {
-      DLAggregateForce.resetParticleStates(this.particles);
-    }
+
     this.particleManager.clear();
     this.obstacleManager.clear();
     paper.view.update();

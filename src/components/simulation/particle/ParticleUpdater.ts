@@ -7,7 +7,6 @@ import { ExternalForce } from '../forces/ExternalForce';
 import { AvoidanceForce } from '../forces/AvoidanceForce';
 import { ObstacleManager } from '../obstacleManager';
 import { AggregationForce } from '../forces/AggregateForce';
-import { DLAggregateForce } from '../forces/DLAggregateForce';
 
 
 export class ParticleUpdater {
@@ -76,19 +75,19 @@ export class ParticleUpdater {
           }
         }
 
-        // Calculate Agregator, if enabled
-// In the forces calculation section of ParticleUpdater.ts
-if (settings.aggregationEnabled) {
-  const aggregationForce = settings.isDLA 
-    ? DLAggregateForce.calculate(particle, particles, settings)
-    : AggregationForce.calculate(particle, particles, settings);
-    
-  if (aggregationForce.length > 0) {
-    finalForce = finalForce.add(aggregationForce);
-    totalWeight += 1;
-  }
-}
-
+        if (settings.aggregationEnabled) {
+          const aggregationForce = AggregationForce.calculate(particle, particles, settings);
+          if (aggregationForce.length > 0) {
+            if (particle.data.isReflected) {
+              const dot = aggregationForce.dot(velocity.normalize());
+              const blendFactor = dot < 0 ? 0.3 : 1.0;
+              finalForce = finalForce.add(aggregationForce.multiply(blendFactor));
+            } else {
+              finalForce = finalForce.add(aggregationForce);
+            }
+            totalWeight += 1; // Using weight of 1 for aggregation force
+          }
+        }
 
         // Only calculate Magnatism forces if enabled
         if (settings.magnetismEnabled && settings.magnetismStrength > 0) {
@@ -241,13 +240,14 @@ if (settings.aggregationEnabled) {
           }
           break;
 
-        case 'travel-off':
-          if (newPosition.x < 0 || newPosition.x > width ||
-            newPosition.y < 0 || newPosition.y > height) {
-            particle.remove();
-            return;
-          }
-          break;
+          case 'travel-off':
+            if (newPosition.x < 0 || newPosition.x > width ||
+              newPosition.y < 0 || newPosition.y > height) {
+              AggregationForce.cleanup(particle.id, particles);  // Add this line
+              particle.remove();
+              return;
+            }
+            break;
       }
 
       point.position = newPosition;

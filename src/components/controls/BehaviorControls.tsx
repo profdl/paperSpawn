@@ -138,40 +138,29 @@ export default function BehaviorControls() {
           value={settings.aggregationDistance}
           onChange={(value) => updateSetting("aggregationDistance", value)}
           min={1}
-          max={50}
+          max={100}
           step={1}
-          formatValue={(v) => `${v}px`}
+          formatValue={(v) => `${Math.round(v)}px`}
         />
       </div>
       <div className="control">
         <label className="inline-block w-[80px] text-[10px]">
-          DLA Mode
+          Spacing
         </label>
-        <input
-          type="checkbox"
-          checked={settings.isDLA}
-          onChange={(e) => updateSetting('isDLA', e.target.checked)}
-          className="ml-4"
+        <DraggableNumberInput
+          value={settings.aggregationSpacing}
+          onChange={(value) => updateSetting("aggregationSpacing", value)}
+          min={1}
+          max={10}
+          step={0.1}
+          formatValue={(v) => `${v.toFixed(1)}x`}
         />
       </div>
-      {settings.isDLA && (
-        <div className="control">
-          <label className="inline-block w-[80px] text-[10px]">
-            Seed Count
-          </label>
-          <DraggableNumberInput
-            value={settings.aggregationSeedCount}
-            onChange={(value) => updateSetting("aggregationSeedCount", value)}
-            min={1}
-            max={10}
-            step={1}
-            formatValue={(v) => `${v}`}
-          />
-        </div>
-      )}
     </div>
   )}
 </div>
+
+
       {/* Magnetism Section */}
       <div>
         <div className="flex justify-between items-center mb-2">

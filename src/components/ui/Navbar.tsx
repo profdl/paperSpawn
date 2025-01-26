@@ -18,7 +18,6 @@ import { useTool } from "../../contexts/ToolContext";
 import { useProjects } from "../../hooks/useProjects";
 import { SimulationSettings } from "../../types";
 import DraggableNumberInput from "./DraggableNumberInput";
-import { DLAggregateForce } from "../../components/simulation/forces/DLAggregateForce";
 import { useSimulation } from "../../contexts/SimulationContext";
 
 interface NavbarProps {
@@ -107,8 +106,7 @@ export default function Navbar({
         aggregationEnabled: settings.aggregationEnabled,
         aggregationDistance: settings.aggregationDistance,
         aggregationLineColor: settings.aggregationLineColor,
-        isDLA: settings.isDLA,
-        aggregationSeedCount: settings.aggregationSeedCount
+
       };
 
       const svgContent = systemRef.current.exportSVG();
@@ -122,9 +120,7 @@ export default function Navbar({
   const handleClearParticles = () => {
     if (!systemRef.current) return;
     systemRef.current.clearParticlesOnly();
-    if (settings.isDLA) {
-      DLAggregateForce.resetParticleStates(systemRef.current.getParticles());
-    }
+   
   };
 
 

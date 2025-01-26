@@ -10,7 +10,6 @@ import { presets } from "../components/simulation/presets";
 import { VectorParticleSystem } from "../components/simulation/VectorParticleSystem";
 import paper from "paper";
 import { CANVAS_DIMENSIONS } from '../components/layout/constants';
-import { DLAggregateForce } from "../components/simulation/forces/DLAggregateForce";
 
 
 interface SimulationContextType {
@@ -71,13 +70,7 @@ export function SimulationProvider({
   
       systemRef.current.clearParticlesOnly();
   
-      // Reset DLA states if DLA mode is enabled
-      if (settings.isDLA) {
-        const particles = systemRef.current.getParticles();
-        if (particles) {
-          DLAggregateForce.resetParticleStates(particles);
-        }
-      }
+
   
       // Get all closed paths from the obstacle manager
       const closedPaths = systemRef.current.getClosedPaths();
@@ -146,16 +139,7 @@ export function SimulationProvider({
         attemptCount++;
       }
 
-      if (settings.isDLA && particlesCreated > 0) {
-        const particles = systemRef.current.getParticles();
-        if (particles) {
-          DLAggregateForce.ensureSeeds(
-            particles, 
-            settings,
-            particles.data.obstacleManager 
-          );
-        }
-      }
+
     }
   }, [settings]);
 
@@ -166,15 +150,9 @@ export function SimulationProvider({
   const handleClear = useCallback(() => {
     if (systemRef.current) {
       systemRef.current.clear();
-      // Reset DLA states if DLA mode is enabled
-      if (settings.isDLA) {
-        const particles = systemRef.current.getParticles();
-        if (particles) {
-          DLAggregateForce.resetParticleStates(particles);
-        }
-      }
+
     }
-  }, [settings.isDLA]);
+  }, []);
 
   const value = {
     settings,

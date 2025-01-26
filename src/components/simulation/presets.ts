@@ -52,10 +52,9 @@ export const presets: Record<PresetType | string, SimulationSettings> = {
     magnetismDistance: 150,
     magnetismAngle: 360,
     aggregationEnabled: false,
-    aggregationDistance: 10,
+    aggregationDistance: 15,
     aggregationLineColor: '#444444',
-    isDLA: false,
-    aggregationSeedCount: 5,
+    aggregationSpacing: 2.0
   } as SimulationSettings,
 
  

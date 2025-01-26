@@ -7,8 +7,8 @@ export class AggregationForce {
       particle.data = {};
     }
     
-    if (particle.data.leaderId === undefined) {
-      particle.data.leaderId = null;
+    if (particle.data.aggregatedParticles === undefined) {
+      particle.data.aggregatedParticles = new Set<number>();
     }
   }
 
@@ -21,48 +21,69 @@ export class AggregationForce {
 
     this.initializeParticleData(particle);
     
-    // If particle is already following a leader, move towards leader
-    if (particle.data.leaderId !== null) {
-      const leader = (particles.children as paper.Group[]).find(p => p.id === particle.data.leaderId);
-      if (leader) {
-        const leaderPos = (leader.children[1] as paper.Path.Circle).position;
-        const currentPos = (particle.children[1] as paper.Path.Circle).position;
-        return leaderPos.subtract(currentPos).multiply(0.1);
-      } else {
-        // Leader no longer exists, reset leadership
-        particle.data.leaderId = null;
-      }
-    }
+    const point = particle.children[1] as paper.Path.Circle;
+    let totalForce = new paper.Point(0, 0);
+    const minDistance = settings.particleSize * settings.aggregationSpacing;
+    const criticalDistance = settings.particleSize * 1.5; // Distance at which strong repulsion kicks in
 
-    // Only look for particles to aggregate with if not already following
-    if (particle.data.leaderId === null) {
-      for (const otherParticle of particles.children as paper.Group[]) {
-        if (particle === otherParticle) continue;
-        
+    for (const otherParticle of particles.children as paper.Group[]) {
+      if (particle === otherParticle) continue;
+      
+      const otherPoint = otherParticle.children[1] as paper.Path.Circle;
+      const vectorToOther = otherPoint.position.subtract(point.position);
+      const distance = vectorToOther.length;
+
+      // Strong repulsion for very close particles (regardless of aggregation status)
+      if (distance < criticalDistance) {
+        const repulsionStrength = 0.5; // Increased repulsion strength
+        const criticalRepulsion = vectorToOther.normalize()
+          .multiply(-(criticalDistance - distance) * repulsionStrength);
+        totalForce = totalForce.add(criticalRepulsion);
+        continue; // Skip regular aggregation logic for very close particles
+      }
+
+      // Regular aggregation logic
+      if (distance <= settings.aggregationDistance && 
+          !particle.data.aggregatedParticles.has(otherParticle.id)) {
+        // Create mutual aggregation
+        particle.data.aggregatedParticles.add(otherParticle.id);
         this.initializeParticleData(otherParticle);
-        
-        const point = particle.children[1] as paper.Path.Circle;
-        const otherPoint = otherParticle.children[1] as paper.Path.Circle;
-        const distance = point.position.getDistance(otherPoint.position);
+        otherParticle.data.aggregatedParticles.add(particle.id);
+      }
 
-        if (distance <= settings.aggregationDistance) {
-          // Simple rule: particle with higher ID becomes leader
-          if (otherParticle.id > particle.id) {
-            particle.data.leaderId = otherParticle.id;
-            break; // Stop looking once we find a leader
-          }
+      // Force calculation for all nearby particles
+      if (distance <= settings.aggregationDistance || 
+          particle.data.aggregatedParticles.has(otherParticle.id)) {
+        let force = new paper.Point(0, 0);
+        
+        if (distance < minDistance) {
+          // Stronger push force when too close
+          const pushStrength = 0.5 * (1 - (distance / minDistance));
+          force = vectorToOther.normalize().multiply(-pushStrength * (minDistance - distance));
+        } else if (distance > minDistance) {
+          // Weaker pull force when too far
+          const pullStrength = 0.1;
+          force = vectorToOther.normalize().multiply(pullStrength * (distance - minDistance));
         }
+
+        totalForce = totalForce.add(force);
       }
     }
 
-    return new paper.Point(0, 0);
+    // Limit maximum force to prevent erratic behavior
+    const maxForce = settings.particleSize * 0.5;
+    if (totalForce.length > maxForce) {
+      totalForce = totalForce.normalize().multiply(maxForce);
+    }
+
+    return totalForce;
   }
 
   // Helper method to cleanup when particles are removed
   static cleanup(particleId: number, particles: paper.Group): void {
     (particles.children as paper.Group[]).forEach(particle => {
-      if (particle.data?.leaderId === particleId) {
-        particle.data.leaderId = null;
+      if (particle.data?.aggregatedParticles) {
+        particle.data.aggregatedParticles.delete(particleId);
       }
     });
   }
