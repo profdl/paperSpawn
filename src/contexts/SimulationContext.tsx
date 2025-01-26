@@ -146,11 +146,14 @@ export function SimulationProvider({
         attemptCount++;
       }
 
-      // Initialize new seeds if DLA mode is enabled
       if (settings.isDLA && particlesCreated > 0) {
         const particles = systemRef.current.getParticles();
         if (particles) {
-          DLAggregateForce.ensureSeeds(particles, settings);
+          DLAggregateForce.ensureSeeds(
+            particles, 
+            settings,
+            particles.data.obstacleManager 
+          );
         }
       }
     }
@@ -190,4 +193,3 @@ export function SimulationProvider({
     </SimulationContext.Provider>
   );
 }
-

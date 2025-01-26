@@ -1,9 +1,15 @@
 import paper from 'paper';
 import { SimulationSettings } from '../../../types';
+import { ParticleCreator } from '../../simulation/particle/ParticleCreator';
+import { ObstacleManager } from '../obstacleManager';
 
 export class DLAggregateForce {
   // Add a method to check and maintain seed count
-  static ensureSeeds(particles: paper.Group, settings: SimulationSettings): void {
+  static ensureSeeds(
+    particles: paper.Group, 
+    settings: SimulationSettings,
+    obstacleManager: ObstacleManager  // Add this parameter
+  ): void {
     if (!settings.aggregationEnabled || !settings.isDLA) return;
 
     const particleArray = particles.children as paper.Group[];
@@ -19,7 +25,7 @@ export class DLAggregateForce {
     // If we need more seeds, create them
     if (currentSeedCount < settings.aggregationSeedCount) {
       const needSeeds = settings.aggregationSeedCount - currentSeedCount;
-      this.initializeRandomSeeds(particles, needSeeds);
+      this.initializeRandomSeeds(particles, needSeeds, obstacleManager);  // Pass obstacleManager
     }
   }
 
@@ -43,9 +49,14 @@ export class DLAggregateForce {
     }
 
     // Ensure we have enough seeds
-    this.ensureSeeds(particles, settings);
+    this.ensureSeeds(
+      particles, 
+      settings,
+      particles.data.obstacleManager // Pass the obstacleManager from particles data
+    );
 
     const point = particle.children[1] as paper.Path.Circle;
+   
     
     // If particle is already stuck, keep it frozen but return zero force
     if (particle.data.aggregationState.isStuck) {
@@ -55,7 +66,7 @@ export class DLAggregateForce {
 
     // Initialize seed particles if they haven't been set
     if (!particles.data?.hasSeeds) {
-      this.initializeRandomSeeds(particles, settings.aggregationSeedCount);
+      this.initializeRandomSeeds(particles, settings.aggregationSeedCount, particles.data.obstacleManager);
       particles.data.hasSeeds = true;
     }
 
@@ -102,14 +113,49 @@ export class DLAggregateForce {
   }
 
 
-  private static initializeRandomSeeds(particles: paper.Group, seedCount: number): void {
+  private static initializeRandomSeeds(
+    particles: paper.Group, 
+    seedCount: number,
+    obstacleManager: ObstacleManager  // Add this parameter
+  ): void {
     const particleArray = particles.children as paper.Group[];
     
-    // Get array of non-seed particles
+    
+    // Get array of particles that can become seeds
     const availableParticles = particleArray.filter(particle => 
       !particle.data?.aggregationState?.isSeed && 
       !particle.data?.aggregationState?.isStuck
     );
+    
+    // If we don't have enough available particles, create new ones
+    const needNewParticles = Math.max(0, seedCount - availableParticles.length);
+    
+    if (needNewParticles > 0) {
+      const view = paper.view;
+      const padding = 50;
+      
+      for (let i = 0; i < needNewParticles; i++) {
+        const x = padding + Math.random() * (view.bounds.width - 2 * padding);
+        const y = padding + Math.random() * (view.bounds.height - 2 * padding);
+        
+        const particleColor = view.element.dataset.particleColor || '#000000';
+        const trailColor = view.element.dataset.trailColor || '#8b8680';
+        
+        const newParticle = ParticleCreator.create(
+          x, y,
+          particleColor,
+          trailColor,
+          2, // particle radius
+          1, // trail width
+          obstacleManager  // Pass the obstacleManager directly
+        );
+        
+        if (newParticle) {
+          particles.addChild(newParticle);
+          availableParticles.push(newParticle);
+        }
+      }
+    }
     
     // Create array of indices and shuffle it
     const indices = Array.from({ length: availableParticles.length }, (_, i) => i);
@@ -143,8 +189,6 @@ export class DLAggregateForce {
       }
     });
 
-    // Check and maintain seed count after cleanup
-    this.ensureSeeds(particles, particles.data.settings);
   }
 
   // Add method to reset all particle states

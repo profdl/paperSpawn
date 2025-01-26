@@ -16,10 +16,12 @@ export class VectorParticleSystem {
   private background: CanvasBackground;
   private svgManager: SVGManager;
   private particles!: paper.Group;
+  
 
 
   constructor(canvas: HTMLCanvasElement, onResize?: (width: number, height: number) => void) {
     this.canvasManager = new CanvasManager(canvas, onResize);
+  
     
     this.obstacleManager = new ObstacleManager();
     this.particleManager = new ParticleManager(this.obstacleManager);
@@ -116,10 +118,11 @@ export class VectorParticleSystem {
     
     // Check if particles exist and if DLA is enabled
     if (settings.aggregationEnabled && settings.isDLA && this.particleManager.getParticles()) {
-      // Ensure seeds are maintained
+      // Pass the obstacleManager when calling ensureSeeds
       DLAggregateForce.ensureSeeds(
         this.particleManager.getParticles(),
-        settings
+        settings,
+        this.obstacleManager
       );
     }
     
@@ -129,6 +132,7 @@ export class VectorParticleSystem {
       view.bounds.height
     );
   }
+
 
 
   
@@ -164,11 +168,26 @@ export class VectorParticleSystem {
 
   // General methods
   clearParticlesOnly(): void {
-    // Reset DLA states before clearing particles
-    if (this.particles) {
-      DLAggregateForce.resetParticleStates(this.particles);
+    const particles = this.particleManager.getParticles();
+    if (particles) {
+      // First remove all connection lines
+      (particles.children as paper.Group[]).forEach((particle: paper.Group) => {
+        if (particle.data?.aggregationLines) {
+          particle.data.aggregationLines.forEach((line: paper.Path) => {
+            if (line && line.remove) {
+              line.remove();
+            }
+          });
+          particle.data.aggregationLines = [];
+        }
+      });
+  
+      // Reset DLA states
+      DLAggregateForce.resetParticleStates(particles);
+      
+      // Then clear the particles
+      this.particleManager.clear();
     }
-    this.particleManager.clear();
   }
   
   clear(): void {
