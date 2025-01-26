@@ -6,6 +6,7 @@ import { WanderForce } from '../forces/WanderForce';
 import { ExternalForce } from '../forces/ExternalForce';
 import { AvoidanceForce } from '../forces/AvoidanceForce';
 import { ObstacleManager } from '../obstacleManager';
+import { AggregationForce } from '../forces/AggregateForce';
 
 export class ParticleUpdater {
   static update(
@@ -72,6 +73,16 @@ export class ParticleUpdater {
             }
           }
         }
+
+        // Calculate Agregator, if enabled
+        if (settings.aggregationEnabled) {
+          const aggregationForce = AggregationForce.calculate(particle, particles, settings);
+          if (aggregationForce.length > 0) {
+            finalForce = finalForce.add(aggregationForce);
+            totalWeight += 1; // Or some appropriate weight for aggregation
+          }
+        }
+
 
         // Only calculate Magnatism forces if enabled
         if (settings.magnetismEnabled && settings.magnetismStrength > 0) {

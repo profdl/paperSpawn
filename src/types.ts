@@ -20,9 +20,11 @@ export interface ParticleData {
   state: ParticleState;
   externalForceAngleOffset?: number;
   bounceCooldown?: number;
-  polarity?: number; 
-  magneticCharge?: number; 
+  aggregatedWith?: Set<number>;
+  aggregationLines?: paper.Path[];
+  isAggregationLeader?: boolean;
 }
+
 
 // interface for magnetic field visualization
 export interface MagneticFieldProperties {
@@ -70,6 +72,8 @@ export interface ParticlePreset {
     magneticMinDistance?: number;
     showMagneticField?: boolean;
     magneticPolarityEnabled?: boolean;
+    aggregationEnabled: boolean;
+    aggregationDistance: number; 
   };
 }
 
@@ -124,6 +128,9 @@ export interface SimulationSettings {
   particleLifetime?: number;
   maxSpeed?: number;
   friction?: number;
+  aggregationEnabled: boolean;
+  aggregationDistance: number;
+  aggregationLineColor: string;
 }
 
 export type PresetType = 'start';

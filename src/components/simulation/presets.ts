@@ -50,7 +50,10 @@ export const presets: Record<PresetType | string, SimulationSettings> = {
     magnetismEnabled: true,
     magnetismStrength: 1,
     magnetismDistance: 150,
-    magnetismAngle: 360
+    magnetismAngle: 360,
+    aggregationEnabled: false,
+    aggregationDistance: 10,
+    aggregationLineColor: '#444444'
   } as SimulationSettings,
 
   // Magnetic chain formation preset

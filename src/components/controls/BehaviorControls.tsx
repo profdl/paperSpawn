@@ -114,7 +114,38 @@ export default function BehaviorControls() {
           </div>
         )}
       </div>
-
+{/* Aggregation Section */}
+<div>
+        <div className="flex justify-between items-center mb-2">
+          <div className="text-[10px] uppercase tracking-wider text-white/60">
+            Aggregation
+          </div>
+          <Switch
+            size="xs"
+            checked={settings.aggregationEnabled}
+            onCheckedChange={(checked) =>
+              updateSetting("aggregationEnabled", checked)
+            }
+          />
+        </div>
+        {settings.aggregationEnabled && (
+          <div className="space-y-1.5">
+            <div className="control">
+              <label className="inline-block w-[80px] text-[10px]">
+                Distance
+              </label>
+              <DraggableNumberInput
+                value={settings.aggregationDistance}
+                onChange={(value) => updateSetting("aggregationDistance", value)}
+                min={1}
+                max={50}
+                step={1}
+                formatValue={(v) => `${v}px`}
+              />
+            </div>
+          </div>
+        )}
+      </div>
       {/* Magnetism Section */}
       <div>
         <div className="flex justify-between items-center mb-2">
