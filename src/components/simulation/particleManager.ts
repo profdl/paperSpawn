@@ -59,8 +59,8 @@ export class ParticleManager {
   createParticle(
     x: number, 
     y: number, 
-    particleColor: string, 
-    trailColor: string,
+    particleColor:  '#000000', 
+    trailColor:  '#000000',
     isSeed: boolean = false  // Add isSeed parameter
   ): paper.Group | null {
     const particle = ParticleCreator.create(

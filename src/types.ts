@@ -80,6 +80,7 @@ export interface ParticlePreset {
 }
 
 export interface SimulationSettings {
+  magnetismAngle: number;
   paintSpawnRate: number;
   count: number;
   particleSize: number;
