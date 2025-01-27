@@ -15,7 +15,7 @@ export class SVGManager {
     item.children.forEach((child: paper.Item) => {
       if (child instanceof paper.Group && child.data.isParticle) {
         const position = child.position;
-        this.particleManager.createParticle(position.x, position.y);
+        this.particleManager.createParticle(position.x, position.y, '#000000', '#000000', false);
         child.remove();
       } else if (child instanceof paper.Path && child.data.isObstacle) {
         const rectangle = new paper.Path.Rectangle(child.bounds);

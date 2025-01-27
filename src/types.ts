@@ -69,6 +69,7 @@ export interface ParticlePreset {
     magnetismEnabled?: boolean;
     magnetismStrength?: number;
     magnetismDistance?: number;
+    magnetismAngle: number;
     magneticFieldStrength?: number;
     magneticMinDistance?: number;
     showMagneticField?: boolean;

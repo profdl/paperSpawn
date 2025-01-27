@@ -6,7 +6,6 @@ import { EraserTool } from './eraserTool';
 import { CanvasBackground } from './canvasBackground';
 import { CanvasManager } from './canvasManager';
 import { SVGManager } from './svgManager';
-import { ParticleData } from '../../types';
 
 export class VectorParticleSystem {
   private canvasManager: CanvasManager;
@@ -15,7 +14,6 @@ export class VectorParticleSystem {
   private eraserTool: EraserTool;
   private background: CanvasBackground;
   private svgManager: SVGManager;
-  private particles!: paper.Group;
   
 
 
@@ -86,7 +84,8 @@ export class VectorParticleSystem {
   }
 
   setBackgroundColor(color: string): void {
-    this.background.setColor(color);
+    // Add type checking or casting
+    this.background.setColor(color as "#000000");
   }
 
   createParticle(x: number, y: number, isSeed: boolean = false): paper.Group {
