@@ -1,11 +1,11 @@
 import paper from 'paper';
-import { SimulationSettings } from '../../../types';
+import { SimulationSettings } from '../../types';
 import { FlockingForce } from '../forces/FlockingForce';
 import { MagnetismForce } from '../forces/MagnetismForce';
 import { WanderForce } from '../forces/WanderForce';
 import { ExternalForce } from '../forces/ExternalForce';
 import { AvoidanceForce } from '../forces/AvoidanceForce';
-import { ObstacleManager } from '../obstacleManager';
+import { ObstacleManager } from '../managers/obstacleManager';
 import { AggregationForce } from '../forces/AggregateForce';
 
 export class ParticleUpdater {

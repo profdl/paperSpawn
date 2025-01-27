@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import Navbar from '../ui/Navbar';
-import ControlPanel from '../ui/ControlPanel';
-import ProjectsDrawer from '../ui/ProjectsDrawer';
-import VerticalToolbar from '../ui/VerticalToolbar';
+import Navbar from './Navbar';
+import ControlPanel from './ControlPanel';
+import ProjectsDrawer from '../shared/ProjectsDrawer';
+import VerticalToolbar from './VerticalToolbar';
 import { SimulationProvider } from '../../contexts/SimulationContext';
 import { ToolProvider } from '../../contexts/ToolContext';
-import VectorSimulationCanvas from '../simulation/VectorSimulationCanvas';
+import VectorSimulationCanvas from './VectorSimulationCanvas';
 
 export default function MainLayout() {
   const [showControlPanel, setShowControlPanel] = useState(true);

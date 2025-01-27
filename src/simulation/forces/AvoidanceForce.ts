@@ -1,6 +1,6 @@
 import paper from 'paper';
-import { SimulationSettings } from '../../../types';
-import { ObstacleManager } from '../obstacleManager';
+import { SimulationSettings } from '../../types';
+import { ObstacleManager } from '../managers/obstacleManager';
 
 export class AvoidanceForce {
   static calculate(

@@ -1,5 +1,5 @@
 import paper from 'paper';
-import { SimulationSettings } from '../../../types';
+import { SimulationSettings } from '../../types';
 
 export class ExternalForce {
   static calculate(settings: SimulationSettings, particle: paper.Group): paper.Point {

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import AccordionSection from './AccordionSection';
+import AccordionSection from '../shared/AccordionSection';
 import ParticleControls from '../controls/ParticleControls';
 import BehaviorControls from '../controls/BehaviorControls';
 

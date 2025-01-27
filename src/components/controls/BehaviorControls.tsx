@@ -1,8 +1,8 @@
 
 import { useSimulation } from "../../contexts/SimulationContext";
-import DraggableNumberInput from "../ui/DraggableNumberInput";
+import DraggableNumberInput from "../shared/DraggableNumberInput";
 import { BoundaryBehavior, BehaviorConfig } from "../../types";
-import { Switch } from "../ui/Switch";
+import { Switch } from "../shared/Switch";
 
 const BEHAVIORS: BehaviorConfig[] = [
   {

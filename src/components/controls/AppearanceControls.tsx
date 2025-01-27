@@ -1,8 +1,8 @@
 import { useSimulation } from '../../contexts/SimulationContext';
-import ColorPicker from '../ui/ColorPicker';
+import ColorPicker from '../shared/ColorPicker';
 import { colorSchemes } from '../../types';
 import { Shuffle } from 'lucide-react';
-import DraggableNumberInput from '../ui/DraggableNumberInput';
+import DraggableNumberInput from '../shared/DraggableNumberInput';
 
 function HSLToHex(h: number, s: number, l: number): string {
   s /= 100;

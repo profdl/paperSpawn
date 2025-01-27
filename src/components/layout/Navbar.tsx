@@ -14,13 +14,13 @@ import {
   Snowflake,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
-import AuthModal from "../ui/AuthModal";
+import AuthModal from "../shared/AuthModal";
 import { useTool } from "../../contexts/ToolContext";
 import { useProjects } from "../../hooks/useProjects";
 import { SimulationSettings } from "../../types";
-import DraggableNumberInput from "./DraggableNumberInput";
+import DraggableNumberInput from "../shared/DraggableNumberInput";
 import { useSimulation } from "../../contexts/SimulationContext";
-import { AggregationForce } from "../simulation/forces/AggregateForce";
+import { AggregationForce } from "../../simulation/forces/AggregateForce";
 
 interface NavbarProps {
   showUI: boolean;

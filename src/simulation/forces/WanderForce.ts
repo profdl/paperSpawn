@@ -1,5 +1,5 @@
 import paper from 'paper';
-import { SimulationSettings } from '../../../types';
+import { SimulationSettings } from '../../types';
 
 export class WanderForce {
   private static wanderAngles: Map<number, number> = new Map();

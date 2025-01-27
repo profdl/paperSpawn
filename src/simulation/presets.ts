@@ -1,4 +1,4 @@
-import { SimulationSettings, PresetType } from '../../types';
+import { SimulationSettings, PresetType } from '../types';
 
 const defaultSettings: Partial<SimulationSettings> = {
   backgroundColor: '#FFFFFF',

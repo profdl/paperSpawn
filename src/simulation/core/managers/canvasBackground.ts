@@ -1,5 +1,5 @@
 import paper from 'paper';
-import { CANVAS_DIMENSIONS } from '../layout/constants';
+import { CANVAS_DIMENSIONS } from '../../../components/layout/constants';
 
 export class CanvasBackground {
   private background: paper.Path.Rectangle;

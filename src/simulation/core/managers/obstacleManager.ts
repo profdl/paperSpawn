@@ -1,6 +1,6 @@
 import paper from 'paper';
-import { TransformHandles } from './transformHandles';
-import { SimulationSettings } from '../../types';  
+import { TransformHandles } from '../../transformHandles';
+import { SimulationSettings } from '../../../types';  
 
 export class ObstacleManager {
   private rectangles: paper.Path.Rectangle[] = [];

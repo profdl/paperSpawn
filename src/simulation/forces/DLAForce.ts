@@ -1,5 +1,5 @@
 import paper from 'paper';
-import { SimulationSettings } from '../../../types';
+import { SimulationSettings } from '../../types';
 
 export class DLAForce {
   private static readonly STICKING_DISTANCE = 2;

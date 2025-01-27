@@ -1,5 +1,5 @@
 import { useSimulation } from '../../contexts/SimulationContext';
-import DraggableNumberInput from '../ui/DraggableNumberInput';
+import DraggableNumberInput from '../shared/DraggableNumberInput';
 import { BoundaryBehavior } from '../../types';
 
 export default function CanvasBehaviorsControls() {

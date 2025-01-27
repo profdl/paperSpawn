@@ -1,8 +1,8 @@
 import paper from 'paper';
-import { SimulationSettings } from '../../types';
+import { SimulationSettings } from '../../../types';
 import { ObstacleManager } from './obstacleManager';
-import { ParticleCreator } from './particle/ParticleCreator';
-import { ParticleUpdater } from './particle/ParticleUpdater';
+import { ParticleCreator } from '../ParticleCreator';
+import { ParticleUpdater } from '../ParticleUpdater';
 
 export class ParticleManager {
   private particles: paper.Group;

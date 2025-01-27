@@ -6,8 +6,8 @@ import React, {
   useRef,
 } from "react";
 import { SimulationSettings } from "../types";
-import { presets } from "../components/simulation/presets";
-import { VectorParticleSystem } from "../components/simulation/VectorParticleSystem";
+import { presets } from "../simulation/presets";
+import { VectorParticleSystem } from "../simulation/core/VectorParticleSystem";
 import paper from "paper";
 import { CANVAS_DIMENSIONS } from '../components/layout/constants';
 

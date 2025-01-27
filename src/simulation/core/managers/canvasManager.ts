@@ -1,5 +1,5 @@
 import paper from 'paper';
-import { CANVAS_DIMENSIONS } from '../layout/constants';
+import { CANVAS_DIMENSIONS } from '../../../components/layout/constants';
 
 export class CanvasManager {
   constructor(canvas: HTMLCanvasElement, onResize?: (width: number, height: number) => void) {

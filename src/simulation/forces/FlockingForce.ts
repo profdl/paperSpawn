@@ -1,5 +1,5 @@
 import paper from 'paper';
-import { SimulationSettings, FlockingForces } from '../../../types';
+import { SimulationSettings, FlockingForces } from '../../types';
 
 export class FlockingForce {
   static calculate(

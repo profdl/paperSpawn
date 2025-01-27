@@ -1,11 +1,11 @@
 import paper from 'paper';
-import { ParticleManager } from './particleManager';
-import { ObstacleManager } from './obstacleManager';
+import { ParticleService } from './particleService';
+import { ObstacleManager } from './managers/obstacleManager';
 
 export class SVGManager {
   constructor(
     private project: paper.Project,
-    private particleManager: ParticleManager,
+    private particleService: ParticleService,  // Changed from ParticleManager
     private obstacleManager: ObstacleManager
   ) {}
 
@@ -15,7 +15,7 @@ export class SVGManager {
     item.children.forEach((child: paper.Item) => {
       if (child instanceof paper.Group && child.data.isParticle) {
         const position = child.position;
-        this.particleManager.createParticle(position.x, position.y, '#000000', '#000000', false);
+        this.particleService.createParticle(position.x, position.y);  // Updated method call
         child.remove();
       } else if (child instanceof paper.Path && child.data.isObstacle) {
         const rectangle = new paper.Path.Rectangle(child.bounds);
