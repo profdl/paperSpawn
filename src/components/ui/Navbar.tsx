@@ -11,6 +11,7 @@ import {
   FolderOpen,
   CloudHail,
   MenuIcon,
+  Snowflake
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import AuthModal from "../ui/AuthModal";
@@ -108,6 +109,7 @@ export default function Navbar({
         aggregationDistance: settings.aggregationDistance,
         aggregationLineColor: settings.aggregationLineColor,
         aggregationSpacing: settings.aggregationSpacing,
+        aggregationMaxConnections: settings.aggregationMaxConnections,
 
       };
 
@@ -199,6 +201,21 @@ export default function Navbar({
                   <span className="text-xs ">Batch Spawn</span>
                 </button>
 
+                <button
+  className={`p-1.5 rounded hover:bg-white/10 transition-colors ${
+    currentTool === "seed" ? "bg-white/20" : ""
+  } flex items-center gap-1`}
+  onClick={() => {
+    if (currentTool !== "seed") {
+      setTool("seed");
+    }
+  }}
+  title="Seed Spawner (S)"
+>
+          
+            <Snowflake className="w-4 h-4" />
+            <span className="text-xs">Seed</span>
+          </button>
                 {/* Divider */}
                 <div className="w-px bg-white/20 mx-1" />
 

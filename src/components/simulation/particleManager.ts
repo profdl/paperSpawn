@@ -56,20 +56,28 @@ export class ParticleManager {
   }
 
 
-  createParticle(x: number, y: number, particleColor: string, trailColor: string): paper.Group | null {
+  createParticle(
+    x: number, 
+    y: number, 
+    particleColor: string, 
+    trailColor: string,
+    isSeed: boolean = false  // Add isSeed parameter
+  ): paper.Group | null {
     const particle = ParticleCreator.create(
-      x, y,
+      x,
+      y,
       particleColor,
       trailColor,
       this.particleRadius,
       this.trailWidth,
-      this.obstacleManager
+      this.obstacleManager,
+      isSeed  // Pass isSeed to ParticleCreator
     );
-
+  
     if (particle) {
       this.particles.addChild(particle);
     }
-
+  
     return particle;
   }
 

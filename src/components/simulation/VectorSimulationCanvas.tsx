@@ -3,7 +3,7 @@ import paper from "paper";
 import { useSimulation } from "../../contexts/SimulationContext";
 import { useTool } from "../../contexts/ToolContext";
 import { VectorParticleSystem } from "./VectorParticleSystem";
-import { CANVAS_DIMENSIONS } from '../layout/constants';
+import { CANVAS_DIMENSIONS } from "../layout/constants";
 
 interface CanvasSize {
   width: number;
@@ -87,6 +87,14 @@ export default function VectorSimulationCanvas() {
     };
   }, []);
 
+  useEffect(() => {
+    // Add cursor style based on tool
+    if (canvasRef.current) {
+      canvasRef.current.style.cursor =
+        currentTool === "seed" ? "crosshair" : "default";
+    }
+  }, [currentTool]);
+
   const handleMouseDown = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
       if (currentTool === "none" || !systemRef.current) return;
@@ -115,6 +123,9 @@ export default function VectorSimulationCanvas() {
             point.y,
             eraserProperties.size
           );
+          break;
+        case "seed":
+          systemRef.current.createParticle(point.x, point.y, true);
           break;
       }
     },
@@ -222,7 +233,10 @@ export default function VectorSimulationCanvas() {
 
     // Ensure view exists and is properly sized
     if (paper.view) {
-      paper.view.viewSize = new paper.Size( CANVAS_DIMENSIONS.WIDTH, CANVAS_DIMENSIONS.HEIGHT,);
+      paper.view.viewSize = new paper.Size(
+        CANVAS_DIMENSIONS.WIDTH,
+        CANVAS_DIMENSIONS.HEIGHT
+      );
     }
 
     const animate = () => {

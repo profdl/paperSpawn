@@ -6,6 +6,7 @@ import { EraserTool } from './eraserTool';
 import { CanvasBackground } from './canvasBackground';
 import { CanvasManager } from './canvasManager';
 import { SVGManager } from './svgManager';
+import { ParticleData } from '../../types';
 
 export class VectorParticleSystem {
   private canvasManager: CanvasManager;
@@ -88,23 +89,22 @@ export class VectorParticleSystem {
     this.background.setColor(color);
   }
 
-  createParticle(x: number, y: number): paper.Group {
+  createParticle(x: number, y: number, isSeed: boolean = false): paper.Group {
     const particleColor = this.canvasManager.getProject().view.element.dataset.particleColor || '#000000';
     const trailColor = this.canvasManager.getProject().view.element.dataset.trailColor || '#8b8680';
-    const particle = this.particleManager.createParticle(x, y, particleColor, trailColor);
+    
+    const particle = this.particleManager.createParticle(
+      x,
+      y,
+      particleColor,
+      trailColor,
+      isSeed  // Pass isSeed parameter
+    );
+  
     if (!particle) {
       throw new Error('Failed to create particle');
     }
     
-    // Initialize DLA state for the new particle
-    if (!particle.data.aggregationState) {
-      particle.data.aggregationState = {
-        isStuck: false,
-        isSeed: false,
-        stickingProbability: Math.random(),
-        aggregatedWith: new Set<number>()
-      };
-    }
     return particle;
   }
 

@@ -18,6 +18,7 @@ export class AggregationForce {
   private static branchCounter = 0;
   private static branches: Map<number, BranchData> = new Map();
 
+
   private static initializeParticleData(particle: paper.Group): void {
     if (!particle.data) {
       particle.data = {};
@@ -116,35 +117,72 @@ static calculate(
   let totalForce = new paper.Point(0, 0);
   const criticalDistance = settings.particleSize * 1.5;
 
-  // First handle connections and their forces
-  if (particle.data.branchConnections?.size > 0) {
-    // For connected particles, apply strong cohesive forces
-    for (const connection of particle.data.branchConnections) {
-      const connectedParticle = particles.children.find(p => p.id === connection.particleId) as paper.Group;
-      if (connectedParticle) {
-        const connectedPoint = connectedParticle.children[1] as paper.Path.Circle;
-        const vectorToConnected = connectedPoint.position.subtract(point.position);
-        const distance = vectorToConnected.length;
+ // First handle connections and their forces
+ if (particle.data.branchConnections?.size > 0) {
+  const maxSpacing = settings.particleSize * settings.aggregationSpacing * 2.5; // Increased breaking threshold
+  const connectionsToRemove: BranchConnection[] = [];
+
+  // For connected particles, apply strong cohesive forces
+  for (const connection of particle.data.branchConnections) {
+    const connectedParticle = particles.children.find(p => p.id === connection.particleId) as paper.Group;
+    if (connectedParticle) {
+      const connectedPoint = connectedParticle.children[1] as paper.Path.Circle;
+      const vectorToConnected = connectedPoint.position.subtract(point.position);
+      const distance = vectorToConnected.length;
+      
+      if (distance > maxSpacing) {
+        // Mark connection for removal when exceeding max distance
+        connectionsToRemove.push(connection);
         
-        // Strong cohesive force to maintain exact spacing
+        // Remove the connection from the connected particle as well
+        if (connectedParticle.data?.branchConnections) {
+          connectedParticle.data.branchConnections = new Set<BranchConnection>(
+            Array.from(connectedParticle.data.branchConnections as Set<BranchConnection>)
+              .filter(conn => conn.particleId !== particle.id)
+          );
+        }
+        
+        // Remove the connection line
+        const connectionKey = this.getConnectionKey(particle.id, connectedParticle.id);
+        const line = this.connectionLines.get(connectionKey);
+        if (line) {
+          line.remove();
+          this.connectionLines.delete(connectionKey);
+        }
+      } else {
+        // Strong cohesive force to maintain spacing
         const targetDistance = settings.particleSize * settings.aggregationSpacing;
-        const strength = 0.5; // Increased strength for connected particles
+        const strength = 0.8; // Increased strength for connected particles
         
         if (distance > targetDistance) {
-          // Pull together
+          // Pull together with increasing force based on distance
+          const pullStrength = Math.min(1, (distance - targetDistance) / targetDistance);
           totalForce = totalForce.add(
-            vectorToConnected.normalize().multiply((distance - targetDistance) * strength)
+            vectorToConnected.normalize().multiply((distance - targetDistance) * strength * pullStrength)
           );
-        } else if (distance < targetDistance) {
-          // Push apart slightly to maintain spacing
+        } else if (distance < targetDistance * 0.8) { // Added minimum spacing threshold
+          // Push apart slightly to maintain minimum spacing
           totalForce = totalForce.add(
-            vectorToConnected.normalize().multiply((distance - targetDistance) * strength)
+            vectorToConnected.normalize().multiply((distance - targetDistance) * strength * 0.5)
           );
         }
       }
     }
   }
 
+  // Remove marked connections
+  if (connectionsToRemove.length > 0) {
+    particle.data.branchConnections = new Set(
+      particle.data.branchConnections = new Set<BranchConnection>(
+        Array.from(particle.data.branchConnections as Set<BranchConnection>)
+          .filter(conn => !connectionsToRemove.some(remove => 
+            remove.particleId === conn.particleId && remove.branchId === conn.branchId
+          )))
+      );
+  }
+}
+
+  
   // Then handle repulsion for non-connected particles
   for (const otherParticle of particles.children as paper.Group[]) {
     if (particle === otherParticle || this.areConnected(particle, otherParticle)) continue;
@@ -161,21 +199,27 @@ static calculate(
     }
   }
 
- // Branch formation and maintenance
- const nearbyParticles = (particles.children as paper.Group[])
- .filter(p => p !== particle)
- .map(p => ({
-   particle: p,
-   distance: (p.children[1] as paper.Path.Circle).position.subtract(point.position).length
- }))
- .sort((a, b) => a.distance - b.distance);
+  // Branch formation and maintenance
+  const nearbyParticles = (particles.children as paper.Group[])
+  .filter(p => p !== particle)
+  .map(p => ({
+    particle: p,
+    distance: (p.children[1] as paper.Path.Circle).position.subtract(point.position).length
+  }))
+  .sort((a, b) => a.distance - b.distance);
 
- for (const {particle: otherParticle, distance} of nearbyParticles) {
-  this.initializeParticleData(otherParticle);
+  for (const {particle: otherParticle, distance} of nearbyParticles) {
+    this.initializeParticleData(otherParticle);
 
-  if (distance <= settings.aggregationDistance) {
-    // Simplified connection logic - connect if within range and not already connected
-    if (!this.areConnected(particle, otherParticle)) {
+    if (distance <= settings.aggregationDistance) {
+      // Use settings.aggregationMaxConnections instead of constant
+      const currentConnections = particle.data.branchConnections?.size || 0;
+      const otherConnections = otherParticle.data.branchConnections?.size || 0;
+
+      if (!this.areConnected(particle, otherParticle) && 
+          currentConnections < settings.aggregationMaxConnections && 
+          otherConnections < settings.aggregationMaxConnections) {
+     
       const newBranchId = ++this.branchCounter;
       
       // Create new connection

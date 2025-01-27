@@ -114,52 +114,99 @@ export default function BehaviorControls() {
           </div>
         )}
       </div>
-{/* Aggregation Section */}
-<div>
-  <div className="flex justify-between items-center mb-2">
-    <div className="text-[10px] uppercase tracking-wider text-white/60">
-      Aggregation
-    </div>
-    <Switch
-      size="xs"
-      checked={settings.aggregationEnabled}
-      onCheckedChange={(checked) =>
-        updateSetting("aggregationEnabled", checked)
-      }
-    />
-  </div>
-  {settings.aggregationEnabled && (
-    <div className="space-y-1.5">
-      <div className="control">
-        <label className="inline-block w-[80px] text-[10px]">
-          Distance
-        </label>
-        <DraggableNumberInput
-          value={settings.aggregationDistance}
-          onChange={(value) => updateSetting("aggregationDistance", value)}
-          min={1}
-          max={100}
-          step={1}
-          formatValue={(v) => `${Math.round(v)}px`}
-        />
+      {/* Aggregation Section */}
+      <div>
+        <div className="flex justify-between items-center mb-2">
+          <div className="text-[10px] uppercase tracking-wider text-white/60">
+            Aggregation
+          </div>
+          <Switch
+            size="xs"
+            checked={settings.aggregationEnabled}
+            onCheckedChange={(checked) =>
+              updateSetting("aggregationEnabled", checked)
+            }
+          />
+        </div>
+        {settings.aggregationEnabled && (
+          <div className="space-y-1.5">
+            <div className="control">
+              <label className="inline-block w-[80px] text-[10px]">
+                Distance
+              </label>
+              <DraggableNumberInput
+                value={settings.aggregationDistance}
+                onChange={(value) =>
+                  updateSetting("aggregationDistance", value)
+                }
+                min={1}
+                max={100}
+                step={1}
+                formatValue={(v) => `${Math.round(v)}px`}
+              />
+            </div>
+            <div className="control">
+              <label className="inline-block w-[80px] text-[10px]">
+                Spacing
+              </label>
+              <DraggableNumberInput
+                value={settings.aggregationSpacing}
+                onChange={(value) => updateSetting("aggregationSpacing", value)}
+                min={1}
+                max={20}
+                step={0.1}
+                formatValue={(v) => `${v.toFixed(1)}x`}
+              />
+            </div>
+          </div>
+        )}
       </div>
-      <div className="control">
-        <label className="inline-block w-[80px] text-[10px]">
-          Spacing
-        </label>
-        <DraggableNumberInput
-          value={settings.aggregationSpacing}
-          onChange={(value) => updateSetting("aggregationSpacing", value)}
-          min={1}
-          max={10}
-          step={0.1}
-          formatValue={(v) => `${v.toFixed(1)}x`}
-        />
-      </div>
-    </div>
-  )}
-</div>
 
+       {/* DLA Freeze section */}
+       <div>
+        <div className="flex justify-between items-center mb-2">
+          <div className="text-[10px] uppercase tracking-wider text-white/60">
+            Freeze (DLA)
+          </div>
+          <Switch
+            size="xs"
+            checked={settings.dlaEnabled}
+            onCheckedChange={(checked) =>
+              updateSetting("dlaEnabled", checked)
+            }
+          />
+        </div>
+        {settings.dlaEnabled && (
+          <div className="space-y-1.5">
+            <div className="control">
+              <label className="inline-block w-[80px] text-[10px]">
+                Snap Distance
+              </label>
+              <DraggableNumberInput
+                value={settings.dlaSnapDistance}
+                onChange={(value) => updateSetting("dlaSnapDistance", value)}
+                min={1}
+                max={50}
+                step={1}
+                formatValue={(v) => `${v}px`}
+              />
+            </div>
+            <div className="control">
+              <label className="inline-block w-[80px] text-[10px]">
+                Snap Spacing
+              </label>
+              <DraggableNumberInput
+                value={settings.dlaSnapSpacing}
+                onChange={(value) => updateSetting("dlaSnapSpacing", value)}
+                min={1}
+                max={20}
+                step={1}
+                formatValue={(v) => `${v}px`}
+              />
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Magnetism Section */}
       <div>

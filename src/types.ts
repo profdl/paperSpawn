@@ -23,6 +23,8 @@ export interface ParticleData {
   aggregatedParticles: Set<number>; 
   isReflected?: boolean;
   reflectedSpeed?: number;
+  isSeed?: boolean;
+  isStuck?: boolean;
 }
 
 // interface for magnetic field visualization
@@ -132,7 +134,10 @@ export interface SimulationSettings {
   aggregationDistance: number;
   aggregationLineColor: string;
   aggregationSpacing: number;
-
+  aggregationMaxConnections: number;
+  dlaEnabled: boolean;
+  dlaSnapDistance: number;
+  dlaSnapSpacing: number;
 }
 
 export type PresetType = 'start';
@@ -150,7 +155,7 @@ export interface ColorScheme {
   trail: string;
 }
 
-export type Tool = 'none' | 'paint' | 'erase' | 'rectangle' | 'select' | 'freehand';
+export type Tool = 'none' | 'paint' | 'erase' | 'rectangle' | 'select' | 'freehand' | 'seed';
 
 export const colorSchemes: ColorScheme[] = [
   {
@@ -160,16 +165,16 @@ export const colorSchemes: ColorScheme[] = [
     trail: "#8b8680"
   },
   {
-    name: "Magnetic Field",
-    background: "#000000",
-    particle: "#4287f5",
-    trail: "#2C5530"
+    name: "Toned Paper",
+    background: "#8b8680",
+    particle: "#FFFFFF",
+    trail: "#000000"
   },
   {
-    name: "Electromagnetic",
-    background: "#1a1a1a",
-    particle: "#ff3838",
-    trail: "#0099ff"
+    name: "Negative",
+    background: "#000000",
+    particle: "#FFFFFF",
+    trail: "#8b8680"
   },
   {
     name: "Neon",

@@ -8,7 +8,6 @@ import { AvoidanceForce } from '../forces/AvoidanceForce';
 import { ObstacleManager } from '../obstacleManager';
 import { AggregationForce } from '../forces/AggregateForce';
 
-
 export class ParticleUpdater {
   static update(
     particle: paper.Group,
@@ -18,14 +17,21 @@ export class ParticleUpdater {
     height: number,
     obstacleManager: ObstacleManager
   ): void {
-    const trail = particle.children[0] as paper.Path;
-    const point = particle.children[1] as paper.Path.Circle;
-    const age = Date.now() - particle.data.createdAt;
-    let velocity = particle.data.velocity;
 
-    if (particle.data.state === 'stopped') {
+    if (particle.data.isSeed) {
+      // Ensure seed particles have zero velocity and don't move
+      particle.data.velocity = new paper.Point(0, 0);
+      particle.data.state = 'frozen';
       return;
     }
+  const trail = particle.children[0] as paper.Path;
+  const point = particle.children[1] as paper.Path.Circle;
+  const age = Date.now() - particle.data.createdAt;
+  let velocity = particle.data.velocity;
+
+
+
+
 
     if (settings.paintingModeEnabled) {
       if (particle.data.state === 'active' && age >= settings.activeStateDuration) {
@@ -49,6 +55,32 @@ export class ParticleUpdater {
         Date.now() > particle.data.bounceCooldown;
 
       if (bounceComplete) {
+
+        //DLA FREEZE
+        if (settings.dlaEnabled && !particle.data.isSeed) {
+          // Check for nearby seeds or frozen particles
+          for (const other of particles.children) {
+            if (other === particle) continue;
+            if (other.data.isSeed || other.data.isStuck) {
+              const distance = point.position.getDistance(other.children[1].position);
+              if (distance <= settings.dlaSnapDistance) {
+                // Calculate ideal position based on spacing
+                const direction = point.position.subtract(other.children[1].position);
+                const idealPosition = other.children[1].position.add(
+                  direction.normalize().multiply(settings.dlaSnapSpacing)
+                );
+                
+                // Move to ideal position and freeze
+                point.position = idealPosition;
+                particle.data.isStuck = true;
+                particle.data.state = 'frozen';
+                velocity.set(0, 0);
+                return;
+              }
+            }
+          }
+        }
+
 
 
         // FLOCKING
@@ -74,6 +106,8 @@ export class ParticleUpdater {
             }
           }
         }
+
+
 
         //AGGREGATION
         if (settings.aggregationEnabled) {
@@ -242,29 +276,26 @@ export class ParticleUpdater {
           }
           break;
 
-          case 'travel-off':
-            if (newPosition.x < 0 || newPosition.x > width ||
-              newPosition.y < 0 || newPosition.y > height) {
-              AggregationForce.cleanup(particle.id, particles);  // Add this line
-              particle.remove();
-              return;
-            }
-            break;
+        case 'travel-off':
+          if (newPosition.x < 0 || newPosition.x > width ||
+            newPosition.y < 0 || newPosition.y > height) {
+            AggregationForce.cleanup(particle.id, particles);  // Add this line
+            particle.remove();
+            return;
+          }
+          break;
       }
 
-      point.position = newPosition;
-
+    if (!particle.data.isSeed) {
+      point.position = point.position.add(velocity);
+      
       if (settings.paintingModeEnabled && particle.data.state === 'active') {
         trail.visible = true;
-        trail.add(newPosition);
+        trail.add(point.position);
         trail.smooth();
       }
-
-      particle.data.velocity = velocity;
     }
 
-    point.opacity = settings.paintingModeEnabled && particle.data.state === 'frozen' ? 1 : 1;
+    particle.data.velocity = velocity;
   }
-
-
-}
+  }}
