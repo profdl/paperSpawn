@@ -14,6 +14,22 @@ export interface TransformableItem {
   rotation: number;
 }
 
+export interface BehaviorControl {
+  label: string;
+  settingKey: keyof SimulationSettings;
+  min: number;
+  max: number;
+  step: number;
+  formatValue: (value: number) => string;
+}
+
+export interface BehaviorConfig {
+  key: string;
+  label: string;
+  enabledKey: keyof SimulationSettings;
+  controls?: BehaviorControl[];
+}
+
 export interface ParticleData {
   velocity: paper.Point;
   createdAt: number;

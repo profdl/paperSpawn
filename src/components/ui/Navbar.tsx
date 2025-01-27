@@ -11,7 +11,7 @@ import {
   FolderOpen,
   CloudHail,
   MenuIcon,
-  Snowflake
+  Snowflake,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import AuthModal from "../ui/AuthModal";
@@ -38,11 +38,12 @@ export default function Navbar({
   setShowMenu,
 }: NavbarProps) {
   const { user, signOut } = useAuth();
-  const { isPaused, setIsPaused, systemRef, settings, handleRespawn } = useSimulation();
-  const { currentTool, setTool, eraserProperties, updateEraserProperties } = useTool();
+  const { isPaused, setIsPaused, systemRef, settings, handleRespawn } =
+    useSimulation();
+  const { currentTool, setTool, eraserProperties, updateEraserProperties } =
+    useTool();
   const [showAuthModal, setShowAuthModal] = React.useState(false);
   const { saveProject } = useProjects();
-
 
   const handleSave = async () => {
     if (!user) {
@@ -114,7 +115,6 @@ export default function Navbar({
         aggregationLineColor: settings.aggregationLineColor,
         aggregationSpacing: settings.aggregationSpacing,
         aggregationMaxConnections: settings.aggregationMaxConnections,
-
       };
 
       const svgContent = systemRef.current.exportSVG();
@@ -127,16 +127,15 @@ export default function Navbar({
 
   const handleClearParticles = () => {
     if (!systemRef.current) return;
-    
+
     // Clear aggregation lines before removing particles
     const particles = systemRef.current.getParticles().children;
-    particles.forEach(particle => {
+    particles.forEach((particle) => {
       AggregationForce.cleanup(particle.id, systemRef.current!.getParticles());
     });
-    
+
     systemRef.current.clearParticlesOnly();
   };
-
 
   const handleOpenProjects = () => {
     if (user) {
@@ -205,21 +204,23 @@ export default function Navbar({
                   <span className="text-xs ">Batch Spawn</span>
                 </button>
 
-                <button
-  className={`p-1.5 rounded hover:bg-white/10 transition-colors ${
-    currentTool === "seed" ? "bg-white/20" : ""
-  } flex items-center gap-1`}
-  onClick={() => {
-    if (currentTool !== "seed") {
-      setTool("seed");
-    }
-  }}
-  title="Seed Spawner (S)"
->
-          
-            <Snowflake className="w-4 h-4" />
-            <span className="text-xs">Seed</span>
-          </button>
+                {settings.dlaEnabled && (
+                  <button
+                    className={`p-1.5 rounded hover:bg-white/10 transition-colors ${
+                      currentTool === "seed" ? "bg-white/20" : ""
+                    } flex items-center gap-1`}
+                    onClick={() => {
+                      if (currentTool !== "seed") {
+                        setTool("seed");
+                      }
+                    }}
+                    title="Seed Spawner (S)"
+                  >
+                    <Snowflake className="w-4 h-4" />
+                    <span className="text-xs">Seed</span>
+                  </button>
+                )}
+
                 {/* Divider */}
                 <div className="w-px bg-white/20 mx-1" />
 
@@ -239,7 +240,9 @@ export default function Navbar({
                     <div className="flex items-center ml-1">
                       <DraggableNumberInput
                         value={eraserProperties.size}
-                        onChange={(value) => updateEraserProperties({ size: value })}
+                        onChange={(value) =>
+                          updateEraserProperties({ size: value })
+                        }
                         min={5}
                         max={100}
                         step={1}
@@ -309,8 +312,8 @@ export default function Navbar({
         </div>
       </nav>
 
-    {/* Menu Dropdown */}
-    {showMenu && (
+      {/* Menu Dropdown */}
+      {showMenu && (
         <div className="fixed top-10 left-4 z-50 w-48 bg-black/90 backdrop-blur-sm border border-white/10 rounded-br-lg shadow-lg sm:left-[calc(6rem+16px)] lg:left-[calc(8rem+16px)]">
           <div className="py-2">
             <button
@@ -354,4 +357,3 @@ export default function Navbar({
     </>
   );
 }
-

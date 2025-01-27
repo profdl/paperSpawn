@@ -1,438 +1,277 @@
+
 import { useSimulation } from "../../contexts/SimulationContext";
 import DraggableNumberInput from "../ui/DraggableNumberInput";
-import { BoundaryBehavior } from "../../types";
+import { BoundaryBehavior, BehaviorConfig } from "../../types";
 import { Switch } from "../ui/Switch";
+
+const BEHAVIORS: BehaviorConfig[] = [
+  {
+    key: "flocking",
+    label: "Flocking",
+    enabledKey: "flockingEnabled",
+    controls: [
+      {
+        label: "Separation",
+        settingKey: "separation",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        formatValue: (v) => `${(v * 100).toFixed(0)}%`,
+      },
+      {
+        label: "",
+        settingKey: "separationDistance",
+        min: 1,
+        max: 100,
+        step: 1,
+        formatValue: (v) => `${v}px`,
+      },
+      {
+        label: "Cohesion",
+        settingKey: "cohesion",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        formatValue: (v) => `${(v * 100).toFixed(0)}%`,
+      },
+      {
+        label: "",
+        settingKey: "cohesionDistance",
+        min: 1,
+        max: 200,
+        step: 1,
+        formatValue: (v) => `${v}px`,
+      },
+      {
+        label: "Alignment",
+        settingKey: "alignment",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        formatValue: (v) => `${(v * 100).toFixed(0)}%`,
+      },
+      {
+        label: "",
+        settingKey: "alignmentDistance",
+        min: 1,
+        max: 150,
+        step: 1,
+        formatValue: (v) => `${v}px`,
+      },
+    ],
+  },
+  {
+    key: "aggregation",
+    label: "Aggregation",
+    enabledKey: "aggregationEnabled",
+    controls: [
+      {
+        label: "Distance",
+        settingKey: "aggregationDistance",
+        min: 1,
+        max: 100,
+        step: 1,
+        formatValue: (v) => `${Math.round(v)}px`,
+      },
+      {
+        label: "Spacing",
+        settingKey: "aggregationSpacing",
+        min: 1,
+        max: 20,
+        step: 0.1,
+        formatValue: (v) => `${v.toFixed(1)}x`,
+      },
+    ],
+  },
+  {
+    key: "dla",
+    label: "Freeze (DLA)",
+    enabledKey: "dlaEnabled",
+    controls: [
+      {
+        label: "Snap Distance",
+        settingKey: "dlaSnapDistance",
+        min: 1,
+        max: 50,
+        step: 1,
+        formatValue: (v) => `${v}px`,
+      },
+      {
+        label: "Snap Spacing",
+        settingKey: "dlaSnapSpacing",
+        min: 1,
+        max: 20,
+        step: 1,
+        formatValue: (v) => `${v}px`,
+      },
+    ],
+  },
+  {
+    key: "magnetism",
+    label: "Magnetism",
+    enabledKey: "magnetismEnabled",
+    controls: [
+      {
+        label: "Strength",
+        settingKey: "magnetismStrength",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        formatValue: (v) => `${(v * 100).toFixed(0)}%`,
+      },
+      {
+        label: "Distance",
+        settingKey: "magnetismDistance",
+        min: 0,
+        max: 300,
+        step: 1,
+        formatValue: (v) => `${v}px`,
+      },
+    ],
+  },
+  {
+    key: "wander",
+    label: "Wander",
+    enabledKey: "wanderEnabled",
+    controls: [
+      {
+        label: "Strength",
+        settingKey: "wanderStrength",
+        min: 0,
+        max: 3,
+        step: 0.01,
+        formatValue: (v) => `${(v * 100).toFixed(0)}%`,
+      },
+      {
+        label: "Speed",
+        settingKey: "wanderSpeed",
+        min: 0,
+        max: 4,
+        step: 0.1,
+        formatValue: (v) => v.toFixed(1),
+      },
+      {
+        label: "Radius",
+        settingKey: "wanderRadius",
+        min: 0,
+        max: 300,
+        step: 1,
+        formatValue: (v) => `${v}px`,
+      },
+    ],
+  },
+  {
+    key: "externalForces",
+    label: "External Forces",
+    enabledKey: "externalForcesEnabled",
+    controls: [
+      {
+        label: "Angle",
+        settingKey: "externalForceAngle",
+        min: 0,
+        max: 360,
+        step: 1,
+        formatValue: (v) => `${v}°`,
+      },
+      {
+        label: "Randomize",
+        settingKey: "externalForceAngleRandomize",
+        min: 0,
+        max: 180,
+        step: 1,
+        formatValue: (v) => `±${v}°`,
+      },
+      {
+        label: "Strength",
+        settingKey: "externalForceStrength",
+        min: 0,
+        max: 2,
+        step: 0.01,
+        formatValue: (v) => `${(v * 100).toFixed(0)}%`,
+      },
+    ],
+  },
+  {
+    key: "avoidance",
+    label: "Obstacle Avoidance",
+    enabledKey: "avoidanceEnabled",
+    controls: [
+      {
+        label: "Distance",
+        settingKey: "avoidanceDistance",
+        min: 0,
+        max: 100,
+        step: 1,
+        formatValue: (v) => `${v}px`,
+      },
+      {
+        label: "Strength",
+        settingKey: "avoidanceStrength",
+        min: 0,
+        max: 2,
+        step: 0.01,
+        formatValue: (v) => `${(v * 100).toFixed(0)}%`,
+      },
+      {
+        label: "Push Force",
+        settingKey: "avoidancePushMultiplier",
+        min: 1,
+        max: 5,
+        step: 0.1,
+        formatValue: (v) => `${v}x`,
+      },
+    ],
+  },
+];
+
+function BehaviorSection({ config }: { config: BehaviorConfig }) {
+  const { settings, updateSetting } = useSimulation();
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-2">
+        <div className="text-[10px] uppercase tracking-wider text-white/60">
+          {config.label}
+        </div>
+        <Switch
+          size="xs"
+          checked={Boolean(settings[config.enabledKey])}
+          onCheckedChange={(checked) =>
+            updateSetting(config.enabledKey, checked)
+          }
+        />
+      </div>
+      {settings[config.enabledKey] && config.controls && (
+        <div className="space-y-1.5">
+          {config.controls.map((control) => (
+            <div key={control.settingKey} className="control">
+              <label className="inline-block w-[80px] text-[10px]">
+                {control.label}
+              </label>
+              <DraggableNumberInput
+                value={Number(settings[control.settingKey]) || 0}
+                onChange={(value) => updateSetting(control.settingKey, value)}
+                min={control.min}
+                max={control.max}
+                step={control.step}
+                formatValue={control.formatValue}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function BehaviorControls() {
   const { settings, updateSetting } = useSimulation();
 
   return (
     <div className="space-y-6">
-      {/* Flocking Section */}
-      <div>
-        <div className="flex justify-between items-center mb-2">
-          <div className="text-[10px] uppercase tracking-wider text-white/60">
-            Flocking
-          </div>
-          <Switch
-            size="xs"
-            checked={settings.flockingEnabled}
-            onCheckedChange={(checked) =>
-              updateSetting("flockingEnabled", checked)
-            }
-          />
-        </div>
-        {settings.flockingEnabled && (
-          <div className="space-y-3">
-            {/* Separation Controls */}
-            <div>
-              <div className="control">
-                <label className="inline-block w-[80px] text-[10px] mb-1">
-                  Separation
-                </label>
-                <DraggableNumberInput
-                  value={settings.separation}
-                  onChange={(value) => updateSetting("separation", value)}
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  formatValue={(v) => `${(v * 100).toFixed(0)}%`}
-                />
-              </div>
-              <div className="control">
-                <label className="inline-block w-[80px] text-[10px] "></label>
-                <DraggableNumberInput
-                  value={settings.separationDistance}
-                  onChange={(value) =>
-                    updateSetting("separationDistance", value)
-                  }
-                  min={1}
-                  max={100}
-                  step={1}
-                  formatValue={(v) => `${v}px`}
-                />
-              </div>
-            </div>
-
-            {/* Cohesion Controls */}
-            <div>
-              <div className="control">
-                <label className="inline-block w-[80px] text-[10px] mb-1">
-                  Cohesion
-                </label>
-                <DraggableNumberInput
-                  value={settings.cohesion}
-                  onChange={(value) => updateSetting("cohesion", value)}
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  formatValue={(v) => `${(v * 100).toFixed(0)}%`}
-                />
-              </div>
-              <div className="control">
-                <label className="inline-block w-[80px] text-[10px]"></label>
-                <DraggableNumberInput
-                  value={settings.cohesionDistance}
-                  onChange={(value) => updateSetting("cohesionDistance", value)}
-                  min={1}
-                  max={200}
-                  step={1}
-                  formatValue={(v) => `${v}px`}
-                />
-              </div>
-            </div>
-
-            {/* Alignment Controls */}
-            <div>
-              <div className="control">
-                <label className="inline-block w-[80px] text-[10px] mb-1">
-                  Alignment
-                </label>
-                <DraggableNumberInput
-                  value={settings.alignment}
-                  onChange={(value) => updateSetting("alignment", value)}
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  formatValue={(v) => `${(v * 100).toFixed(0)}%`}
-                />
-              </div>
-              <div className="control">
-                <label className="inline-block w-[80px] text-[10px]"></label>
-                <DraggableNumberInput
-                  value={settings.alignmentDistance}
-                  onChange={(value) =>
-                    updateSetting("alignmentDistance", value)
-                  }
-                  min={1}
-                  max={150}
-                  step={1}
-                  formatValue={(v) => `${v}px`}
-                />
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-      {/* Aggregation Section */}
-      <div>
-        <div className="flex justify-between items-center mb-2">
-          <div className="text-[10px] uppercase tracking-wider text-white/60">
-            Aggregation
-          </div>
-          <Switch
-            size="xs"
-            checked={settings.aggregationEnabled}
-            onCheckedChange={(checked) =>
-              updateSetting("aggregationEnabled", checked)
-            }
-          />
-        </div>
-        {settings.aggregationEnabled && (
-          <div className="space-y-1.5">
-            <div className="control">
-              <label className="inline-block w-[80px] text-[10px]">
-                Distance
-              </label>
-              <DraggableNumberInput
-                value={settings.aggregationDistance}
-                onChange={(value) =>
-                  updateSetting("aggregationDistance", value)
-                }
-                min={1}
-                max={100}
-                step={1}
-                formatValue={(v) => `${Math.round(v)}px`}
-              />
-            </div>
-            <div className="control">
-              <label className="inline-block w-[80px] text-[10px]">
-                Spacing
-              </label>
-              <DraggableNumberInput
-                value={settings.aggregationSpacing}
-                onChange={(value) => updateSetting("aggregationSpacing", value)}
-                min={1}
-                max={20}
-                step={0.1}
-                formatValue={(v) => `${v.toFixed(1)}x`}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-
-       {/* DLA Freeze section */}
-       <div>
-        <div className="flex justify-between items-center mb-2">
-          <div className="text-[10px] uppercase tracking-wider text-white/60">
-            Freeze (DLA)
-          </div>
-          <Switch
-            size="xs"
-            checked={settings.dlaEnabled}
-            onCheckedChange={(checked) =>
-              updateSetting("dlaEnabled", checked)
-            }
-          />
-        </div>
-        {settings.dlaEnabled && (
-          <div className="space-y-1.5">
-            <div className="control">
-              <label className="inline-block w-[80px] text-[10px]">
-                Snap Distance
-              </label>
-              <DraggableNumberInput
-                value={settings.dlaSnapDistance}
-                onChange={(value) => updateSetting("dlaSnapDistance", value)}
-                min={1}
-                max={50}
-                step={1}
-                formatValue={(v) => `${v}px`}
-              />
-            </div>
-            <div className="control">
-              <label className="inline-block w-[80px] text-[10px]">
-                Snap Spacing
-              </label>
-              <DraggableNumberInput
-                value={settings.dlaSnapSpacing}
-                onChange={(value) => updateSetting("dlaSnapSpacing", value)}
-                min={1}
-                max={20}
-                step={1}
-                formatValue={(v) => `${v}px`}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Magnetism Section */}
-      <div>
-        <div className="flex justify-between items-center mb-2">
-          <div className="text-[10px] uppercase tracking-wider text-white/60">
-            Magnetism
-          </div>
-          <Switch
-            size="xs"
-            checked={settings.magnetismEnabled}
-            onCheckedChange={(checked) =>
-              updateSetting("magnetismEnabled", checked)
-            }
-          />
-        </div>
-        {settings.magnetismEnabled && (
-          <div className="space-y-1.5">
-            <div className="control">
-              <label className="inline-block w-[80px] text-[10px]">
-                Strength
-              </label>
-              <DraggableNumberInput
-                value={settings.magnetismStrength}
-                onChange={(value) => updateSetting("magnetismStrength", value)}
-                min={0}
-                max={1}
-                step={0.01}
-                formatValue={(v) => `${(v * 100).toFixed(0)}%`}
-              />
-            </div>
-
-            <div className="control">
-              <label className="inline-block w-[80px] text-[10px]">
-                Distance
-              </label>
-              <DraggableNumberInput
-                value={settings.magnetismDistance}
-                onChange={(value) => updateSetting("magnetismDistance", value)}
-                min={0}
-                max={300}
-                step={1}
-                formatValue={(v) => `${v}px`}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Wander Section */}
-      <div>
-        <div className="flex justify-between items-center mb-2">
-          <div className="text-[10px] uppercase tracking-wider text-white/60">
-            Wander
-          </div>
-          <Switch
-            size="xs"
-            checked={settings.wanderEnabled}
-            onCheckedChange={(checked) =>
-              updateSetting("wanderEnabled", checked)
-            }
-          />
-        </div>
-        {settings.wanderEnabled && (
-          <div className="space-y-1.5">
-            <div className="control">
-              <label className="inline-block w-[80px] text-[10px]">
-                Strength
-              </label>
-              <DraggableNumberInput
-                value={settings.wanderStrength}
-                onChange={(value) => updateSetting("wanderStrength", value)}
-                min={0}
-                max={3}
-                step={0.01}
-                formatValue={(v) => `${(v * 100).toFixed(0)}%`}
-              />
-            </div>
-            <div className="control">
-              <label className="inline-block w-[80px] text-[10px]">Speed</label>
-              <DraggableNumberInput
-                value={settings.wanderSpeed}
-                onChange={(value) => updateSetting("wanderSpeed", value)}
-                min={0}
-                max={4}
-                step={0.1}
-                formatValue={(v) => v.toFixed(1)}
-              />
-            </div>
-            <div className="control">
-              <label className="inline-block w-[80px] text-[10px]">
-                Radius
-              </label>
-              <DraggableNumberInput
-                value={settings.wanderRadius}
-                onChange={(value) => updateSetting("wanderRadius", value)}
-                min={0}
-                max={300}
-                step={1}
-                formatValue={(v) => `${v}px`}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* External Forces Section */}
-      <div>
-        <div className="flex justify-between items-center mb-2">
-          <div className="text-[10px] uppercase tracking-wider text-white/60">
-            External Forces
-          </div>
-          <Switch
-            size="xs"
-            checked={settings.externalForcesEnabled}
-            onCheckedChange={(checked) =>
-              updateSetting("externalForcesEnabled", checked)
-            }
-          />
-        </div>
-        {settings.externalForcesEnabled && (
-          <div className="space-y-1.5">
-            <div className="control">
-              <label className="inline-block w-[80px] text-[10px]">Angle</label>
-              <DraggableNumberInput
-                value={settings.externalForceAngle}
-                onChange={(value) => updateSetting("externalForceAngle", value)}
-                min={0}
-                max={360}
-                step={1}
-                formatValue={(v) => `${v}°`}
-              />
-            </div>
-            <div className="control">
-              <label className="inline-block w-[80px] text-[10px]">
-                Randomize
-              </label>
-              <DraggableNumberInput
-                value={settings.externalForceAngleRandomize}
-                onChange={(value) =>
-                  updateSetting("externalForceAngleRandomize", value)
-                }
-                min={0}
-                max={180}
-                step={1}
-                formatValue={(v) => `±${v}°`}
-              />
-            </div>
-            <div className="control">
-              <label className="inline-block w-[80px] text-[10px]">
-                Strength
-              </label>
-              <DraggableNumberInput
-                value={settings.externalForceStrength}
-                onChange={(value) =>
-                  updateSetting("externalForceStrength", value)
-                }
-                min={0}
-                max={2}
-                step={0.01}
-                formatValue={(v) => `${(v * 100).toFixed(0)}%`}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Obstacle Avoidance Section */}
-      <div>
-        <div className="flex justify-between items-center mb-2">
-          <div className="text-[10px] uppercase tracking-wider text-white/60">
-            Obstacle Avoidance
-          </div>
-          <Switch
-            size="xs"
-            checked={settings.avoidanceEnabled}
-            onCheckedChange={(checked) =>
-              updateSetting("avoidanceEnabled", checked)
-            }
-          />
-        </div>
-        {settings.avoidanceEnabled && (
-          <div className="space-y-1.5">
-            <div className="control">
-              <label className="inline-block w-[80px] text-[10px]">
-                Distance
-              </label>
-              <DraggableNumberInput
-                value={settings.avoidanceDistance}
-                onChange={(value) => updateSetting("avoidanceDistance", value)}
-                min={0}
-                max={100}
-                step={1}
-                formatValue={(v) => `${v}px`}
-              />
-            </div>
-            <div className="control">
-              <label className="inline-block w-[80px] text-[10px]">
-                Strength
-              </label>
-              <DraggableNumberInput
-                value={settings.avoidanceStrength}
-                onChange={(value) => updateSetting("avoidanceStrength", value)}
-                min={0}
-                max={2}
-                step={0.01}
-                formatValue={(v) => `${(v * 100).toFixed(0)}%`}
-              />
-            </div>
-            <div className="control">
-              <label className="inline-block w-[80px] text-[10px]">
-                Push Force
-              </label>
-              <DraggableNumberInput
-                value={settings.avoidancePushMultiplier}
-                onChange={(value) =>
-                  updateSetting("avoidancePushMultiplier", value)
-                }
-                min={1}
-                max={5}
-                step={0.1}
-                formatValue={(v) => `${v}x`}
-              />
-            </div>
-          </div>
-        )}
-      </div>
+      {BEHAVIORS.map((behavior) => (
+        <BehaviorSection key={behavior.key} config={behavior} />
+      ))}
 
       {/* Boundary Behavior Section */}
       <div>
@@ -443,10 +282,7 @@ export default function BehaviorControls() {
           className="w-full bg-black/50 border border-white/20 rounded px-2 py-1 text-xs"
           value={settings.boundaryBehavior}
           onChange={(e) =>
-            updateSetting(
-              "boundaryBehavior",
-              e.target.value as BoundaryBehavior
-            )
+            updateSetting("boundaryBehavior", e.target.value as BoundaryBehavior)
           }
         >
           <option value="travel-off">Travel Off</option>
