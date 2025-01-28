@@ -5,7 +5,7 @@ import { MagnetismForce } from '../forces/MagnetismForce';
 import { WanderForce } from '../forces/WanderForce';
 import { ExternalForce } from '../forces/ExternalForce';
 import { AvoidanceForce } from '../forces/AvoidanceForce';
-import { ObstacleManager } from '../managers/obstacleManager';
+import { ObstacleManager } from '../core/managers/obstacleManager';
 import { AggregationForce } from '../forces/AggregateForce';
 
 export class ParticleUpdater {

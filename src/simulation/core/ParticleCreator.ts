@@ -1,5 +1,5 @@
 import paper from 'paper';
-import { ObstacleManager } from '../managers/obstacleManager';
+import { ObstacleManager } from '../core/managers/obstacleManager';
 
 export class ParticleCreator {
   static create(

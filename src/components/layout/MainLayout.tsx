@@ -9,7 +9,6 @@ import VectorSimulationCanvas from './VectorSimulationCanvas';
 
 export default function MainLayout() {
   const [showControlPanel, setShowControlPanel] = useState(true);
-  const [showSaveModal, setShowSaveModal] = useState(false);
   const [showProjectsDrawer, setShowProjectsDrawer] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 

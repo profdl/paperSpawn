@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useCallback } from 'react';
-import { SimulationSettings, presets } from '../types';
+import { SimulationSettings } from '../types';
+import {presets} from '../simulation/presets'
 
 interface SettingsContextType {
   settings: SimulationSettings;
