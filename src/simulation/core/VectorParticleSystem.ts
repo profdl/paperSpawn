@@ -1,6 +1,6 @@
 import paper from 'paper';
 import { SimulationSettings } from '../../types';
-import { ObstacleManager } from './core/managers/obstacleManager';
+import { ObstacleManager } from './managers/obstacleManager';
 import { ParticleService } from '../particleService';
 import { EraserTool } from '../eraserTool';
 import { CanvasBackground } from './managers/canvasBackground';

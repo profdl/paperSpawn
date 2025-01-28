@@ -1,6 +1,6 @@
 import paper from 'paper';
-import { ParticleService } from './particleService';
-import { ObstacleManager } from './core/managers/obstacleManager';
+import { ParticleService } from '../../particleService';
+import { ObstacleManager } from './obstacleManager';
 
 export class SVGManager {
   constructor(
