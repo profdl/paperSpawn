@@ -1,6 +1,7 @@
 import paper from 'paper';
 import { SimulationSettings } from '../types';
 import { ObstacleManager } from './core/managers/obstacleManager';
+import { VectorParticleSystem } from './core/VectorParticleSystem';
 
 export class ParticleService {
   private particles: paper.Group;
@@ -9,10 +10,15 @@ export class ParticleService {
   private particleColor: string = '#000000';
   private trailColor: string = '#8b8680';
   private obstacleManager: ObstacleManager;
+  private particleSystem: VectorParticleSystem;
 
-  constructor(obstacleManager: ObstacleManager) {
+  constructor(
+    obstacleManager: ObstacleManager, 
+    particleSystem: VectorParticleSystem
+  ) {
     this.particles = new paper.Group();
     this.obstacleManager = obstacleManager;
+    this.particleSystem = particleSystem; 
   }
 
   createParticle(
@@ -127,8 +133,9 @@ export class ParticleService {
           settings,
           width,
           height,
-          this.obstacleManager
-        );
+          this.obstacleManager,
+          this.particleSystem  
+        )
       });
     });
   }

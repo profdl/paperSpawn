@@ -69,6 +69,16 @@ export const presets: Record<PresetType | string, SimulationSettings> = {
     avoidancePushMultiplier: 2,
     bounceEnergy: 1,
     sensorDistance: 30,
+
+    // Color Force
+    bgColorForceEnabled: false,
+    bgColorForceStrength: 1,
+    bgColorForceAngleMin: 15,
+    bgColorForceAngleMax: 45,
+    //Image Displacement
+    bgColorDisplaceEnabled: true,
+    bgColorDisplaceDistance: 10,
+    bgColorDisplaceAngle: 20,
   
   } as SimulationSettings,
 };

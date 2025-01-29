@@ -18,7 +18,8 @@ export class VectorParticleSystem {
   constructor(canvas: HTMLCanvasElement, onResize?: (width: number, height: number) => void) {
     this.canvasManager = new CanvasManager(canvas, onResize);
     this.obstacleManager = new ObstacleManager();
-    this.particleService = new ParticleService(this.obstacleManager);
+    this.particleService = new ParticleService(
+      this.obstacleManager, this);
     this.eraserTool = new EraserTool();
     
     this.background = new CanvasBackground(
@@ -54,6 +55,10 @@ export class VectorParticleSystem {
   // Background methods
   setBackgroundImage(imageUrl: string): void {
     this.background.setImage(imageUrl);
+  }
+
+  getBackgroundImage(): paper.Raster | null {
+    return this.background.getBackgroundImage();
   }
 
   removeBackgroundImage(): void {

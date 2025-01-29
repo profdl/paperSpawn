@@ -33,42 +33,23 @@ export class CanvasBackground {
     });
   
     this.backgroundImage.onLoad = () => {
-      // Calculate new dimensions based on fitting to canvas width
-      const canvasWidth = CANVAS_DIMENSIONS.WIDTH;
-      const imageAspectRatio = this.backgroundImage!.width / this.backgroundImage!.height;
-      const newWidth = canvasWidth;
-      const newHeight = Math.round(canvasWidth / imageAspectRatio); // Round to prevent fractional pixels
-  
-      // Scale the image to exactly match the new dimensions
-      this.backgroundImage!.scaling = new paper.Point(newWidth / this.backgroundImage!.width, newWidth / this.backgroundImage!.width);
+      // Scale image to fit canvas while maintaining aspect ratio
+      const viewBounds = paper.view.bounds;
+      const scale = Math.min(
+        viewBounds.width / this.backgroundImage!.width,
+        viewBounds.height / this.backgroundImage!.height
+      );
       
-      // Important: Set BOTH view size and background rectangle to exactly match
-      paper.view.viewSize = new paper.Size(newWidth, newHeight);
+      this.backgroundImage!.scale(scale);
+      this.backgroundImage!.position = paper.view.center;
       
-      // Ensure background rectangle exactly matches view bounds
-      this.background.remove();
-      this.background = new paper.Path.Rectangle({
-        rectangle: new paper.Rectangle(0, 0, newWidth, newHeight),
-        fillColor: this.background.fillColor
-      });
-  
-      // Center everything precisely
-      this.backgroundImage!.position = new paper.Point(newWidth / 2, newHeight / 2);
-      
-      // Call resize callback with exact dimensions
-      if (this.onCanvasResize) {
-        this.onCanvasResize(newWidth, newHeight);
-      }
-  
-      // Style settings
-      this.backgroundImage!.opacity = 1;
+      // Ensure proper layering
       this.backgroundImage!.sendToBack();
-      this.background.sendToBack();
+      this.background.sendToBack();  // Send the background rectangle behind the image
       
       paper.view.update();
     };
   }
-
   removeBackgroundImage(): void {
     if (this.backgroundImage) {
       this.backgroundImage.remove();
@@ -86,5 +67,9 @@ export class CanvasBackground {
     });
     
     paper.view.update();
+  }
+
+  getBackgroundImage(): paper.Raster | null {
+    return this.backgroundImage;
   }
 }

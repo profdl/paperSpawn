@@ -14,9 +14,9 @@ export interface TransformableItem {
   rotation: number;
 }
 
-export interface BehaviorControl {
+interface BehaviorControl {
   label: string;
-  settingKey: keyof SimulationSettings;
+  settingKey: keyof SimulationSettings;  
   min: number;
   max: number;
   step: number;
@@ -156,6 +156,16 @@ export interface SimulationSettings {
   dlaEnabled: boolean;
   dlaSnapDistance: number;
   dlaSnapSpacing: number;
+  // Image Force Settings
+  bgColorForceEnabled: boolean;
+  bgColorForceStrength: number;
+  bgColorForceAngleMin: number;
+  bgColorForceAngleMax: number;
+  
+  // Image Displacement Settings (separate feature)
+  bgColorDisplaceEnabled: boolean;
+  bgColorDisplaceDistance: number;
+  bgColorDisplaceAngle: number;
 }
 
 export type PresetType = 'start';

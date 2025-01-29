@@ -222,6 +222,61 @@ const BEHAVIORS: BehaviorConfig[] = [
       },
     ],
   },
+  {
+    key: "bgColorForce",
+    label: "Image Forces",
+    enabledKey: "bgColorForceEnabled",
+    controls: [
+      {
+        label: "Strength",
+        settingKey: "bgColorForceStrength",
+        min: 0,
+        max: 2,
+        step: 0.01,
+        formatValue: (v) => `${(v * 100).toFixed(0)}%`,
+      },
+      {
+        label: "Min Angle",
+        settingKey: "bgColorForceAngleMin",
+        min: -360,
+        max: 360,
+        step: 1,
+        formatValue: (v) => `${v}°`,
+      },
+      {
+        label: "Max Angle",
+        settingKey: "bgColorForceAngleMax",
+        min: -360,
+        max: 360,
+        step: 1,
+        formatValue: (v) => `${v}°`,
+      }
+    ],
+  },
+
+  {
+    key: "bgColorDisplace",
+    label: "Image Displacement",
+    enabledKey: "bgColorDisplaceEnabled",
+    controls: [
+      {
+        label: "Distance",
+        settingKey: "bgColorDisplaceDistance",
+        min: 0,
+        max: 50,
+        step: 0.5,
+        formatValue: (v) => `${v}px`,
+      },
+      {
+        label: "Angle",
+        settingKey: "bgColorDisplaceAngle",
+        min: -360,
+        max: 360,
+        step: 1,
+        formatValue: (v) => `${v}°`,
+      }
+    ],
+  },
 ];
 
 function BehaviorSection({ config }: { config: BehaviorConfig }) {

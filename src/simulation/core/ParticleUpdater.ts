@@ -7,6 +7,8 @@ import { ExternalForce } from '../forces/ExternalForce';
 import { AvoidanceForce } from '../forces/AvoidanceForce';
 import { ObstacleManager } from '../core/managers/obstacleManager';
 import { AggregationForce } from '../forces/AggregateForce';
+import { BGColorForce } from '../forces/BGColorForce';
+import {VectorParticleSystem} from './VectorParticleSystem';
 
 export class ParticleUpdater {
   static update(
@@ -15,8 +17,9 @@ export class ParticleUpdater {
     settings: SimulationSettings,
     width: number,
     height: number,
-    obstacleManager: ObstacleManager
-  ): void {
+    obstacleManager: ObstacleManager,
+    particleSystem: VectorParticleSystem 
+    ): void {
 
     if (particle.data.isSeed) {
       // Ensure seed particles have zero velocity and don't move
@@ -80,6 +83,42 @@ export class ParticleUpdater {
             }
           }
         }
+
+// BG COLOR FORCE
+// Handle Image Forces
+if (settings.bgColorForceEnabled && settings.bgColorForceStrength > 0) {
+  const bgColorForce = BGColorForce.calculate(particle, particleSystem, settings);
+  if (bgColorForce.length > 0) {
+    if (particle.data.isReflected) {
+      const dot = bgColorForce.dot(velocity.normalize());
+      const blendFactor = dot < 0 ? 0.3 : 1.0;
+      finalForce = finalForce.add(bgColorForce.multiply(blendFactor));
+    } else {
+      finalForce = finalForce.add(bgColorForce);
+    }
+    totalWeight += settings.bgColorForceStrength;
+  }
+}
+
+// Handle Image Displacement (separate from forces)
+if (settings.bgColorDisplaceEnabled && settings.bgColorDisplaceDistance > 0) {
+  const displacement = BGColorForce.calculateDisplacement(particle, particleSystem, settings);
+  if (displacement.length > 0) {
+    const circle = particle.children[1] as paper.Path.Circle;
+    const trail = particle.children[0] as paper.Path;
+    
+    const originalPosition = circle.position.clone();
+    const displacedPosition = originalPosition.add(displacement);
+    circle.position = displacedPosition;
+    
+    if (trail.visible && trail.segments.length > 0) {
+      const lastSegment = trail.lastSegment;
+      if (lastSegment) {
+        lastSegment.point = displacedPosition;
+      }
+    }
+  }
+}
 
 
 
