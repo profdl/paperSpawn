@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Navbar from './Navbar';
 import ControlPanel from './ControlPanel';
 import ProjectsDrawer from '../shared/ProjectsDrawer';
+import GalleryDrawer from '../shared/GalleryDrawer';  // Add this import
 import VerticalToolbar from './VerticalToolbar';
 import { SimulationProvider } from '../../contexts/SimulationContext';
 import { ToolProvider } from '../../contexts/ToolContext';
@@ -10,7 +11,12 @@ import VectorSimulationCanvas from './VectorSimulationCanvas';
 export default function MainLayout() {
   const [showControlPanel, setShowControlPanel] = useState(true);
   const [showProjectsDrawer, setShowProjectsDrawer] = useState(false);
+  const [showGalleryDrawer, setShowGalleryDrawer] = useState(false);  // Add this state
   const [showMenu, setShowMenu] = useState(false);
+  const toggleGalleryDrawer = () => {
+    setShowGalleryDrawer(prev => !prev); // Toggle the state
+  };
+
 
   return (
     <SimulationProvider>
@@ -21,6 +27,7 @@ export default function MainLayout() {
               showUI={showControlPanel} 
               onToggleUI={() => setShowControlPanel(!showControlPanel)}
               onOpenProjects={() => setShowProjectsDrawer(true)}
+              onToggleGallery={toggleGalleryDrawer}
               showMenu={showMenu}
               setShowMenu={setShowMenu}
             />
@@ -52,6 +59,10 @@ export default function MainLayout() {
           <ProjectsDrawer
             isOpen={showProjectsDrawer}
             onClose={() => setShowProjectsDrawer(false)}
+          />
+          <GalleryDrawer
+            isOpen={showGalleryDrawer}
+            onClose={() => setShowGalleryDrawer(false)}
           />
         </div>
       </ToolProvider>

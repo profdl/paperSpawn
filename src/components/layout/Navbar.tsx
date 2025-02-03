@@ -12,6 +12,7 @@ import {
   CloudHail,
   MenuIcon,
   Snowflake,
+  LayoutGrid
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import AuthModal from "../shared/AuthModal";
@@ -28,6 +29,7 @@ interface NavbarProps {
   onOpenProjects: () => void;
   showMenu: boolean;
   setShowMenu: (show: boolean) => void;
+  onToggleGallery: () => void; 
 }
 
 export default function Navbar({
@@ -36,6 +38,7 @@ export default function Navbar({
   onOpenProjects,
   showMenu,
   setShowMenu,
+  onToggleGallery,
 }: NavbarProps) {
   const { user, signOut } = useAuth();
   const { isPaused, setIsPaused, systemRef, settings, handleRespawn } =
@@ -115,6 +118,13 @@ export default function Navbar({
         aggregationLineColor: settings.aggregationLineColor,
         aggregationSpacing: settings.aggregationSpacing,
         aggregationMaxConnections: settings.aggregationMaxConnections,
+        bgColorForceEnabled: settings.bgColorForceEnabled,
+        bgColorForceStrength: settings.bgColorForceStrength,
+        bgColorForceAngleMin: settings.bgColorForceAngleMin,
+        bgColorForceAngleMax: settings.bgColorForceAngleMax,
+        bgColorDisplaceEnabled: false,
+        bgColorDisplaceDistance: 0,
+        bgColorDisplaceAngle: 0
       };
 
       const svgContent = systemRef.current.exportSVG();
@@ -271,6 +281,13 @@ export default function Navbar({
                     <Settings className="w-4 h-4 text-cyan-800" />
                   )}
                 </button>
+              <button
+                onClick={onToggleGallery} // Changed from onOpenGallery
+                className="p-1.5 rounded hover:bg-white/10 transition-colors"
+                title="Toggle Gallery"
+              >
+                <LayoutGrid className="w-4 h-4 text-white" />
+              </button>
 
                 {/* Divider */}
                 <div className="w-px bg-white/20 mx-1" />
